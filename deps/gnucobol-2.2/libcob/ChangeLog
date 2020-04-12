@@ -1,0 +1,3014 @@
+
+2017-09-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (cob_screen_get_all, field_accept): beep instead of
+	  wrong-casting characters we currently can't store
+	* screenio.c (field_accept): beep on insert if field is already full
+	* screenio.c (cob_screen_init): set cursor depending on insert mode
+	  to vertical bar cursor (on) or square cursor (off)
+	* screenio.c (cob_screen_get_all): fix for handling BACKSPACE,
+	  added handling for DELETE and INSERT keys and COB_INSERT_MODE
+
+2017-08-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_init)[_WIN32]: only use GetUsername if HAVE_GETUSERNAME
+	  is defined (for example in config.h)
+
+2017-08-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: moved code to cleanup modules to cob_exit_common_modules
+	  and do this only once (after exit handler calls, before call cleanup)
+
+2017-08-26  Ron Norman <rjn@inglenet.com>
+
+	* common.c: Free the structs used to track modules on STOP RUN
+
+2017-08-18  Ron Norman <rjn@inglenet.com>
+
+	* common.c: Keep list of all active modules for later free of
+	            memory allocated for decimal constants
+	* common.c: cob_stop_run issue callbacks to free any decimal memory
+	* common.c: cob_module_enter check for Recursive CALL used in the
+	            wrong place. Add cob_module_global_enter routine.
+	* common.h: Add cob_module_global_enter routine.
+	            Add cob_stmt_exception to cob_global, used to indicate
+	            the previous statment has ON EXCEPTION clause.
+
+2017-08-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_tidy): don't exit if runtime isn't initialized yet
+
+2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* call.c, common.c, fileio.c, intrinsic.c, screenio.c:
+	  surrounded code parts that cannot be tested by LCOV_EXCP markers
+
+2017-08-12  Ron Norman <rjn@inglenet.com>
+
+	* common.c: cob_stop_run issue callbacks to free any decimal memory
+	* common.c: avoid infinite loop walking COB_MODULE list when RECURSIVE
+	            modules are being used
+
+2017-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: common.h [_MSC_VER]: moved setenv hack to inline function
+	* common.c, common.h: new environment functions cob_setenv cob_unsetenv
+	* common.h, coblocal.h: moved declaration of cob_strdup to allow it
+	  to be called like the other memory functions
+
+2017-08-06 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c (cob_file_external_addr): fixed bug #404, where the
+	  cob_file_key for a RELATIVE file was not allocated.
+
+2017-07-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c: moved cob_sys_get_char and added parts for !COB_GEN_SCREENIO
+
+2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h [__MINGW32__]: added missing defines
+
+2017-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: increased MAX_FD_RECORD to 64MB and introduced
+	  MAX_FD_RECORD_IDX with the old 64KB limit
+
+2017-07-16  Edward Hart <edward.dan.hart@gmail.com>
+
+	* exception.def: update to COBOL 2014 and added finalizer exception.
+
+2017-07-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: checked the now optional sort-return before accessing it
+
+2017-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added CODE_COVERAGE parts as provided by AX_CODE_COVERAGE
+	* general: surrounded exception ABORTs that cannot be tested by
+	  LCOV_EXCP markers
+
+2017-06-04  Ron Norman <rjn@inglenet.com>
+
+	* common.c: Improved 'cobcrun -r' display for when
+	  unsetenv is used in runtime.cfg to show environment variable
+	  was removed and runtime.cfg variable was then present
+
+2017-05-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* system.def: replaced misleading name C$PRINTABLE (OC-extension,
+	  not a C$ -> ACUCOBOL extension!) by CBL_GC_PRINTABLE (old name
+	  still supported for legacy reasons)
+
+2017-05-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: renamed cob_get_current_date_and_time to
+	  cob_get_current_date_and_time_from_os
+	* common.c, coblocal.c: store datetime from COB_CURRENT_DATE as
+	  cob_time and check for this in cob_get_current_date_and_time
+	  instead of in every function
+	* common.c: allow partial replace of datetime (including offset only)
+	  by COB_CURRENT_DATE
+
+2017-05-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.c: fixed minor style issues, mostly missing spaces around
+	  operators.
+
+2017-05-22  Ron Norman <rjn@inglenet.com>
+
+	* termio.c (pretty_display_numeric):  handle
+	  SIGN_SEPARATE  TRAILING & LEADING
+
+2017-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* system.def: added maximum call parameters for system library calls
+
+2017-05-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: correctly update file status for DELETE FILE statement
+	  (we always returned 00 until now)
+	* fileio.c:
+
+2017-05-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (cob_move): return the status returned by (move)
+	* screenio.c: FR #191 only set flag pending_accept when cob_move
+	  returns no error
+
+2017-05-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_sys_oc_nanosleep): prefer HAVE_NANO_SLEEP over _WIN32
+
+2017-05-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (screen_display): FR #191 set flag pending_accept
+	  for DISPLAY screen, too
+
+2017-05-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_sig_handler, cob_set_signal): added code for SIGBUS
+	  in correspondence to SIGSEGV code
+
+2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (set_value, get_value): using correcting format modifier
+	  for cob_s64_t (CB_FMT_LLD)
+
+2017-04-27  Sergey Kashyrin <ska@kiska.net>
+
+	* common.c (set_value, get_value): changed type long to cob_s64_t
+	  as SORT was broken on Windows
+
+2017-04-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: always use COB_KEYWORD_INLINE (set by configure)
+	  for COB_INLINE
+
+2017-04-18 Ron Norman <rjn@inglenet.com>
+
+	* numeric.c, common.c, coblocal.h: define ISFINITE depending on
+	  HAVE_ISFINITE to either use 'isfinite' or 'finite' or '_finite'
+
+2017-04-10  Brian Tiffin <btiffin@gnu.org>
+
+	* common.c, common.h: remove cob_get_prog_pointer in preference to
+	  cob_get_pointer.
+
+2017-04-08  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c (in_last_n_chars): fixed underflow when field->size was
+	  less than n, ultimately causing an invalid read.
+	* fileio.c (indexed_open): fixed minor memory leak.
+
+2017-03-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: fixed minor buffer overflows in the formatted-date
+	  functions (see bug #357).
+
+2017-03-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_chain_setup): only set field's value if given on
+	  command line, preserve program internal initialization otherwise
+
+2017-03-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_module_enter): set cob_call_params from argc
+	  for main programs
+	* common.c (cob_chain_setup): don't set cob_call_params any more
+	* common.c [_MSC_VER] (cob_get_current_date_and_time):
+	  silence wrong warning 6011
+
+2017-03-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: fix minor memory leaks in configuration code
+
+2017-02-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c: [!COB_GEN_SCREENIO] fixed zero_line_col_allowed
+	  missing / superfluous in function declarations
+
+2017-02-06  Ron Norman <rjn@inglenet.com>
+
+	* common.c, common.h:
+	  added cob_module_free so that structure gets freed within libcob
+	* fileio.c, common.h:
+	  Added new routines cob_file_external_addr,cob_file_malloc,cob_file_free
+	  so that 'cob_file' is allocated within libcob
+	  This will allow the stucture have fields added to the end
+	  without forcing a recompile.
+
+2017-02-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h, call.c: [__MINGW32__] fixes for mixed printf
+	  format modifiers for long long
+	* common.c: [WIN32] check if PROCESS_QUERY_LIMITED_INFORMATION is
+	  actually defined (not the case for MINGW and old VC versions)
+
+2017-01-18  Ron Norman <rjn@inglenet.com>
+
+	* call.c (cob_get_param_type): added check for COB_FIELD_REAL_BINARY
+
+2017-01-17  Ron Norman <rjn@inglenet.com>
+
+	* call.c: added code to handle default data field types by using cob_move
+	* move.c: added missing cob_put_s64_compx routine
+
+2017-01-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: Copyright year 2017
+
+2017-01-10  Ron Norman <rjn@inglenet.com>
+
+	* move.c, call.c, common.h: New routines added to provide
+	  application C code access to COBOL data fields.
+
+2017-01-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h, common.c (cob_check_subscript): corrected minimum check
+
+2017-01-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (field_accept): don't write anything on the screen for
+	  ACCEPT OMITTED
+
+2017-01-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h: new exported function cob_raise to raise a signal,
+	  running both external and internal signal handlers
+	* termio.c (cob_accept_field): handle input code of ctrl-C as termination
+	  command and cob_stop_run with 128 + 2 (fatal error 2)
+	* coblocal.h, common.h: move (cob_get_current_date_and_time) and
+	  its data definition cob_time from coblocal.h to common.h
+	* common.c [_MSC_VER]: moved initialization of function pointer to
+	  (get_function_ptr_for_precise_time), for call in
+	  (cob_get_current_date_and_time)
+	* common.h: extended cob_time with is_daylight_saving_time and day_of_year
+	* common.c [_BSD_SOURCE]: get utc_offset directly from tm_gmtoff
+
+2017-01-01  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c (cob_read_next): change to return 46 on 2nd read on an optional
+	  missing file, removed some redundant code
+	* fileio.c [WITH_DB]: moved call to join_environment to indexed_open
+
+2016-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: added COB_MAX_UNBOUNDED_SIZE
+	* common.c (cob_allocate): check for COB_EC_STORAGE_IMP
+	  returned when requested to allocate more than the maximum possible size
+	* common.h, common.c (cob_check_odo, cob_check_subscript): additional
+	  parameters for table name in DEPENDING ON and flag for ODO, additional
+	  runtime error line with the (current) maximum of the table
+
+2016-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c, common.h: C interface addons including FR #187:
+	  typedef cobchar_t, (cob_set_cursor_pos) / cobmove to set cursor position,
+	  (cob_display_text) / cobaddstrc to display text at current cursor pos.,
+	  (cob_display_formatted_text) / cobprintf to printf to current cursor
+	  position, (cob_get_char) / cobgetch to get a single character or
+	  function key, (cob_get_text) to get a text input and function keys with
+	  a given size from current cursor position
+	* screenio.c, common.h, system.def: added system routine
+	  CBL_PUT_SCR_POS / cob_sys_put_scr_pos to set the cursor position
+	  and for compatibility: CBL_READ_KBD_CHAR / cob_sys_get_char to get
+	  a single character (better use ACCEPT one-byte-var)
+	* common.c, common.h, coblocal.h, screenio.c: FR #191 added runtime
+	  configuration COB_EXIT_WAIT and COB_EXIT_MSG for waiting if
+	  extended ACCEPT after last extended DISPLAY (if any) is missing
+
+2016-12-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (field_accept): changes for ACCEPT OMITTED:
+	  return COB-SCR-KEY-LEFT and COB-SCR-KEY-RIGHT, additional return
+	  the new keycodes COB-SCR-INSERT, COB-SCR-DELETE, COB-SCR-BACKSPACE,
+	  COB-SCR-KEY-HOME, COB-SCR-KEY-END (*only* for ACCEPT OMITTED!)
+
+2016-12-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: include isconfig.h (if not available define DISAM_NO_ISCONFIG)
+	  and don't use isstat1/isstat2 if not available
+
+2016-12-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: added compatibility define for cobclear and corrected
+	  cobrescanenv to always return zero.
+
+2016-12-18 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c (lock_record, test_record_lock): initialize DBT structure
+	  before using it to prevent memory corruption
+
+2016-12-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (print_info): FR #169 output exact versions of GMP/MPIR and
+	  BDB that were used for building libcob and the versions that are in
+	  the loaded libraries if they differ, add output of curses_version()
+	* common.c (var_print): fixed empty/zero string
+
+2016-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, coblocal.h (cob_strcat): fixing minor memory leak by adding a
+	  third parameter which should be set if the result is assigned to one of
+	  the original strings
+
+2016-11-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_sys_fork, cob_sys_waitpid): don't abort if necessary
+	  functions aren't available on the sysytem or fail, return -1 or
+	  the system specific error code instead
+	* common.c (cob_sys_waitpid): added [_WIN32] implementation
+
+2016-11-17 Ron Norman <rjn@inglenet.com>
+
+	* common.c, common.h, system.def: added cob_sys_fork for CBL_GC_FORK
+	  (fork a new COBOL process) and cob_sys_waitpid for CBL_GC_WAITPID
+	  (wait for completion of another process)
+	* system.def: Add CBL_GC_xxx as alias for CBL_OC_xxx
+
+2016-11-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, coblocal.h, fileio.c: moved common code parts of fileio.c as
+	  function (cob_runtime_warning) to common.c ;
+	  reformatted message and include source location, if known
+	* call.c (cob_call_field): warn and remove leading spaces for CALL
+
+2016-10-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* call.c (cob_call): fr #101 - allow more parameters for CALL:
+	  renamed COB_MAX_FIELD_PARAMS to MAX_CALL_FIELD_PARAMS (set in configure),
+	  allowed additional options 192 and 252, new default: 192
+
+2016-10-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: check "COB_UNIX_LF" before error COB_FERROR_INITIALIZED
+
+2016-10-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: added COB_UNUSED() for parameters of indexed file functions
+	  when configured --without-db
+
+2016-10-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: re-fixed COB_ONCE for MSC
+	* system.def: replaced octal by hex strings for hex-system routines
+
+2016-11-07  Ron Norman <rjn@inglenet.com>
+
+	* move.c, common.h: added cob_move_ibm function for 'move-ibm'
+
+2016-10-13  Ron Norman <rjn@inglenet.com>
+
+	* numeric.c, common.h: added cob_decimal_align function for 'arithemtic-osvs'
+
+2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.h: added cob_flags_t typedef for variables made of bit flags.
+
+2016-09-19  Ron Norman <rjn@inglenet.com>
+
+	* numeric.c: added cob_decimal_clear
+
+2016-08-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.c (cob_get_current_date_and_time): fixed bug where milliseconds
+	  where confused with nanoseconds.
+
+2016-08-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h: new routine (cob_is_initialized)
+	* common.c (cob_module_enter): activated storing module call parameters
+	  on module entry
+
+2016-08-16  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (field_accept): fixed bug #300 (segfault on screen ACCEPT
+	  OMITTED).
+
+2016-08-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_runtime_error): reversed the prefix from runtime errors,
+	  always starts with "libcob: " now
+	* common.c (cob_get_strerror): own reentrant version of strerror
+	* common.c (cob_load_config_file): use cob_get_strerror instead of
+	  a guessed error message
+
+2016-07-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_reg_sighnd): call cob_set_signal() if not done already
+
+2016-07-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* coblocal.h: changed types in config_tbl to unsigned (compiler warnings)
+	* common.h [_MSC_VER]: added definitions for COB_NOINLINE, COB_A_INLINE
+
+2016-07-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: added support for LINE/COL 0.
+	* screenio.c: fixed small issues with DISPLAY ALL X"02" and X"07".
+
+2016-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h, coblocal.h: moved internal functions to coblocal as COB_HIDDEN
+	* common.h: added COB_EXPIMP to cob_set_exception
+	* common.c, coblocal.h: #ifdef 0 for unused helper functions
+	  cob_int_to_string and cob_int_to_formatted_bytestring
+
+2016-06-26  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.c, common.h, move.c, string.c: moved cob_max_int and cob_min_int
+	  to common.c.
+
+2016-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h: minor fixes for compatibility to VC2005
+
+2016-06-20 Ron Norman <rjn@inglenet.com>
+
+	* coblocal.h, common.c: FR #138 identify config variables which accept
+	  a path list and any which only accept a single directory/file
+	  are checked for the PATH_SEP character and error is given if
+	  that has been used by mistake. Example:
+
+	  Invalid value '/temp:/tmp' for configuration tag 'COB_TRACE_FILE';
+	       should not contain ':'
+
+2016-06-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: revised all message strings
+	* screenio.c: added (cob_get_scr_cols) and (cob_get_scr_lines) for
+	  providing the C interface with the current COBOL screen cols/lines
+	* common.h: FR #145: added defines for cobcols, coblines and cobrescanenv
+	* common.c, common.h: FR #126: renamed (runtime_env) to (runtime_conf)
+
+2016-05-27  Edward Hart <edward.dan.hart@gmail.com>
+
+	* move.c (cob_move_display_to_edited): fixed bug #220 - fixed insertion
+	  which float are now distinguished from those which don't.
+
+2016-05-22  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.h, move.c, termio.c: replaced PICTURE strings containing packed
+	  ints with array of (cob_pic_symbol) structs which are easier to use.
+
+2016-05-01 Ron Norman <rjn@inglenet.com>
+
+	* common.c fixed incorrect reporting of error for undefined environment variables
+
+2016-04-26  Brian Tiffin <btiffin@gnu.org>
+
+	* common.c, common.h: Re-fixed CBL_OC_HOSTED tzname, timezone, daylight
+	  for VC2013 names.
+
+2016-04-25  Brian Tiffin <btiffin@gnu.org>
+
+	* common.c: Fixed CBL_OC_HOSTED tzname, timezone, daylight for WIN32 names.
+
+2016-04-23  Brian Tiffin <btiffin@gnu.org>
+
+	* common.h, numeric.c: 64bit unsigned treated as signed when long int
+	  same size as long long.
+
+2016-04-06  Brian Tiffin <btiffin@gnu.org>
+
+	* common.c: Updated CBL_OC_HOSTED with tzname, timezone, daylight.
+
+2016-03-29  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.c (cob_set_exception), common.h, coblocal.h: made cob_set_
+	  exception a public function for SET LAST EXCEPTION TO OFF. Also made
+	  argument of 0 reset all exception information.
+
+2016-03-28  Brian Tiffin <btiffin@gnu.org>
+
+	* common.c, common.h, system.def: Added CBL_OC_HOSTED
+	  feature-request #49.
+
+2016-03-23  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c (numval): added missing NUMVAL-C-specific code I missed in
+	  r793, causing bug #218.
+
+2016-03-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_set_location, cob_trace_section, cob_exit_common): fix for
+	  bug #216 - store a duplicate of cob_last_sfile for tracing, free on exit
+
+2016-03-15  Ron Norman <rjn@inglenet.com>
+
+	* common.c: display COB_PRE_LOAD as set and as evaluated
+	* call.c: clear COB_PRE_LOAD value before evaluating
+
+2016-03-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* intrinsic.c (locale_time): consolidation still used sizeof(buff) after
+	  buff changed from char [] to char *, fixed by introducing LOCTIME_BUFSIZE
+	* intrinsic.c (cob_intr_lcl_time_from_secs) re-added missing exception
+
+2016-03-12  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: consolidated copy-and-pasted code in numerous functions,
+	  including: SUBSTITUTE(-CASE), NUMVAL(-C), VARIANCE and
+	  LOCALE-TIME(-FROM-SECONDS).
+	* intrinsic.c: renamed "xqtyear" variables to "current_year".
+
+2016-02-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (set_config_val): removed use of cob_strcat for output of
+	  possible values
+
+2016-02-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (set_default_line_column): fixed bug #202 where screens
+	  were displayed at the cursor position when no LINE or COL was given.
+
+2016-01-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* intrinsic.c (split_around_t): fixed stack overflow occuring in wrong
+	  date/datetime format strings for FUNCTION TEST-FORMATTED-DATETIME
+	* intrinsic.c: changed definition of string lengths for date/time
+	  according to existing ones (COB_xyz_BUFF)
+	* common.h [_MSC_VER]: adding alias for setenv/unsetenv fixing small memory
+	  leak for calls of (putenv) - MSC duplicates the string, POSIX does not
+
+2016-01-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: fixing all warnings generated by msc code analysis
+	  (possible memory related issues)
+	* common.c (cob_rescan_env_vals): always remove invalid settings from env.
+	* common.c (cob_realloc): new, combining cob_malloc, cob_free and memcpy
+	* common.c (cob_get_current_date_and_time) [_MSC_VER]: use fallback
+	  to GetLocalTime if calls to FileTimeToSystemTime or
+	  SystemTimeToTzSpecificLocalTime return an error
+	* common.c (print_version): changed generation of build stamp
+	* common.c (cb_config_entry): corrected check for setting without value
+	  and postponed it, doing the check for a valid setting name before
+	* cobgetopt.c (cob_getopt_long_long): Fix bug #194 and warnings of msc code
+	  analysis (possible memory issues) - switched from alloca to cobc's
+	  internal memory handling (cobc_malloc and cobc_free)
+
+2016-01-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: fixed bug #160 - added support for variable screen origin.
+
+2016-01-23  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (cob_screen_attr): fixed bug #192 - stopped ERASE and BLANK
+	  being applied in ACCEPT statements.
+
+2016-01-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (get_screen_item_line_and_col): simplified and improved to
+	  make interpretation of LINE and COL clauses more similar to that of
+	  other implementations.
+
+2016-01-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* call.c (cob_call): fr #101 - allow more parameters for CALL
+	  (COB_MAX_FIELD_PARAMS to be one of 16/36/56/76/96)
+
+2015-12-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.h: added COB_SCREEN_GRID.
+
+2015-12-30  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: fixed bug #176 - added code to correctly find the line and
+	  column of a screen item.
+	* common.h: changed cob_screen to a doubly linked list (to simplify the
+	  algorithm required above).
+
+2015-12-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: added SYSTEM-OFFSET and support for unknown offsets for
+	  FORMATTED-(DATE)TIME.
+
+2015-12-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: implemented FULL and REQUIRED clauses.
+
+2015-12-14  Brian Tiffin <btiffin@gnu.org>
+
+	* numeric.c (cob_print_realbin): bug #171 - unsigned values fail with high bit set
+
+2015-12-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.c (cob_get_current_date_and_time): fixed bug where offset_known
+	  was not set to 1 on Unix systems.
+
+2015-12-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: fixed bug #170 - added detection of whether offset_known
+	  is true or not - and added detection of EC-IMP-UTC-UNKNOWN exception.
+	* exception.def: added EC-IMP-UTC-UNKNOWN.
+
+2015-12-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: added support for optional offset parameter for
+	  FORMATTED-(DATE)TIME functions (defaults to zero).
+
+2015-12-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: fixed bug #169 - added correct implementation of times
+	  ending with Z (i.e. to return the UTC time).
+
+2015-11-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* intrinsic.c (cob_intr_current_date): bug #164 - offset for CURRENT-DATE
+
+2015-10-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_check_linkage): add function for check of linkage items
+	  (currently checking only access to not passed OPTIONAL items)
+
+2015-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_init)[WIN32]: resolve COB_UNIX_LF before reading runtime
+	  configuration as error messages would have wrong LF otherwise
+
+2015-10-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (conf_runtime_error): add function for configuration specific
+	  errors and tweaked the messages
+	* common.c (set_config_val): added possible values for gc_conf.enums
+	  to error messages; added check of maximum values for ENV_SIZE
+	* common.c (cob_load_config_file): if include file is not found prefix
+	  it with path of current loaded configuration file
+	* common.c: tweaked output for --runtime-env and added function
+	  (set_config_val_by_name) for overriding default values (used for USERNAME)
+
+2015-10-25  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: fixed bug #161 - fixed screens terminating when the number
+	  of characters entered equalled the length of the first field.
+	* screenio.c: added a few comments and shortened some code.
+
+2015-10-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: fixed bug #159 - added conversion from 1-based to 0-based
+	  coordinates for case where only LINE clause is given on
+	  ACCEPT/DISPLAY.
+
+2015-10-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c [WIN32][MINGW]: tweaking of additional environment settings
+
+2015-10-10 Ron Norman <rjn@inglenet.com>
+
+	* common.c: added code to report additional environment settings
+
+2015-10-06  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: fixed bug #158 - fixed TEST-FORMATTED-DATETIME rejecting
+	  October (month #10). Also fixed unreported bug where
+	  TEST-FORMATTED-DATETIME rejected dates followed by whitespace.
+
+2015-09-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: cast PATHSEPC PATHSEPS SLASH_INT SLASH_STR with appropriate type
+	  and rename the first three to PATHSEP_CHAR PATHSEP_STR SLASH_CHAR
+
+2015-08-21  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: implemented LOWLIGHT.
+
+2015-08-20  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: added detection of EC-SCREEN-LINE-NUMBER,
+	  EC-SCREEN-STARTING-COLUMN and EC-SCREEN-ITEM-TRUNCATED.
+	* screenio.c, common.h: refactored functions implementing ACCEPT and
+	  DISPLAY.
+
+2015-07-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* call.c (cob_init_call): Don't add the current directory "." to resolve_path
+	  if it's already set (either via runtime configuration or default value)
+
+2015-07-07  Ron Norman <rjn@inglenet.com>
+
+	* Accept env var COB_CURRENT_DATE/COB_DATE and runtime.cfg current_date
+	  to specify a date override for the application.
+	  All ACCEPT FROM DATE, DAY, TIME will the use the value defined
+	  rather than the current system time.
+	  This will be a useful feature for application testing.
+	* common.c (cb_config_entry): keyword "reset": reset data pointer in gc_conf
+	* common.c (cob_expand_env_string): copy SPACE, LR, CR, HT, VT as spaces,
+	  the first implementation dropped them completely
+	* fileio.c fixed to avoid core dump when COB_SYNC and using BDB
+
+2015-06-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: bug #140 - changed pow to int_pow to avoid rounding
+	  errors. On MinGW, pow (10, 8) rounded to 9999999 instead of 10000000,
+	  for example.
+
+2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* screenio.c: Add or enhance special keys to Extended ACCEPT.
+          Insert, Tab, Shift-Tab, Backspace, Delete, Alt-Delete, End,
+          Alt-End, Home, Alt-Home, Left-arrow, Alt-Left-arrow,
+          Right-arrow, Alt-Right-arrow.
+
+2015-06-21  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.c: fixed segfault caught in updated SWITCH test by extending
+	  cob_switch array by 1.
+
+2015-05-18  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* screenio.c (cob_screen_attr): Fix bug #143 WITH BLANK SCREEN / BLANK LINE
+	  has to color the whole screen / line.
+
+2015-05-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: fr #65 added more switches "SWITCH-16" to "SWITCH-36"
+
+2015-05-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cb_config_entry): remove redundant aliases !copy/(un)set/!anything
+	* common.c: add ACUCOBOL configuration aliases LOGICAL_CANCELS
+	  (= !COB_PHYSICAL_CANCEL) and STRIP_TRAILING_SPACES (= !COB_LS_FIXED)
+
+2015-05-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_load_config_file, cob_load_config): respect environment
+	  COB_CONFIG_DIR when loading runtime configuration
+
+2015-05-12  Ron Norman <rjn@inglenet.com>
+
+	* common.c: changed to be more specific about acceptable values for
+	  runtime boolean options
+
+2015-05-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* intrinsic.c (cob_intr_current_date): return field with size of 21
+	  and without trailing NULL
+
+2015-05-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h, coblocal.h, call.c, common.c: fixed CALL after physical CANCEL
+	  by moving physical_cancel (defined in call.c and referenced via
+	  runtimeptr) to cobglobptr->cob_physical_cancel for check in COBOL modules
+
+2015-04-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobgetopt.c (_getopt_initialize): re-added support for GNU extensions
+	  '+'/'-' in optstring[0], '+' => forcing POSIX correct behaviour (stop at
+	  first non-option), '-' => report non-options as argument of option code=1
+
+2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: implemented FORMATTED-CURRENT-DATE,
+	  INTEGER-OF-FORMATTED-DATE and TEST-FORMATTED-DATETIME
+	* intrinsic.c: updated FORMATTED-DATETIME and FORMATTED-TIME to support
+	  fractional number of seconds.
+	* common.c: refactored (cob_accept_time)
+	* intrinsic.c: miscellaneous refactoring and deleted precondition
+	  comments which are currently just cluttering the code
+
+2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.h: added new macros COB_USE_VC(2005/2008/2013)_OR_GREATER to
+	  replace _MSC_VER comparison
+
+2015-03-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: Changed COB_FILE_MODE to 0666
+	* fileio.c: use COB_FILE_MODE as permission for all cases where
+	  files are possibly created (fixes bug #126)
+
+2015-03-14  Ron Norman <rjn@inglenet.com>
+
+	* common.c: new code for table driven processing of runtime.cfg
+	  (runtime configuration) file and environment variables
+	  New cob_settings structure used to store all run-time options
+	  The old runtime_env was removed
+	  call.c cobgetopt.c fileio.c intrinsic.c move.c numeric.c screenio.c
+	  all updated to work with the new cob_settings structure
+
+2015-03-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_load_config, cob_load_config_file, cb_config_entry): new
+	  functions for loading a runtime configuration file
+	* call.c, common.c, intrinsic.c, numeric.c: fix segfault on early exit
+	  during runtime initialisation
+
+2015-02-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobgetopt.c (cob_getopt_long_long): List all ambiguous possibilities,
+	  applied patch of Ulrich Drepper (see glibc's BZ #7101 - 2011-05-15)
+	* cobgetopt.c: removed \n from msgids, converted all backtick to apostrophe
+
+2015-02-26  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: fixed buffer overflow in screen section ACCEPT
+
+2015-01-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.h, intrinsic.c: updated (cob_valid_time_format) and
+	  (cob_valid_datetime_format) to take the decimal point as a parameter
+	  to handle DECIMAL-POINT IS COMMA
+
+2015-01-12  Sergey Kashyrin <ska@kiska.net>
+
+	* intrinsic.c: Fix for Bug #120 - Function CURRENT-DATE
+
+2014-12-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (cob_exit_screen): check cobglobptr for early errors,
+	  especially in case of runtime error "cob_init() has not been called"
+
+2014-11-17  Philipp Böhme  <phi.boehme@googlemail.com>
+
+	* call.c (do_cancel_module): bugfix for cancel,
+	  The bug was a crash in some situations, if the same module
+	  is cancelled more than once. (Solution as suggested by Sergey)
+
+2014-09-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: implemented (cob_intr_formatted_date),
+	  (cob_intr_formatted_datetime) and (cob_intr_formatted_time)
+	* intrinsic.c: moved common date/time checks into functions
+	  (valid_integer_date), (valid_year) and (valid_time)
+	* intrinsic.c: split main algorithms of (cob_intr_day_of_integer) and
+	  (cob_intr_date_of_integer) into (day_of_integer) and (date_of_integer)
+	* common.c, common.h: added date/time format validation functions
+	  (cob_valid_date_format), (cob_valid_datetime_format) and
+	  (cob_valid_time_format)
+
+2014-09-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* numeric.c, intrinsic.c, common.h: use cob_gmp_free in intrinsics, too
+
+2014-09-09  Philipp Böhme  <phi.boehme@googlemail.com>
+
+	* numeric.c: new static function cob_gmp_free
+	* numeric.c (cob_decimal_set_double, cob_decimal_get_packed,
+	  cob_decimal_get_display): use cob_gmp_free() to free memory allocated in
+	  mpir/gmp
+
+2014-09-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_check_env_false): new pendant to cob_check_env_true,
+	  currently used only for disabling COB_BELL
+
+2014-08-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_sys_getopt_long_long): make params lo_size(1), so_size(0)
+	  and opt_val_size(5) optional (can be OMITTED in CALL 'CBL_OC_GETOPT')
+
+2014-09-03  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* common.c, common.h: added cob_free() function (as suggested by
+	  Sergey Kashyrin)
+	* changed all free() to cob_free() (Own freeing function for debugging
+	  purposes. (e.g. to locate heap crashes caused by malloc/free))
+	* numeric.c: use free function (passed by mp_get_memory_functions) (Bug #91)
+
+2014-08-05  Louis Krupp <lkrupp@users.sf.net>
+
+	* screenio.c: compilation fails if configured without curses (bug #90)
+
+2014-07-09  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* fileio.c (cob_file_sort_giving): initialize record buffer size before
+	  cob_copy_check, solving bug #66
+
+2014-06-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h (cob_temp_name): new function, moved from
+	  cobc (cobc_temp_name)
+	* common.c (cob_temp_name) [_WIN32]: Use direct calls to getenv instead of
+	  additional calling WINAPI for temporary folder (GetTempPath);
+	  use identical logic as in non-win environments to build the name instead
+	  of calling WINAPI (GetTempFileName+DeleteFile)
+	* fileio.c: renaming (cob_tmpfile) to (cob_srttmpfile) and
+	  (cob_get_temp_file) to (cob_get_sort_tempfile)
+	* fileio.c (cob_srttmpfile): using new (cob_temp_name) to get the name
+	* common.c: use (cob_sys_getpid) everywhere instead of (getpid);
+	  use (setenv) if available
+
+2014-05-20  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* call.c: inverted preload list for WIN32 builds
+	* common.c, move.c, screenio.c, fileio.c: Set runtime switch
+	  from environment to true on "1", "Y", "YES", "TRUE", "ON"
+
+2014-05-13  Ron Norman <rjn@inglenet.com>
+
+	* numeric.c: added cob_cmp_float with tolerance for equality comparison
+
+2014-05-07  Ron Norman <rjn@inglenet.com>
+
+	* move.c: replaced memcpy by memmove
+
+2014-05-06  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* common.c, common.h: Added print_runtime_env showing all environment values
+	  along with resolved variables used in libcob
+	  New string helper functions: cob_int_to_string, cob_strcat, cob_strjoin,
+	  cob_int_to_formatted_bytestring
+	* call.c: Remove duplicates when resolving COB_LIBRARY_PATH
+
+2014-04-25  Ron Norman <rjn@inglenet.com>
+
+	* move.c: fixed bug in cob_move_fp_to_fp()
+	* numeric.c: Fixed errors in cob_add_int() when computing with floats.
+
+2014-04-14  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* common.c, common.h, system.def: Added cob_sys_getopt_long_long
+	* makefile.am: Added cobgetopt.c, cobgetopt.h
+
+2014-03-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: support for user-defined LOCALEDIR via environment
+
+2014-03-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h: Rewriting cob_sig_handler, printing caught signal to
+	  stderr, adding cob_reg_sighnd for registration of external signal handling
+
+2014-01-17  Ron Norman <rjn@inglenet.com>
+
+	* intrinsic.c: Change cob_intr_random to correctly compute RANDOM number
+
+2013-12-26  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* strings.c: Fix Unstring delimited by all delimiter size > 1 issue,
+	  see bug #54.
+
+2013-??-??  Sergey Kashyrin <ska@kiska.net>
+
+	* fileio.c: Bugfix in cob_sys_copy_file (now using file_open_buff)
+
+201?-??-??  Sergey Kashyrin <ska@kiska.net>
+
+	* fileio.c (cob_new_item): cleanup
+
+2012-06-21  Sergey Kashyrin <ska@kiska.net>
+
+	* numeric.c: Workaround optimizer bug
+
+2010-10-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (!COB_GEN_SCREENIO): Make cob_sys_sound_bell usable via
+	  cob_speaker_beep
+	* common.c:  Add possibility to disable the bell via
+	  COB_BELL=NO/NONE/0/OFF (currently only the first char is checked)
+
+2010-09-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c: Added cob_convert_key for converting keys according to used
+	  libraries (especially fix for PDCurses + numpad support)
+
+2010-06-28  Roger While <simrw@sim-basis.de>
+
+	* MARK - Version 2.0
+	* Move to GPL/LGPL 3
+
+2010-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+   * strings.c: Fixing cob_unstring_into bug (#139)
+
+2010-03-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, screenio.c: New env var COB_BELL for controlling WITH BEEP,
+	  possible values (standard BEEP):
+	  BEEP    (curses beep on soundcard/pc-speaker, fallback terminal flash)
+	  FLASH   (curses terminal flash, fallback beep on soundcard/pc-speaker)
+	  SPEAKER (printf("\a"))
+
+20??-??-??  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Implement COB_VARSEQ_FORMAT to override default format
+	  for variable length sequential files.
+
+20??-??-??  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: used fdcobsync for sync, defined depending on configuration
+	* fileio.c (cob_sync): droped synch mode for COB_SYNCH (Y=P), moved
+	  calls of cob_sync to (save_status)
+
+20??-??-??  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: dropped support for BDB < 4.1
+
+20??-??-??  Roger While <simrw@sim-basis.de>
+
+	* call.c (cob_init_call): Change to COB_PRE_LOAD: if an entry is not
+	  found in COB_LIBRARY_PATH try the full name
+
+20??-??-??  Sergey Kashyrin <ska@kiska.net>
+
+	* common.c: nanosleep for 370
+
+2009-12-25  Roger While <simrw@sim-basis.de>
+
+	* strings.c: Added check for COB_EC_RANGE_INSPECT_SIZE and
+	  NULL extension to cob_inspect_converting
+
+2009-10-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h, system.def: Added new system routine C$GETPID
+
+2009-08-28  Roger While <simrw@sim-basis.de>
+
+	* strings.c: Fix for UNSTRING with multiple variable length fields
+
+2009-08-03  Sergey Kashyrin <ska@kiska.net>
+
+	* common.c: cob_accept_day_of_week corrected
+
+2009-08-03  Gary Cutler <CutlerGL@gmail.com>
+
+	* common.c: cob_accept_day_of_week corrected
+
+2009-07-25  Gary Cutler
+
+	* screenio.c: Fix PDCurses bug with COLOR_PAIRS
+
+2009-06-09  Roger While <simrw@sim-basis.de>
+
+	* move.c: Fix editing symbol moves
+
+2009-06-01  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Revise memory algo for SORT - Introduce COB_SORT_CHUNK
+
+2009-05-25  Roger While <simrw@sim-basis.de>
+
+	* General: Remove the following extraneous include files:
+	            byteswap.h, call.h, fileio.h, intrinsic.h, move.h, numeric.h,
+	            screenio.h, strings.h, termio.h by integration into common.h
+	            as first step
+
+2009-05-16  Roger While <simrw@sim-basis.de>
+
+	* General: Changes to remove lib local symbols
+	* common.c, fileio.c: Fix to enable running test suite under Win
+
+2009-05-11  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Implement file status 24 for relative files
+	* termio.c, screenio.c: Implement ACCEPT OMITTED
+	* fileio.c, fileio.h: Change all I/O except L/S to file descriptor basis
+
+2009-05-01  Roger While <simrw@sim-basis.de>
+
+	* General: Code clean/sanitize
+
+2009-04-10  Roger While <simrw@sim-basis.de>
+
+	* General: Support for icc
+	* fileio.c: Sanitize / remove BDB < 4.1 support
+	* fileio.c, fileio.h: Support LOCK clause on OPEN
+
+2009-02-23  Roger While <simrw@sim-basis.de>
+
+	* screenio.c: Fix up accept without lines parameter
+
+2009-02-03  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c: Fix Cygwins busted rand function
+
+2009-01-27  Roger While <simrw@sim-basis.de>
+
+	* call.c: Change hyphen interpretation
+
+2009-01-22  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Functions CONCATENATE and SUBSTITUTE-CASE
+
+2009-01-20  Roger While <simrw@sim-basis.de>
+
+	* screenio.c, screenio.h: Minimal support for value occurs
+
+2009-01-17  Roger While <simrw@sim-basis.de>
+
+	* common.c, screenio.c, screenio.h: Save/restore screen over SYSTEM call
+	* General: Sanitize headers. Do not use names in prototypes
+
+2009-01-15  Roger While <simrw@sim-basis.de>
+
+	* screenio.c, screenio.h, termio.c - SCROLL for ACCEPT/DISPLAY
+
+2009-01-14  Roger While <simrw@sim-basis.de>
+
+	* screenio.c, screenio.h: ACCEPT ... FROM LINES/COLUMNS
+
+2008-12-20  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Implement SUBSTITUTE function
+
+2008-12-10  Roger While <simrw@sim-basis.de>
+
+	* screenio.c: Add inter-field cursor movement for screen input
+
+2008-12-08  Roger While <simrw@sim-basis.de>
+
+	* General: More stack reducing
+	* common.h: Constify attribute pointer in cob_field
+
+2008-12-03  Roger While <simrw@sim-basis.de>
+
+	* General: More stack reducing
+	  Clean up dangling varargs
+
+2008-11-20  Roger While <simrw@sim-basis.de>
+
+	* General: Reduce stack usage
+
+2008-11-15  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Fix SORT GIVING when output is line sequential
+	* common.c, common.h, call.c, call.h: C routines for calling COBOL
+
+2008-11-14  Roger While <simrw@sim-basis.de>
+
+	* common.c: Always activate SIGSEGV handler
+
+2008-10-17  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: cob_check_based - Check BASED items
+
+2008-09-22  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Evaluate FILE STATUS for SORT files
+	* General: More constification
+
+2008-08-20  Roger While <simrw@sim-basis.de>
+
+	* common.h: Change macro for __builtin_expect
+
+2008-08-16  Roger While <simrw@sim-basis.de>
+
+	* coblocal.h, termio.c, screenio.c: Change global name screen_initialized
+
+2008-08-01  Roger While <simrw@sim-basis.de>
+
+	* byteswap.h: Do not rely on gcc doing the right thing for short
+
+2008-07-21  Roger While <simrw@sim-basis.de>
+
+	* screenio.c: Do not display SECURE items
+	* General: Cleanup, do early malloc initializations
+
+2008-07-19  Roger While <simrw@sim-basis.de>
+
+	* General: Tidy up syntax
+	* intrinsic.c: Optimize field generation
+
+2008-07-18  Roger While <simrw@sim-basis.de>
+
+	* common.c: Win does not have nanosleep
+
+2008-07-14  Roger While <simrw@sim-basis.de>
+
+	* termio.c, move.c: Preliminary changes for zero-length fields
+
+2008-07-11  Roger While <simrw@sim-basis.de>
+
+	* strings.c: Handle special replacement correctly
+
+2008-07-09  Roger While <simrw@sim-basis.de>
+
+	* screenio.c, screenio.h: Fix up SCREEN handling
+
+2008-07-05  Roger While <simrw@sim-basis.de>
+
+	* screenio.c: Extend SCREEN processing
+
+2008-07-01  Roger While <simrw@sim-basis.de>
+
+	* termio.c: Revert '.' display of non-displayable characters
+
+2008-06-29  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h, system.def: Implement CBL_OC_NANOSLEEP
+	* coblocal.h, move.c: support routines for the above
+
+2008-06-25  Roger While <simrw@sim-basis.de>
+
+	* screenio.c, screenio.h: Define input fields for SCREEN section
+
+2008-06-23  Roger While <simrw@sim-basis.de>
+
+	* screenio.c: New env COB_SCREEN_EXCEPTIONS to retrun extended
+	  exception codes on ACCEPT
+
+2008-06-17  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Fix return from ISAM (not BDB) from OPEN
+	* common.c: redirect to stderr when necessary
+	* screenio.c: More support
+
+2008-06-10  Roger While <simrw@sim-basis.de>
+
+	* screenio.c, screenio.h, termio.c: More Screen changes
+
+2008-06-05  Roger While <simrw@sim-basis.de>
+
+	* coblocal.h, common.c, fileio.c, fileio.h: Cleanup, prepare for linptr
+	  reuse
+
+2008-06-04  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Cleanup /simplification
+
+2008-06-03  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Support UNLOCK statement
+
+2008-06-01  Roger While <simrw@sim-basis.de>
+
+	* coblocal.h, move.c, numeric.c: Localize cob_binary_get/set routines
+	* common.c, move.c: Cater for spaces in numeric fields
+	* termio.c: Display '.' for invalid characters
+
+2008-05-31  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Allow VARYING on LINE SEQUENTIAL
+
+2008-05-23  Roger While <simrw@sim-basis.de>
+
+	* common.h, termio.c: Better display of POINTER items
+
+2008-05-19  Roger While <simrw@sim-basis.de>
+
+	* screenio.c, screenio.h: More support for SCREEN
+
+2008-05-14  Roger While <simrw@sim-basis.de>
+
+	* common.c: Fix C$NARG for chaining syntax
+	* common.c, common.h: Simplify accept from environment
+
+2008-05-12  Roger While <simrw@sim-basis.de>
+
+	* screenio.c: Fix some screen displays
+
+2008-04-17  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h, system.def: Implement MF call X"91",
+	  subfunctions 11, 12, 16
+
+2008-04-02  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Implement FUNCTION COMBINED-DATETIME
+
+2008-03-31  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Implement LOCALE-TIME-FROM-SECONDS
+	  More refmodding for functions
+
+2008-03-29  Roger While <simrw@sim-basis.de>
+
+	* General: Fix up sparse warnings
+
+2008-03-24  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Refmodding for some FUNCTIONS
+
+2008-03-11  Roger While <simrw@sim-basis.de>
+
+	* call.c: New environment variable to control case conversion on
+	  dynamic program loads.
+	  COB_LOAD_CASE=UPPER|LOWER
+
+2008-03-05  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: New environment variables to control LINE SEQUENTIAL
+	  files.
+	  COB_LS_NULLS - Equivalent to MF's -N switch.
+	  Bytes less than ASCII space are preceded by a null
+	  byte on write.
+	  COB_LS_FIXED - Write the record without trailing space
+	  removal.
+
+2008-03-01  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: BDB CLOSE must close secondary files first
+
+2008-02-19  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Clean up and comment
+
+2008-02-14  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Fix ifdef's for variable sequential files
+
+2008-02-12  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h:  Rationalize some previously exported variables
+	  New function - cob_set_location for line debugging
+
+2008-01-07  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: DISPLAY .. UPON COMMAND-LINE
+
+2008-01-03  Roger While <simrw@sim-basis.de>
+
+	* move.h: Remove own_memxxx routines
+	* General: Remove references to own_memxxx routines
+
+2007-12-27  Roger While <simrw@sim-basis.de>
+
+	** Mark 1.0 RELEASE
+
+2007-12-15  Roger While <simrw@sim-basis.de>
+
+	* common.c: Change exception structure definition to optimize
+	  64 bit allocation
+
+2007-11-21  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Add C/D/VB-ISAM code
+
+2007-11-20  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Cater for 02 return status
+	  Put in hooks for C/D/VB-ISAM
+
+2007-11-09  Roger While <simrw@sim-basis.de>
+
+	* numeric.c: Use 64-bit when available
+
+2007-11-01  Roger While <simrw@sim-basis.de>
+
+	* numeric.c: Fix 64-bit unsigned problem
+
+2007-10-27  Roger While <simrw@sim-basis.de>
+
+	* strings.c: Fix figurative constant handling in INSPECT
+
+2007-10-24  Roger While <simrw@sim-basis.de>
+
+	* numeric.c, numeric.h: New routine cob_cmp_uint
+
+2007-10-22  Roger While <simrw@sim-basis.de>
+
+	* numeric.c: Fix 36 digit numerics
+
+2007-10-20  Roger While <simrw@sim-basis.de>
+
+	* call.c: Clean up
+	* codegen.h: Fix up signed/unsigned comparison
+
+2007-10-17  Roger While <simrw@sim-basis.de>
+
+	* common.c: User defined exit routines must be called before
+	             the OC clean up routines.
+	             Fix missing call to user defined error routines.
+
+2007-10-10  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Change delete to fdelete (C++)
+
+2007-09-18  Roger While <simrw@sim-basis.de>
+
+	* screenio.c: Check for mvgetnstr in curses lib
+
+2007-09-12  Roger While <simrw@sim-basis.de>
+
+	* fileio.h: Add in CHANNEL definition
+
+2007-09-07  Roger While <simrw@sim-basis.de>
+
+	* General: unistd.h is not availiable on native Win
+	* move.c, termio.c: Cater for changed pic string representation
+
+2007-08-31  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Move defines, change EXTFH interface
+	  Linage is reduced to a pointer in the fileio struct
+	  2 local defines moved from fileio.c to fileio.h for EXTFH
+
+2007-08-23  Roger While <simrw@sim-basis.de>
+
+	* General: Remove ASCII 10/20, fix up ascii/ebcdic on target
+	  Note changes to module and file structures
+
+2007-08-14  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Implement method to use an external SEQ/RAN file handler
+	* fileio.h: Use spare byte in file struct as file version
+
+2007-08-12  Roger While <simrw@sim-basis.de>
+
+	* numeric.c: Fix for EBCDIC machines
+
+2007-08-09  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Implement method to use an external ISAM file handler
+
+2007-08-01  Roger While <simrw@sim-basis.de>
+
+	* call.c: Implement cob_c_cancel
+	* General: More constification
+
+2007-07-26  Roger While <simrw@sim-basis.de>
+
+	* common.c, fileio.c: (un)likely optimizations
+	* byteswap.h: For i386, let gcc work out the 2 byte case
+
+2007-07-24  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Do not use locks if filename begins with "/dev/"
+
+2007-07-21  Roger While <simrw@sim-basis.de>
+
+	* common.c: Use calloc instead of malloc
+
+2007-07-11  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Fix a memory leak in the I/S close code
+
+2007-07-02  Roger While <simrw@sim-basis.de>
+
+	* call.c: Previously we were trying to detect if dlopen(NULL)
+	  works in configure and ifdef'ing in call.c
+	  This does not work in all circumstances.
+	  For borked systems this now has to be changed by hand
+	  in call.c. The comments at the top of call.c -
+	  /* NOTE - The following variable should be uncommented when
+	  it is known that dlopen(NULL) is borked.
+	  This is known to be true for some PA-RISC HP-UX 11.11 systems.
+	  This is fixed with HP patch PHSS_28871. (There are newer
+	  but this fixes dlopen/dlsym problems)
+	  */
+	  /* #define COB_BORKED_DLOPEN */
+
+2007-07-01  Roger While <simrw@sim-basis.de>
+
+	* codegen.h: Further optimizations
+
+2007-06-28  Roger While <simrw@sim-basis.de>
+
+	* codegen.h: Tweak for non-alignment-tolerant architectures
+	* intrinsic.c: DST hack for ports that do not have "%z"
+	  Note - This needs to be properly fixed
+
+2007-06-26  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c: For specific ports, fix TZ in CURRENT-DATE
+	  Add use of strftime for timezone if configure detected
+
+2007-06-06  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: LOCK on WRITE/REWRITE
+
+2007-05-22  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Implement IGNORING LOCK.
+	  Fix a WRITE/REWRITE problem with duplicate keys.
+
+2007-05-17  Roger While <simrw@sim-basis.de>
+
+	* screenio.c: Use normal curses when available
+
+2007-05-10  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Fix positioning with START,READ NEXT/PREVIOUS on duplicate
+	  records.
+
+2007-05-08  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: Fix incompatible param definitions on CBL_EXIT_PROC
+	  and CBL_ERROR_PROC
+
+2007-05-04  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Preliminary support for record locking
+
+2007-04-28  Roger While <simrw@sim-basis.de>
+
+	* numeric.c: Remove duplicated code.
+	  Set up variables for binary > 64 bits
+
+2007-04-26  Roger While <simrw@sim-basis.de>
+
+	* numeric.c: Fix incorrect value when signed bit set in an
+	  eight byte binary value.
+	* numeric.c, numeric.h: Remove unused routine. Make 2 routines static.
+
+2007-04-17  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c: Fix a Cygwin compile failure
+
+2007-04-11  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: Define cob_one for screen display
+
+2007-04-10  Roger While <simrw@sim-basis.de>
+
+	* strings.c, strings.h: Dynamically allocate for unstring
+
+2007-03-27  Roger While <simrw@sim-basis.de>
+
+	* common.c: Fix 64-bit warning
+
+2007-03-16  Roger While <simrw@sim-basis.de>
+
+	* common.c, intrinsic.c: Provide fractional seconds on Win platform
+
+2007-03-13  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c: Provide fractional seconds for CURRENT-DATE if
+	  supported on the platform
+	* common.c: Provide fractional seconds for ACCEPT .. FROM TIME
+	  if supported on the platform
+	* fileio.h: Align file structure
+	* fileio.c: When filename mapping, allow underline in varibale name
+
+2007-03-05  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c: Windows/Cygwin implementation of LOCALE-DATE/TIME
+
+2007-03-03  Roger While <simrw@sim-basis.de>
+
+	* General: Use COB_FIELD_xxx macros
+
+2007-03-01  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Change params for LOCALE-DATE/TIME
+
+2007-02-26  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c: Fix for not defined LANGINFO
+
+2007-02-25  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Fix Indexed-Sequential rewrite
+
+2007-02-13  Roger While <simrw@sim-basis.de>
+
+	* All: Change initialization of fields/attributes
+
+2007-02-11  Roger While <simrw@sim-basis.de>
+
+	* coblocal.h: New file, contains prototypes that should only
+	  be known to the library
+	* All: Implement above header file
+
+2007-02-09  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Implement SORT-RETURN
+
+2007-02-07  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Implement LOCALE-DATE, LOCALE-TIME
+	* fileio.c, fileio.h: Fix a READ PREVIOUS problem
+
+2007-01-24  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Implement new SORT routines
+	                Note these do not need the ISAM handler
+
+2007-01-17  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: Add cob_is_omitted, check for NULL parameter
+
+2007-01-16  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Implement FUNCTION's
+	  SECONDS-PAST-MIDNIGHT, SECONDS-FROM-FORMATTED-TIME
+	* All: Remove COB_SET_EXCEPTION define
+	* intrinsic.c: Set COB_EC_ARGUMENT_FUNCTION exception code where
+	                appropriate
+
+2007-01-15  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h, fileio.c, fileio.h: Change sort comparison routines
+	  to not overwrite collating sequence. Also optimize.
+	  Note, this fixes a problem with a (file) SORT with COLLATING and
+	  INPUT and/or OUPUT procedures. Previously, this would
+	  incorrectly change alphanumeric tests in the
+	  INPUT/OUTPUT procedures.
+	* fileio.c, fileio.h: Allow special ASSIGN [TO] DISPLAY processing
+
+2007-01-12  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Fix miscompile on WIN64
+
+2007-01-10  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Allow special ASSIGN [TO] KEYBOARD processing
+
+2007-01-08  Roger While <simrw@sim-basis.de>
+
+	* call.c, call.h: Implement new CANCEL processing
+
+2006-12-17  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Correct the NUMVAL-C function
+
+2006-12-12  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Fix secondary key access
+
+2006-12-07  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Implement TRIM function
+
+2006-11-28  Roger While <simrw@sim-basis.de>
+
+	* move.c: Small optimization
+	* numeric.c: New routines cob_cmp_long_numdisp,
+	              cob_cmp_long_signed_numdisp
+
+2006-11-12  Roger While <simrw@sim-basis.de>
+
+	* codegen.h: Remaining integer cmp/add/sub optimizations
+
+2006-10-23  Roger While <simrw@sim-basis.de>
+
+	* Makefile.am: Remove gcc options
+	  General: Constify some stuff
+
+2006-10-16  Roger While <simrw@sim-basis.de>
+
+	* codegen.h: Fix 3 byte compare
+
+2006-10-15  Roger While <simrw@sim-basis.de>
+
+	* codegen.h: This is now the place for optimization
+	  Duplication in numeric.c is not necessary
+	  Add in optimization for 3/5/6/7 byte compares
+	  Add in 3 byte add optimization
+	* numeric.c: Delete duplicated code from codegen.h
+	  Constify
+
+2006-10-14  Roger While <simrw@sim-basis.de>
+
+	* common.c, fileio.c, fileio.h, move.c, move.h: const defintions
+
+2006-09-30  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: Implement CBL_EXIT_PROC
+	* General: tidy up
+
+2006-08-31  Roger While <simrw@sim-basis.de>
+
+	* call.c: Alternate ifdef'd algo for call list
+
+2006-08-28  Roger While <simrw@sim-basis.de>
+
+	* General: Check for COB_PARAM_CHECK
+	* numeric.c: Experimental code
+
+2006-08-26  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Implement COB_FILE_PATH variable for default
+	  path prefix on files that do not have any other assignment
+
+2006-08-09  Roger While <simrw@sim-basis.de>
+
+	* system.def, common.c, common.h: More MF/ACU system routines
+
+2006-08-01  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h, call.c: Change cob_field_to_string to type void
+
+2006-07-31  Roger While <simrw@sim-basis.de>
+
+	* system.def, fileio.c, fileio.h, call.c, common.c, common.h: New MF
+	  system routines - see system.def
+
+2006-07-26  Roger While <simrw@sim-basis.de>
+
+	* All: General clean up and fix gcc 4 warnings
+	* New file system.def
+	* call.c, common.c, common.h: System routines
+
+2006-07-19  Roger While <simrw@sim-basis.de>
+
+	* All: General clean up
+
+2006-07-14  Roger While <simrw@sim-basis.de>
+
+	* codegen.h, numeric.c: Fix optimization for HP compiler
+	* intrinsic.c: Fix bug in NUMVAL routines
+
+2006-07-12  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: Implement ALLOCATE/FREE
+	* strings.c: Clean up
+
+2006-07-07  Roger While <simrw@sim-basis.de>
+
+	* codegen.h, numeric.c: More optimizations
+	* fileio.c: Further BDB fixes
+
+2006-07-06  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: BDB >= 4.1 fixes
+
+2006-07-04  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: BDB >= 4.1 fixes
+
+2006-06-22  Roger While <simrw@sim-basis.de>
+
+	* call.c: Set cob_exception_code for not found calls
+
+2006-06-21  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Fix typo for cob_sort_output_cache
+
+2006-06-06  Roger While <simrw@sim-basis.de>
+
+	* move.h: Remove generic memcpy/memset for non (GNUC && i386)
+
+2006-06-05  Roger While <simrw@sim-basis.de>
+
+	* fileio.c, fileio.h: Implement PREVIOUS for IS files
+
+2006-05-27  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: Implement cob_fatal_error
+
+2006-05-20  Roger While <simrw@sim-basis.de>
+
+	* Fixes for extended ACCEPT/DISPLAY
+
+2006-05-18  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h, intrinsic.c, intrinsic.h: Implement FUNCTIONs
+	  EXCEPTION-FILE, EXCEPTION-STATEMENT, EXCEPTION-LOCATION, EXCEPTION-STATUS
+
+2006-05-12  Roger While <simrw@sim-basis.de>
+
+	* common.c, exception.def: Exceptions for ACCEPT/DISPLAY
+
+2006-05-10  Roger While <simrw@sim-basis.de>
+
+	* common.h: Preliminary support for CURSOR IS and CRT STATUS IS
+	* intrinsic.c, intrinsic.h: Implement STORED-CHAR-LENGTH (Fujitsu)
+
+2006-05-08  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: cob_chain_setup - setup CHAINING params from
+	  command line
+	* strings.c, strings.h: implement TRAILING syntax in INSPECT clause
+
+2006-05-05  Roger While <simrw@sim-basis.de>
+
+	* strings.c: Avoid memory bloat with INSPECT
+
+2006-05-04  Roger While <simrw@sim-basis.de>
+
+	* common.h: Define likely/unlikely macros
+	* call.c, move.c: Use above macros
+
+2006-05-03  Roger While <simrw@sim-basis.de>
+
+	* screenio.c, screenio.h: Change strucrures
+
+2006-05-01  Roger While <simrw@sim-basis.de>
+
+	* General: Changes for native EBCDIC machines
+	* codegen.h, numeric.c: Further optimization for cob_cmp_xxx,
+	  cob_add_xxx, cob_sub_xxx
+	* common.c, common.h: Support for sign-ebcdic and sign-ascii20
+	               (Note ascii20 is not correct)
+	               Implement SET ENVIRONMENT (ACU)
+
+2006-04-17  Roger While <simrw@sim-basis.de>
+
+	* codegen.h, numeric.c: Optimized cob_cmp_xxx, cob_add_xxx,
+	  cob_sub_xxx
+
+2006-04-06  Roger While <simrw@sim-basis.de>
+
+	* common.h, common.c: Define new function cob_strdup
+	  common.c, call.c, fileio.c: Use cob_strdup
+	  fileio.c: Fix size_t mistake
+
+2006-04-02  Roger While <simrw@sim-basis.de>
+
+	* codegen.h: Fix up a bunch of mistakes
+
+2006-03-25  Roger While <simrw@sim-basis.de>
+
+	* common.c: Although not currently used, update the
+	  ASCII/EBCDIC tables
+
+2006-03-23  Roger While <simrw@sim-basis.de>
+
+	* numeric.c: Fix a stack corruption in the fast C-3 compare
+
+2006-03-22  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h: Implement COLLATING SEQUENCE for table SORT
+
+2006-03-21  Roger While <simrw@sim-basis.de>
+
+	* move.c: More edited field fixes from Hans Martin Rasch
+
+2006-03-16  Roger While <simrw@sim-basis.de>
+
+	* move.c: Fix edited field with +/- and currency
+
+2006-03-10  Roger While <simrw@sim-basis.de>
+
+	* All: Reduce compile warnings under Win
+	* common.c: setlocale depends on HAVE_SETLOCALE
+	             We must do a setlocale for LC_NUMERIC
+	             as languages with a comma separator change
+	             the operation of string functions which bork
+	             specfically FP operations
+
+2006-03-09  Roger While <simrw@sim-basis.de>
+
+	* numeric.c: Fix remainder problem
+	              Fix returning functions which return void
+
+2006-03-04  Roger While <simrw@sim-basis.de>
+
+	* common.c: Don't do cob_put_sign for PACKED fields
+	             in the cob_cmp_xxx routines
+
+2006-02-21  Roger While <simrw@sim-basis.de>
+
+	* new include: codegen.h
+	  This contains inlines that only relate to code
+	  generation
+	  Implemented are cob_cmp_xxx_binary and cob_addsub_xxx_binary
+	  where xxx is u8, s8, u16, s16 etc.
+	* call.c: Fix a preload problem under Cygwin
+
+2006-02-18  Roger While <simrw@sim-basis.de>
+
+	* move.h: Take out x86 memcpy optimization
+
+2006-02-08  Roger While <simrw@sim-basis.de>
+
+	* common.c, common.h, numeric.c, numeric.h: Optimize COMP/COMP-3
+
+2006-02-01  Roger While <simrw@sim-basis.de>
+
+	* fileio.h, fileio.c: Changes for FILE STATUS
+	  We have to pass the FILE STATUS as a parameter
+	  to the I/O call. This is required for EXTERNAL FD's.
+
+2006-01-29  Roger While <simrw@sim-basis.de>
+
+	* call.c: Implement COB_PRE_LOAD
+
+2006-01-27  Roger While <simrw@sim-basis.de>
+
+	* Tweak COMP-3
+
+2006-01-26  Roger While <simrw@sim-basis.de>
+
+	* strings.c: Rip out regex use. It cannot handle
+	  a low-value (null byte) in RE.
+	  call.c: Native WIN MSC needs path separator of ';'
+	  common.h, common.c: Implement CBL_ERROR_PROC
+
+2006-01-25  Roger While <simrw@sim-basis.de>
+
+	* fileio.h, fileio.c: signed to unsigned for file_status
+
+2006-01-17  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Print assign name when erroring
+
+2006-01-07  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: 64-bit fixes
+
+2006-01-05  Roger While <simrw@sim-basis.de>
+
+	* General: Bootstrap up to new libtool / automake
+	            MS VS/VC changes
+	  fileio.c: Fix relative postioning and incorrectly
+	             returned relative record number
+
+2005-12-30  Roger While <simrw@sim-basis.de>
+
+	* Change ifdef's on MINGW to WIN32 (Also defined on 64-bit Win)
+	  intrinsic.c: ifdef's for strftime (CURRENT-DATE)
+	  fileio.c: Basic platform changes
+
+2005-12-28  Roger While <simrw@sim-basis.de>
+
+	* General: Further fixes for non-gcc
+
+2005-12-27  Roger While <simrw@sim-basis.de>
+
+	* General: Change occurrences of "char[variable]"
+	  move.c: Change code for "MOVE ALL '98' TO binary/packed/edited"
+	           This is still not completely correct
+
+2005-12-23  Roger While <simrw@sim-basis.de>
+
+	* termio.c, common.c: Move extended accept/display from
+	  termio to common. Define cobc_argc/argv as static.
+
+2005-12-21  Roger While <simrw@sim-basis.de>
+
+	* fileio.c - Cater for various format of the record
+	  length field in variable length sequential files
+	  (WITH_VARSEQ)
+
+2005-12-18  Roger While <simrw@sim-basis.de>
+
+	* All: Cleanup "shadowed" variables
+	        Start generalizing code for large numbers
+	  common.c: Take out Ebcdic table, now genned by codegen
+
+2005-12-09  Roger While <simrw@sim-basis.de>
+
+	* move.c: Fix display of large unsigned numbers.
+	  termio.c: Change number of displayed digits.
+
+2005-12-08  Roger While <simrw@sim-basis.de>
+
+	* common.h: New defines - COB_SMALL_BUFF, COB_MEDIUM_BUFF,
+	  COB_LARGE_BUFF.
+	  Replace all occurrences of FILENAME_MAX/BUFSIZ.
+
+2005-12-04  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c: Fix strftime for MingW
+
+2005-12-04  Roger While <simrw@sim-basis.de>
+
+	* byteswap.h: Take out typedefs. They are likely to
+	  clash with standard includes.
+
+2005-12-03  Roger While <simrw@sim-basis.de>
+
+	* common.c: Do not gen signals for Ming
+	* fileio.c: Ming / typing changes
+
+2005-11-25  Roger While <simrw@sim-basis.de>
+
+	* common.c: Extended signal handling
+	  fileio.c: Don't use mkstemp on non-Win
+
+2005-11-16  Roger While <simrw@sim-basis.de>
+
+	* call.c: Fix wrong cached handle
+	  fileio.c: Fix spacing in LS read
+
+2005-11-15  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Allow COB_SYNC=P (Paranoid)
+	  This will try even harder to sync.
+
+2005-11-15  Roger While <simrw@sim-basis.de>
+
+	* common.c, fileio.h, fileio.c: Check open files
+	  at run-unit termination. Implement sync'ing
+	  with enviroment variable COB_SYNC=Y.
+	  Catch signals QUIT, INT and HUP.
+
+2005-11-08  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Tweaks for LS files
+
+2005-11-04  Roger While <simrw@sim-basis.de>
+
+	* call.c: Don't repeatedly call (lt_)dlopen on
+	  NULL (main program); Do it once at startup.
+
+2005-11-01  Roger While <simrw@sim-basis.de>
+
+	* screenio.c: Cater for include in ncurses/ncurses.h
+	* fileio.c: ferror under Cygwin doesn't like a
+	  void * parameter - Cast it.
+	  Fix line-sequential reads when input has carriage-returns.
+
+2005-10-26  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Remove HAVE_DB ifdef, fix warnings
+	* move.c: Fix warnings
+
+2005-10-25  Roger While <simrw@sim-basis.de>
+
+	* move.h, move.c, numeric.c, fileio.c, strings.c
+	  memcpy/memset optimizations
+	  move.c: Fix a mpz_ call (optimization)
+
+2005-10-14  Roger While <simrw@sim-basis.de>
+
+	* All: More GCC 4 fixes
+
+2005-10-13  Roger While <simrw@sim-basis.de>
+
+	* common.h, common.c: Fix function type (GCC 4)
+
+2005-08-07  Roger While <simrw@sim-basis.de>
+
+	* All .c: indent, braces
+	* call.c: Dynamically allocate areas, const allocation
+
+2005-08-04  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Harden I/O error checking
+	  Replace fputc with putc
+	* screenio.c,h: Rename cob_screen_clear to cob_screen_terminate
+	* common.c,h: Call cob_screen_terminate in cob_stop_run
+	  Define cob_stop_run as noreturn (gnuc)
+	* All: Change occurrences of exit to cob_stop_run
+
+2005-07-31  Roger While <simrw@sim-basis.de>
+
+	* intrinsic.c, intrinsic.h: Add SIGN, FRACTION-PART, clean up
+	* common.c, common.h: cob_check_version - Program versioning
+	* move.c, numeric.c: Some preliminary assembler stuff
+
+2005-07-14  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: Dummy routines for read,write, etc.
+	  Always generate the function jump table, even if
+	  DB not configured. Jumps to the dummy routines
+	  result in status 30.
+
+	* All: Do malloc's through own new routine cob_malloc
+	  This will produce an error and terminate if memory
+	  cannot be acquired.
+
+2005-07-02  Roger While <simrw@sim-basis.de>
+
+	* common.h: cob_module bit fields to char
+	* intrinsic.c: Clean up and fixes
+	* move.c, numeric.c: Experiment with own_mem(cpy,set)
+	* fileio.c: Cast fseek offsets to off_t
+	             Return correctly if DB not defined
+
+2005-06-28  Roger While <simrw@sim-basis.de>
+
+	* New files: intrinsic.h, intrinsic.c
+	* Fix cob_add/sub_int
+
+2005-06-13  Roger While <simrw@sim-basis.de>
+
+	* common.c: Handle new COB_SWITCH_n=ON/OFF
+	  screenio.c: Handle pdcurses
+
+2005-06-11  Roger While <simrw@sim-basis.de>
+
+	* strings.c: Fix INSPECT
+	  fileio.c: Mistake in LINAGE
+
+2005-06-09  Roger While <simrw@sim-basis.de>
+
+	* call.c: Fix memory leak in drop function.
+
+2005-06-01  Roger While <simrw@sim-basis.de>
+
+	* Makefile*, fileio.c, common.c: Hacks for MinGW
+	  move.c: Include math.h
+
+2005-05-31  Roger While <simrw@sim-basis.de>
+
+	* common.h, common.c, numeric.c, move.c, termio.c :
+	    Rough implementation of COMP-1/2 fields.
+
+2005-05-27  Roger While <simrw@sim-basis.de>
+
+	* byteswap.h: u_int16_t etc. are not necessarily defined
+	  in sys/types.h (e.g. MinGW). So ifndef on __BIT_TYPES_DEFINED__
+	  and typedef them.
+	  fileio.c: Cater for extended DB headers db4/ db4.1/ db4.2/ db4.3/
+
+2005-05-23  Roger While <simrw@sim-basis.de>
+
+	* call.h, call.c: New functions cob_resolve_1
+	                   cob_call_resolve_1.
+	                   These are wrappers for optimized dynamic
+	                   calls.
+
+2005-05-21  Roger While <simrw@sim-basis.de>
+
+	* call.h, call.c: Cater for call.def
+	                   Cater for --with-dl
+	                   Restructure code slightly
+	                   Take out check for cob_initialized
+
+2005-05-03  Roger While <simrw@sim-basis.de>
+
+	* Mak*:      Due to autoreconf
+	  common.c:  Slight restructure.
+	              cob_exp10 must be int not long.
+	  common.h:  extern definitions.
+	  fileio.c:  Force SORT to put duplicates in order.
+	  move.c:    Performance.
+	  numeric.c: Remove unused function.
+	              Change long to int (64-bitters where long = 8 bytes).
+
+2005-04-15  Keisuke Nishida  <knishida@opencobol.org>
+
+	* Makefile.am (libcob_la_CFLAGS): Add -fsigned-char.
+
+2005-04-13  Keisuke Nishida  <knishida@opencobol.org>
+
+	* byteswap.h: #include <sys/types.h>.  Use u_int16_t, u_int32_t, and
+	u_int64_t instead of unsigned short, etc.
+
+2005-03-03  Roger While <simrw@sim-basis.de>
+
+	* fileio.h, fileio.c :
+	  LINAGE
+
+2005-02-11  Roger While <simrw@sim-basis.de>
+
+	* common.h, common.c, termio.c :
+	  Reorder struct cob_module.
+	  Fixes for ARGUMENT-VALUE/NUMBER -
+	  discovered by Franklin Ankum.
+	  Fix possible too small buffer.
+
+2005-02-09  Roger While <simrw@sim-basis.de>
+
+	* I must be going senile. Finally fix
+	  cob_external_addr.
+
+2005-02-08  Roger While <simrw@sim-basis.de>
+
+	* Fix my cob_external_addr routine
+
+2005-02-07  Roger While <simrw@sim-basis.de>
+
+	* common.h, common.c: new routine cob_external_addr
+	  Dynamically cater for EXTERNAL items at runtime
+
+2005-02-04  Roger While <simrw@sim-basis.de>
+
+	* termio.h, termio.c :
+	  implement DISPLAY .. UPON ENVIRONMENT-VALUE
+	  implement DISPLAY .. UPON ARGUMENT-NUMBER
+	  implement ACCEPT .. FROM ARGUMENT-NUMBER
+	  implement ACCEPT .. FROM ARGUMENT-VALUE
+
+2005-01-07  Roger While <simrw@sim-basis.de>
+
+	* move.c: Fix incorrect truncation when !binary_trunc
+	  and moving binary to packed or edited fields
+	* numeric.c: Fix arithmetic with numeric display
+	  fields when !binary_trunc
+
+2004-11-19  Roger While <simrw@sim-basis.de>
+
+	* move.c: Fix incorrect truncation when !binary_trunc
+
+2004-11-05  Roger While <simrw@sim-basis.de>
+
+	* numeric.c: Handle arithmetic for !binary_trunc.
+
+2004-11-04  Roger While <simrw@sim-basis.de>
+
+	* move.c: Fix regression for NIST suite
+
+2004-11-04  Bernard Giroud <bgiroud@opencobol.org>
+
+	* numeric.c (cob_decimal_get_binary): reverted:
+	  NIST test suite is no more working.
+
+2004-11-02  Bernard Giroud <bgiroud@opencobol.org>
+
+	* numeric.c (cob_decimal_get_binary) :
+	  Worked around what I consider a bug in Gmp for getting
+	  a long signed value.
+	* Added checks for option binary-truncate from a
+	  suggestion of Roger While.
+
+2004-10-31  Roger While <simrw@sim-basis.de>
+
+	* fileio.h: For I/O exceptions, has_status flag and slight
+	  rearrangement of fields in cob_file structure.
+
+2004-10-30  Roger While <simrw@sim-basis.de>
+
+	* call.c, common.c, move.c: Replace back-tick "'" with
+	  quote "'"
+	* move.c: Fix to handle PIC ***B***B**9.
+	* byteswap.h: Always generate optimum code, not just with -O
+	* fileio.c: Tidy up file error messages.
+	  In the ENOENT return for OPEN OUTPUT/EXTEND, return status 30.
+	  Note this will not have any effect until we activate error
+	  handling for the OPEN. (Coming up soon)
+
+2004-09-17  Keisuke Nishida  <knishida@opencobol.org>
+
+	* numeric.h (COB_STORE_TRUNC_ON_OVERFLOW): Define as 0x04, not 0x02.
+	  (Thanks to Roger While)
+
+2004-07-06  Keisuke Nishida  <knishida@opencobol.org>
+
+	* numeric.h (COB_STORE_ROUND, COB_STORE_KEEP_ON_OVERFLOW)
+	  (COB_STORE_TRUNC_ON_OVERFLOW): New macros.
+	* numeric.h, numeric.c (cob_decimal_get_display)
+	  (cob_decimal_get_binary, cob_decimal_get_field, cob_add, cob_sub)
+	  (cob_div_quotient, cob_div_remainder): New arg 'opt'.
+	* numeric.c (cob_decimal_get_field_round): Removed.
+	  Integrated into 'cob_decimal_get_field'.
+	  (cob_display_add_int): Renamed from cob_add_int_to_display.
+	  (cob_add_round, cob_sub_round): Removed.
+
+2004-07-05  Keisuke Nishida  <knishida@opencobol.org>
+
+	* fileio.c (sort_read): Set field size for varying records.
+	  (Thanks to Roger While!)
+
+2004-06-12  Keisuke Nishida  <knishida@opencobol.org>
+
+	* termio.c (display): Display full digits of binary item
+	  when pretty-display is off, not when binary-truncate is off.
+
+2004-05-21  Keisuke Nishida  <knishida@opencobol.org>
+
+	* move.c (cob_binary_get_int64): Reimplemented using memcpy.
+	(cob_binary_get_int): Call cob_binary_get_int64.
+	(cob_binary_set_int): Call cob_binary_set_int64.
+
+2004-05-16  Keisuke Nishida  <knishida@opencobol.org>
+
+	* common.c (cob_cmp): Compare non-display numeric and alphanumeric
+	  correctly.
+
+2004-05-04  Keisuke Nishida  <knishida@opencobol.org>
+
+	* termio.c (display_numeric): Leading sign for binary.
+
+2004-05-04  Keisuke Nishida  <knishida@opencobol.org>
+
+	* byteswap.h (COB_BSWAP_32_IA32): Always use bswap.
+	  (We no longer support i386.)
+
+2004-05-04  Keisuke Nishida  <knishida@opencobol.org>
+
+	* fileio.c (cob_default_error_handle): Set error for status 35.
+
+2004-05-04  Keisuke Nishida  <knishida@opencobol.org>
+
+	* common.c (cob_runtime_error): Flush buffer at the end.
+
+2004-04-07  Keisuke Nishida  <knishida@opencobol.org>
+
+	* common.h, common.c (cob_table_sort_init, cob_table_sort_init_key)
+	  (cob_table_sort): New functions.
+
+2004-04-07  Keisuke Nishida  <knishida@opencobol.org>
+
+	* strings.c (cob_inspect_converting): Do not convert repeatedly.
+	  (Thanks to Richard Smith <rich@theforest.plus.com>)
+
+2004-03-12  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
+
+	* screenio.c: #include <ncurses.h>
+
+2004-03-12  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
+
+	* fileio.c (file_close): FILE *fp = f->file;
+
+2004-03-10  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
+
+	* fileio.c (cob_sort_init): Use temporary sort file.
+	  (cob_sort_finish): Delete sort file.
+	  (cob_open): No filename mapping for SORT files.
+
+2004-03-09  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
+
+	* move.c (cob_binary_set_int, cob_binary_set_int64): Reimplemented.
+	  (Thanks to Roger While)
+
+2004-03-06  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
+
+	* fileio.c (file_open): Open files in the text mode for line
+	  sequential files.
+
+2004-03-06  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
+
+	* fileio.c (file_open, file_close): Use fcntl for file locking.
+
+2003-10-01  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* common.h (cob_module): New member 'flag_pretty_display'.
+	* termio.c (display): Updated.
+
+2003-09-29  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* common.c (cob_is_numeric): Test packed decimal.
+
+2003-08-30  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* common.h (cob_module): Replace 'flag_binary_print_full' by
+	  'flag_binary_truncate'.  Related functions updated.
+
+2003-08-29  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* termio.h (COB_SYSIN, COB_SYSOUT, COB_SYSERR): Removed.
+	* termio.h, termio.c (cob_display_error): New function.
+	  (cob_newline_error): New function.
+
+2003-08-27  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* fileio.c: Compile indexed and sort i/o only when either of
+	  HAVE_DBOPEN or WITH_DB is defined.
+
+2003-08-26  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* common.h (cob_module): New member 'flag_filename_mapping'.
+	* fileio.c (cob_open): filename mapping.
+
+2003-08-26  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* common.h, common.c (cob_a2e, cob_e2a): New variables.
+
+2003-08-25  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* fileio.c (sort_read): Bug fix of first read.
+
+2003-08-25  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* fileio.h, fileio.c (cob_sort_init): 3rd argument 'sequence'.
+	  (cob_sort_finish): New function.
+
+2003-08-22  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* Don't use run-time config file.
+	* common.h, common.c (cob_config_lookup, cob_config_compare): Removed.
+	* call.c (cob_init_call): Handle env "COB_DYNAMIC_RELOADING".
+
+2003-08-21  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* common.h (cob_module): New member 'flag_binary_print_full'.
+	* termio.c (cob_display): Binary full print.
+
+2003-08-21  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* common.h (cob_display_sign): New enum.
+	  (cob_module): New entry 'display_sign'.
+	* common.c (cob_real_get_sign, cob_real_put_sign): Check display_sign.
+
+2003-08-19  Keisuke Nishida  <knishida@netlab.jp>
+
+	* termio.c (cob_accept_command_line): Omit the program name (argv[0]).
+
+2003-08-17  Keisuke Nishida  <knishida@netlab.jp>
+
+	* termio.h, termio.c (cob_display_environment): New function.
+	  (cob_accept_environment): Remove the second argument.
+
+2003-08-12  Keisuke Nishida  <knishida@netlab.jp>
+
+	* byteswap.h: New file.
+	* byteorder.h: Removed.
+
+2003-08-12  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h, common.c (cob_return_code): Removed.
+
+2003-08-10  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (COB_FLAG_BINARY_SWAP): New macro.
+	* move.h, move.c (cob_binary_get_int): New function.
+	  (cob_binary_get_int64): New function.
+	  (cob_binary_set_int): New function.
+	  (cob_binary_set_int64): New function.
+	* common.h (COB_TYPE_NUMERIC_NATIVE): Removed.
+	* common.h, common.c (cob_binary_convert): Removed.
+	* move.c (cob_move_display_to_native): Removed.
+	  (cob_move_native_to_display): Removed.
+	* numeric.c (cob_decimal_set_native): Removed.
+	  (cob_decimal_get_native): Removed.
+
+2003-08-09  Keisuke Nishida  <knishida@netlab.jp>
+
+	* call.c (cob_call_error): Exit with status 1.
+
+2003-08-07  Keisuke Nishida  <knishida@netlab.jp>
+
+	* byteorder.h: New file.
+	* common.h (COB_TYPE_NUMERIC_NATIVE): New macro.
+	* common.h, common.c (cob_binary_convert): New function.
+	* move.c (cob_move_display_to_native): New function.
+	  (cob_move_native_to_display): New function.
+	* numeric.c (cob_decimal_set_native): New function.
+	  (cob_decimal_get_native): New function.
+
+2003-08-05  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (COB_WRITE_MASK, COB_WRITE_LINES, COB_WRITE_PAGE)
+	  (COB_WRITE_AFTER, COB_WRITE_BEFORE): New macros.
+	* fileio.h, fileio.c (cob_write_page, cob_write_lines): Removed.
+	  (cob_write): Take third argument.
+	* fileio.c (file_write_opt): New function.
+	  (FILE_WRITE_AFTER, FILE_WRITE_BEFORE): New macros.
+
+2003-07-28  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h, common.c (cob_exception): Removed.
+
+2003-06-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h, fileio.c (cob_sort_init): Removed the 3rd argument.
+	  (cob_sort_init_key): New function.
+
+2003-06-28  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h, common.c (cob_cmp_result): Removed.
+
+2003-06-25  Keisuke Nishida  <knishida@netlab.jp>
+
+	* termio.c (cob_accept): Do not use readline.
+
+2003-06-19  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c, common.h (cob_check_odo): New function.
+	  (cob_check_subscript_depending): Removed.
+
+2003-06-18  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.c (relative_rewrite): Refer to the relative key unless
+	  the access mode is sequential.
+
+2003-06-12  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.c (SEEK_INIT): New macro.
+
+2003-06-07  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.c, numeric.h: No longer use gmp.
+	(cob_decimal_init, cob_decimal_clear): Removed.
+
+2003-06-07  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_module): New member 'collating_sequence'.
+	* common.c (CMP): New macro.
+	(cmp_char, cmp_all, cmp_alnum): Use CMP.
+
+2003-05-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_switch): Removed.
+	* common.c (cob_set_switch, cob_get_switch): New function.
+
+2003-05-27  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_module): Renamed from cob_environment.
+	  (cob_current_module): Renamed from cob_env.
+	  (cob_module_enter): Renamed from cob_push_environment.
+	  (cob_module_leave): Renamed from cob_pop_environment.
+	  (cob_module_init): Removed.
+	* call.c (cob_resolve): Do not call cob_module_init.
+
+2003-05-20  Keisuke Nishida  <knishida@netlab.jp>
+
+	* strings.c (cob_string_delimited): New function.
+	  (cob_string_append): Take only one argument.
+
+2003-05-18  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c (ding_on_error): Removed.
+
+2003-05-18  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.c: Large file system support.
+	  (_LFS64_LARGEFILE) [WITH_LFS64]: Defined.
+	  (_LFS64_STDIO) [WITH_LFS64]: Defined.
+	  (_FILE_OFFSET_BITS) [WITH_LFS64]: Defined.
+	  (_LARGEFILE64_SOURCE) [WITH_LFS64]: Defined.
+
+2003-05-18  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_d2i, cob_i2d): New macros.
+
+2003-05-15  Keisuke Nishida  <knishida@netlab.jp>
+
+	* move.c (COPY_COMMON_REGION): Removed.
+	  (store_common_region): New function.
+	  (cob_display_to_int): New function.
+	  (cob_binary_to_int): New function.
+	  (cob_get_int): Optimized.
+
+2003-05-13  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.c (INITIAL_FLAGS): Set to O_BINARY when _WIN32 is defined
+	  rather than __MINGW32__.
+	  (file_open): Open in binary mode.
+	  (cob_open): Make sure that errno == ENOENT after stat.
+
+2003-05-06  Keisuke Nishida  <knishida@netlab.jp>
+
+	* exception.def (COB_EC_ALL): Added.
+	* common.h (COB_SET_EXCEPTION): New macro.
+	  (cob_exception_table): New variable.
+	  (cob_exception_id): New enum.
+	  (cob_exception_code): Removed.
+
+2003-05-04  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.c: Optimized cob_add_int/cob_sub_int for DISPLAY.
+	  (digit_table): New variable.
+	  (init_digit_table): New function.
+	  (display_add_int, display_sub_int): New functions.
+	  (cob_add_int_to_display): New function.
+	  (cob_add_int): Call 'cob_add_int_to_display'.
+	  (cob_sub_int): Call 'cob_add_int'.
+	  (Thanks to David Korn <dgk@research.att.com>)
+
+2003-05-04  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_get_sign, cob_put_sign): Redefined as macros.
+	* common.c (cob_real_get_sign, cob_real_put_sign): Called from
+	  the above macros.
+
+2003-05-03  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (COB_OPEN_NONE, COB_OPEN_LOCKED): New macros.
+	  (COB_CLOSE_REEL, COB_CLOSE_REEL_REMOVAL): Removed.
+	  (COB_FILE_CLOSED_WITH_LOCK): New macro.
+	* fileio.c (sequential_close): Close with lock.
+	  (sequential_open): Seek to the end for extend file.
+	  (cob_open): Return COB_FILE_CLOSED_WITH_LOCK when file is locked.
+
+2003-05-03  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h, common.c (cob_linage_counter): New variable.
+
+2003-04-26  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h, common.c (cob_uint_attr, cob_sint_attr): Removed.
+	  (cob_ubin_attr, cob_sbin_attr): Removed.
+	* move.c: Do not use them.
+
+2003-04-03  Keisuke Nishida  <knishida@netlab.jp>
+
+	* move.c (cob_get_int): Renamed from cob_to_int.
+
+2003-03-30  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.c (cob_decimal_set_int): Remove the 3rd argument 'decimals'.
+	  (cob_decimal_set_int64): Removed.
+
+2003-03-25  Keisuke Nishida  <knishida@netlab.jp>
+
+	* exception.def: New file.
+
+2003-03-06  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c (cob_field_to_string): Search for ' ' from backward.
+
+2003-02-25  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c (cob_push_environment, cob_pop_environment): New functions.
+
+2003-01-23  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (cob_file): Break out flags.
+	* fileio.c: Updated.
+
+	* fileio.h, fileio.c (cob_dummy_status): Removed.
+	* fileio.c (save_status): Check file_status before setting status.
+
+2003-01-20  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (COB_FLAG_HAVE_SIGN): New macro.
+	  (COB_FLAG_SIGN_SEPARATE): New macro.
+	  (COB_FLAG_SIGN_LEADING): New macro.
+	  (COB_FLAG_BLANK_ZERO): New macro.
+	  (COB_FLAG_JUSTFIED): New macro.
+	  (COB_FIELD_HAVE_SIGN): New macro.
+	  (COB_FIELD_SIGN_SEPARATE): New macro.
+	  (COB_FIELD_SIGN_LEADING): New macro.
+	  (COB_FIELD_BLANK_ZERO): New macro.
+	  (COB_FIELD_JUSTIFIED): New macro.
+	  (cob_field_attr): Remove members 'have_sign', 'sign_separate',
+	  'sign_leading', 'blank_zero', and 'justified'.  New member
+	  'flags'.  All files updated.
+
+2003-01-20  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.h (cob_decimal): Rename 'number' to 'data'.
+
+2003-01-15  Keisuke Nishida  <knishida@netlab.jp>
+
+	* move.c (cob_move_all): New function.
+	  (cob_move): Call cob_move_all.
+
+2002-12-10  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_environment, cob_env): New.
+	  (cob_decimal_point, cob_currency_symbol, cob_numeric_separator):
+	  Replaced by cob_env.  All files updated.
+	* common.c (cob_decimal_point, cob_currency_symbol): Removed.
+
+2002-12-05  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c (cob_index, cob_index_depending): Exit when index is
+	  out of range.
+
+2002-11-25  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.c (cob_decimal_get, cob_decimal_get_r): Copy decimal
+	  before modifying it.
+
+2002-11-25  Keisuke Nishida  <knishida@netlab.jp>
+
+	* strings.h (cob_inspect_init): Take second argument 'replacing'.
+	  (cob_inspect_characters): New function.
+	  (cob_inspect_all): New function.
+	  (cob_inspect_leading): New function.
+	  (cob_inspect_first): New function.
+
+2002-11-25  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h, common.c (cob_cmp_int): New function.
+
+2002-11-24  Keisuke Nishida  <knishida@netlab.jp>
+
+	* move.h, move.c (cob_memcpy): Renamed from cob_mem_move.
+
+	* fileio.h (COB_ASCENDING, COB_DESCENDING): Moved from common.h.
+
+	* common.h (cob_field_attr): Remove member 'all'.
+	  (COB_TYPE_*): New macros.
+	  (COB_FIELD_IS_NUMERIC): New macro.
+
+	* numeric.h (cob_d1, cob_d2, cob_d3, cob_d4, cob_dt): Removed.
+	  (cob_decimal_set_int64): Removed.
+	* numeric.h, numeric.c (cob_numeric_cmp): New function.
+	* common.c (cob_cmp): Call 'cob_numeric_cmp' for numeric comparison.
+	* fileio.c (sort_compare): Always call cob_cmp.
+
+2002-11-23  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.h, numeric.c (cob_add_r, cob_sub_r): New functions.
+	  (cob_decimal_get_r): Renamed from 'cob_decimal_get_rounded'.
+
+2002-11-22  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h, fileio.c (cob_sort_init): Take 3 arguments.
+
+2002-11-22  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h, common.c (cob_uint_attr, cob_sint_attr): New constants.
+	* common.h, common.c (cob_ubin_attr, cob_sbin_attr): New constants.
+
+2002-11-21  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.h, numeric.c (cob_add, cob_sub, cob_add_int, cob_sub_int):
+	  Don't take parameter 'round'.  All caller updated.
+
+2002-11-19  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.c (lineseq_read): Not do anything special with '\0'.
+
+2002-11-19  Keisuke Nishida  <knishida@netlab.jp>
+
+	* strings.h, strings.c: Divide string functions.
+	  (cob_inspect, cob_string, cob_unstring): Removed.
+	  (cob_inspect_init): New function.
+	  (cob_inspect_start): New function.
+	  (cob_inspect_before): New function.
+	  (cob_inspect_after): New function.
+	  (cob_inspect_tallying_characters): New function.
+	  (cob_inspect_tallying_all): New function.
+	  (cob_inspect_tallying_leading): New function.
+	  (cob_inspect_replacing_characters): New function.
+	  (cob_inspect_replacing_all): New function.
+	  (cob_inspect_replacing_leading): New function.
+	  (cob_inspect_replacing_first): New function.
+	  (cob_inspect_converting): New function.
+	  (cob_inspect_finish): New function.
+	  (cob_string_init): New function.
+	  (cob_string_append): New function.
+	  (cob_string_finish): New function.
+	  (cob_unstring_init): New function.
+	  (cob_unstring_delimited): New function.
+	  (cob_unstring_init): New function.
+	  (cob_unstring_tallying): New function.
+	  (cob_unstring_finish): New function.
+	* strings.h (COB_INSPECT_*, COB_STRING_*, COB_UNSTRING_*): Removed.
+
+2002-11-13  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h, common.c (cob_all_attr): New variable.
+	  (cob_just_attr): Renamed from 'cob_alnum_justified_attr'.
+	  (cob_cmp): New function.
+	  (cob_cmp_zero, cob_cmp_space, cob_cmp_low): Removed.
+	  (cob_cmp_high, cob_cmp_quote, cob_cmp_field): Removed.
+	* common.c (cmp_char): Renamed from 'cmp_figurative'.
+	  (cob_cmp_alnum): Renamed from 'cmp_field'.
+	* fileio.c (sort_compare): Updated.
+
+2002-11-13  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_status): Removed.
+	  (cob_error_code): New variable.
+	  (COB_STATUS_SUCCESS, COB_STATUS_OVERFLOW): Removed.
+	  (COB_EC_*): New macros.
+	  All files updated.
+
+	* strings.h (COB_STRING_WITH_POINTER): Removed.
+	  (COB_UNSTRING_WITH_POINTER): Removed.
+	* strings.h, strings.c (cob_string, cob_unstring): Take second
+	  argument 'ptr'.
+	* strings.c (set_int, add_int): Removed.
+
+2002-11-11  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (COB_FILE_OUT_OF_KEY_RANGE): New macro.
+	* fileio.c (relative_read_next): Use COB_FILE_OUT_OF_KEY_RANGE.
+	  (cob_default_error_handle): Add COB_FILE_OUT_OF_KEY_RANGE.
+
+2002-11-08  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_field_attr): New member 'all'.
+	* common.c, common.h (cob_cmp_str, cob_cmp_all): Removed.
+	* common.c (cob_cmp_field): Integrate comparison functions.
+
+2002-11-08  Keisuke Nishida  <knishida@netlab.jp>
+
+	* support.h: Removed.
+	* Makefile.am: Remove support.h.
+
+2002-11-07  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.c, numeric.h (cob_add_int, cob_sub_int): Do not take
+	  argument 'decimals'.  All callers updated.
+
+2002-10-21  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c (cmp_figurative): New function.
+	* common.c, common.h (cob_cmp_zero, cob_cmp_space): New functions.
+	  (cob_cmp_low, cob_cmp_high, cob_cmp_quote): New functions.
+
+2002-10-18  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.h, numeric.c (cob_add_int64, cob_sub_int64): Removed.
+
+2002-10-13  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (cob_file): New member 'record', replacing
+	  'record_size' and 'record_data'.
+	  (cob_file): Rename 'record_depending' to 'record_size'.
+	* fileio.c: Updated.
+
+2002-10-13  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_field_attr, cob_field): New typedef.
+	* fileio.h (cob_file_key, cob_file, cob_fileio_funcs): New typedef.
+	* numeric.h (cob_decimal): New typedef.
+	* screenio.h (cob_screen): New typedef.
+	  (cob_screen_type, cob_screen_data, cob_screen_position): New typedef.
+	* support.h (cob_frame): New typedef.
+
+2002-10-08  Keisuke Nishida  <knishida@netlab.jp>
+
+	* Use 'struct cob_field *' instead of 'struct cob_field'
+	for all function prototypes.  All files updated.
+	* common.h (COB_FIELD_IS_VALID): Removed.
+
+	* common.h (cob_field_attr): Renamed from cob_field_desc.
+	All files updated.
+
+	* common.c, common.h (cob_group_attr): New variable.
+	(cob_alnum_justified_attr): New variable.
+
+	* support.h (cob_ref, cob_ref_rest): Removed.
+
+2002-09-30  Keisuke Nishida  <knishida@netlab.jp>
+
+	* cobconfig.h.in: Removed.
+
+2002-09-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (cob_file): Restructured.
+	* fileio.c: Updated for new cob_file scheme.
+	* fileio.h, fileio.c (cob_sort_init): Renamed from cob_sort_keys.
+	* cobconfig.h.in (HAVE_DB1_DB_H, HAVE_DB_H): Removed.
+
+2002-09-24  Keisuke Nishida  <knishida@netlab.jp>
+
+	* support.h: Do not support non-computed-goto jump.
+	* cobconfig.h.in: Use AM_CONFIG_HEADER scheme.
+	(COB_HAVE_COMPUTED_GOTO): Removed.
+	(HAVE_DB1_DB_H, HAVE_DB_H): Added.
+	* fileio.h: #include <libcob/cobconfig.h>
+	Include <db1/db.h> or <db.h> which exists.
+
+2002-09-23  Keisuke Nishida  <knishida@netlab.jp>
+
+	* strings.c (cob_unstring): Don't use alloca.
+
+2002-09-12  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.h (cob_decimal): Use exponent instead of decimals.
+	* numeric.c: Related functions updated.
+
+2002-09-12  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.c (sequential_open): Set f->file.fd to 0 on error.
+
+2002-09-06  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h, fileio.c: INDEXED files has been reimplemented using db1.
+
+2002-08-05  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.c (sort_compare): Prototype for db-3.1.x.
+
+2002-08-02  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h, common.c (cob_cmp_all): Unify the former cob_cmp_all
+	and cob_cmp_all_str.
+	* common.c (cmp_internal): New function.
+	(cob_cmp_str, cob_cmp_field): Use it.
+
+2002-08-01  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (COB_ORG_SORT, COB_ORG_MAX): New macros.
+	(cob_file): New member 'sort_nkeys' and 'sort_keys'.
+	* fileio.c (sort_file): New variable.
+	(sort_compare, sort_open, sort_close, sort_read, sort_write):
+	New functions.
+	(sort_funcs): New variable.
+	(cob_sort_keys, cob_sort_using, cob_sort_giving): New functions.
+	(cob_init_fileio): Init sort functions.
+
+2002-08-01  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (COB_ASCENDING, COB_DESCENDING): New macros.
+
+2002-07-31  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c (cob_init_config): New function.
+	(cob_init): Updated.  Load the config file first.
+
+2002-07-30  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.c (indexed_write_internal): New function.
+	(indexed_write, indexed_rewrite): Updated.
+
+2002-07-30  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.c (lineseq_read): Check for EOF.
+
+2002-07-30  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (cob_fileio_funcs): 'write' takes only one argument.
+	(sequential_write, lineseq_write, relative_write, indexed_write):Ditto.
+	(cob_write): Updated.
+
+2002-07-30  Keisuke Nishida  <knishida@netlab.jp>
+
+	* screenio.c: Check configuration.
+
+2002-07-24  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.h (cob_decimal): Removed.
+	* numeric.c, numeric.h: Relace 'cob_decimal' by 'struct cob_decimal *'.
+
+2002-07-14  Keisuke Nishida  <knishida@netlab.jp>
+
+	* move.c (cob_set_int): Moved from numeric.c.
+	Reimplemented using 'cob_move'.
+
+2002-07-13  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.c (cob_decimal_get_double): Bug fix in calculation.
+	(cob_decimal_set_double): Take effect of decimal figures.
+
+2002-07-08  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (cob_file): New field 'assign'.
+	* fileio.c, fileio.h (cob_open): Do not take file name.  Use 'assign'.
+
+2002-07-05  Keisuke Nishida  <knishida@netlab.jp>
+
+	* screenio.c, screenio.h (cob_screen_attr): New function.
+	* screenio.h (COB_SCREEN_TYPE_ATTRIBUTE): New type.
+	(cob_screen_data): New entry 'dummy'.
+
+2002-07-05  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fileio.h (cob_file): Renamed from cob_file_desc.
+	* fileio.c: Updated.
+
+2002-07-01  Keisuke Nishida  <knishida@netlab.jp>
+
+	* screenio.c, screenio.h: New files.
+	* Makefile.am: Add them.
+
+2002-06-17  Keisuke Nishida  <knishida@netlab.jp>
+
+	* call.c (cob_call_resolve): Don't set cob_status.
+
+2002-06-11  Keisuke Nishida  <knishida@netlab.jp>
+
+	* call.c (cob_resolve): Use COB_MODULE_EXT.
+
+2002-06-11  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c, common.h (cob_alnum_desc): New variable.
+	* common.c (cob_zero, cob_space, cob_high, cob_low, cob_quote): Use it.
+	* move.c (cob_mem_move): Use it.
+
+2002-06-11  Keisuke Nishida  <knishida@netlab.jp>
+
+	* Allow cob_field.desc to be NULL.
+	* common.h, common.c, move.c, numeric.c: Updated.
+
+2002-06-11  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (COB_FIELD_IS_VALID): New macro.
+	* fileio.c, strings.c: Use 'COB_FIELD_IS_VALID'.
+
+2002-06-11  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.h (cob_field): Field 'size' moved from 'cob_field_desc'.
+	(COB_FIELD_SIZE, COB_FIELD_DATA): Removed.
+	* common.c, fileio.c, move.c, numeric.c, strings.c, termio.c: Updated.
+
+2002-06-04  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c, common.h (cob_config_compare): New function.
+	* call.c (cob_init_call): Use 'cob_config_compare'.
+
+	* common.c (ding_on_error): New variable.
+	(cob_init): Set ding_on_error from option "ding-on-error".
+	(cob_runtime_error): Ring a bell only when "ding-on-error" is "yes".
+
+2002-06-04  Keisuke Nishida  <knishida@netlab.jp>
+
+	* support.h (cob_perform): Enclosed by do ... while (0).
+
+2002-06-04  Keisuke Nishida  <knishida@netlab.jp>
+
+	* Makefile.am (libcob_la_CFLAGS): -I$(top_srcdir).
+	* call.c, common.c, fileio.c, move.c: Updated.
+
+2002-05-31  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.c, numeric.h (cob_div_remainder): Renamed from
+	'cob_div_reminder' (typo fix).
+
+2002-05-31  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c, common.h (cob_index, cob_index_depending): Take 'name'.
+	Display index name with the error message.
+	* support.h (COB_INDEX, COB_INDEX_DEPENDING): Take 'name'.
+
+2002-05-31  Keisuke Nishida  <knishida@netlab.jp>
+
+	* Makefile.am (libcob_la_DEPENDENCIES): Removed.
+
+2002-05-30  Keisuke Nishida  <knishida@netlab.jp>
+
+	* common.c (cob_check_numeric): Takes the field name as an argument.
+	* common.h (cob_field_desc): Remove member 'name'.
+
+2002-05-30  Keisuke Nishida  <knishida@netlab.jp>
+
+	* numeric.c (cob_decimal_pow): Handle decimals.
+	(cob_decimal_set_double, cob_decimal_get_double): New functions.
+	* numeric.h (cob_decimal_set_double, cob_decimal_get_double): Exported.
+
+2002-05-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* Keep field names at run-time.
+	* common.h (cob_field_desc): New member 'name'.
+	* common.c (cob_check_numeric): Display filed name on error.
+
+	* Makefile.am (libcob_la_DEPENDENCIES): Add defaults.h.
+
+2002-05-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* termio.c (cob_init_termio): #include <string.h>
+
+2002-05-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* Support run-time config file: libcob.conf.
+	* common.c (config_load, config_insert, cob_config_lookup):
+	New functions.
+	(cob_init): Call 'config_load'.
+	* common.h (cob_config_lookup): Declared.
+
+	* call.c (dynamic_reloading): Renamed from cob_dynamic_reloading.
+	(cob_init_call): Initialize 'dynamic_reloading'.

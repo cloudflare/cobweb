@@ -1,0 +1,1 @@
+dummymac.o: dummymac.c

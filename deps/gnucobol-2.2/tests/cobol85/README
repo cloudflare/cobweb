@@ -1,0 +1,70 @@
+How to run the NIST CCVS85 (aka. ANSI85) Test Suite
+=====================================
+
+*NOTE* It is expected that WARNING messages appear when running the test.
+
+*NOTE* The language interpreter "perl" is required to run these tests.
+
+The final command of the the test is a diff between expected results and
+actual results, i.e. "diff summary.txt summary.log".
+If there is any output from this command, please tar and compress the
+complete cobol85 directory and report this to the GnuCOBOL mailing list.
+You will receive further instructions where to send this.
+
+*NOTE* This test can take a long time depending on your hardware.
+
+1. Prerequisite: test suite "newcob.val", EITHER -
+a) Manually download the test archive "newcob.val.Z" from
+   http://www.itl.nist.gov/div897/ctg/cobol_form.htm
+
+   Uncompress it and move the file newcob.val to the tests/cobol85 directory
+
+b) Automatic download/uncompress
+   If the test suite is not available "make test" will uncompress the archive
+   "newcob.val.Z" from tests/cobol85.
+   If the test archive is also missing "make test" will try to download the
+   archive beforehand.
+
+2. Run the test suite:
+   make test
+
+3. Test report summary will be put in summary.log.
+
+4. When rerunning the tests as a result of a change, always do a "make clean"
+   *before* "make test"
+
+5. The default tests configured for GnuCOBOL are:
+   NC SM IC SQ RL IX ST SG OB IF DB
+   Note: IX will be skipped if ISAM access was disabled during configure.
+
+Make Options
+------------
+
+- make test     run the test suite
+- make diff     diff from *.txt to the last reports
+- make clean    remove built files
+
+Test Modules
+------------
+
+Core tests:
+
+  NC - COBOL nucleus tests
+  SM - COPY sentence tests
+  IC - CALL sentence tests
+
+File I-O tests:
+
+  SQ - Sequential file I-O tests
+  RL - Relative file I-O tests
+  IX - Indexed file I-O tests
+  ST - SORT sentence tests
+
+Advanced facilities:
+
+  RW - REPORT SECTION tests
+  CM - COMMUNICATION SECTION tests
+  IF - Intrinsic Function tests
+  SG - Segment tests
+  DB - Debugging facilities tests
+  OB - Obsolete facilities tests

@@ -1,0 +1,58 @@
+--- libcob/common.c	2017-09-06 19:37:28.000000000 +0100
++++ gnucobol-2.2/libcob/common.c	2020-04-12 16:07:19.178546554 +0100
+@@ -6624,9 +6624,9 @@
+ #endif
+ 
+ 	/* Load runtime configuration file */
+-	if (unlikely (cob_load_config () < 0)) {
+-		cob_stop_run (1);
+-	}
++	/* if (unlikely (cob_load_config () < 0)) { */
++	/* 	cob_stop_run (1); */
++	/* } */
+ 
+ 	/* Copy COB_PHYSICAL_CANCEL from settings (internal) to global structure */
+ 	cobglobptr->cob_physical_cancel = cobsetptr->cob_physical_cancel;
+@@ -6695,24 +6695,24 @@
+ 	}
+ 	cob_free (s);
+ #elif	defined (HAVE_READLINK)
+-	path = NULL;
+-	if (!access ("/proc/self/exe", R_OK)) {
+-		path = "/proc/self/exe";
+-	} else if (!access ("/proc/curproc/file", R_OK)) {
+-		path = "/proc/curproc/file";
+-	} else if (!access ("/proc/self/path/a.out", R_OK)) {
+-		path = "/proc/self/path/a.out";
+-	}
+-	if (path) {
+-		s = cob_malloc ((size_t)COB_LARGE_BUFF);
+-		i = (int)readlink (path, s, (size_t)COB_LARGE_MAX);
+-		if (i > 0 && i < COB_LARGE_BUFF) {
+-			cobglobptr->cob_main_argv0 = cob_strdup (s);
+-			cob_free (s);
+-			return;
+-		}
+-		cob_free (s);
+-	}
++	/* path = NULL; */
++	/* if (!access ("/proc/self/exe", R_OK)) { */
++	/* 	path = "/proc/self/exe"; */
++	/* } else if (!access ("/proc/curproc/file", R_OK)) { */
++	/* 	path = "/proc/curproc/file"; */
++	/* } else if (!access ("/proc/self/path/a.out", R_OK)) { */
++	/* 	path = "/proc/self/path/a.out"; */
++	/* } */
++	/* if (path) { */
++	/* 	s = cob_malloc ((size_t)COB_LARGE_BUFF); */
++	/* 	i = (int)readlink (path, s, (size_t)COB_LARGE_MAX); */
++	/* 	if (i > 0 && i < COB_LARGE_BUFF) { */
++	/* 		cobglobptr->cob_main_argv0 = cob_strdup (s); */
++	/* 		cob_free (s); */
++	/* 		return; */
++	/* 	} */
++	/* 	cob_free (s); */
++	/* } */
+ #endif
+ 
+ #ifdef	HAVE_GETEXECNAME

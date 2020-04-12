@@ -1,0 +1,132 @@
+
+2017-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: use only memory and environment functions provided by libcob
+	* cobcrun.c (cobcrun_setenv): removed
+
+2017-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added CODE_COVERAGE parts as provided by AX_CODE_COVERAGE
+	* cobcrun.c: don't print runtime env when program name > max length,
+	  surrounded exception ABORTs that cannot be tested by LCOV_EXCP markers
+
+2017-01-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: Copyright year 2017
+
+2016-08-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: fixed missing cob_stop_run() for --print-runtime-conf,
+	  apply possible configuration files given on the command line before
+	  and allow to use it together with starting a program
+
+2016-08-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: added option --brief (-q) to remove the path to cobcrun
+	  in argv[0]
+
+2016-06-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
+
+	* cobcrun.c (cobcrun_initial_module) [_WIN32]: fixed setting of
+	  COB_PRE_LOAD and COB_LIBRARY_PATH to use PATHSEP_CHAR
+
+2016-06-21  Brian Tiffin <btiffin@gnu.org>
+
+	* cobcrun.c : replaced cob_strdup. Need to revisit.
+
+2016-05-16  Brian Tiffin <btiffin@gnu.org>
+
+	* cobcrun.c : replaced non-portable strndup, and fixed free with cob_free
+
+2016-05-15  Brian Tiffin <btiffin@gnu.org>
+
+	* cobcrun.c : Added -M path/module command line option
+	  if path/ found, prepend to COB_LIBRARY_PATH
+	  if module (no slash) found, prepend to COB_PRE_LOAD
+	  may set both.
+
+2016-01-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
+
+	* cobcrun.c (cobcrun_print_version): changed generation of build stamp
+
+2015-03-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
+
+	* cobcrun.c : new option --config=<file> / -c <file> for setting the
+	  runtime configuration file to be loaded during initialisation
+
+2014-08-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
+
+	* cobcrun.c : Changed output of --help for help2man
+	* Makefile.am : Added manpage generation + install
+
+2014-05-06  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* cobcrun.c : Added --runtime-env for displaying current runtime variables.;
+	  --version shows both version numbers of cobcrun (new) and libcob.;
+	  moved print_info (along with print_var) to libcob/common.c
+
+2014-02-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
+
+	* cobcrun.c : Tweaked --info for showing current settings (environment) along
+	  with settings hard-wired during build (COB_xyz),
+	  removed entries in output that belongs to cobc only
+
+2012-05-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c : Added conversion for enabling options in WIN style;
+	  Use getopt for option parsing;
+	  Set LC_ALL "" for native messages
+
+2010-06-28  Roger While <simrw@sim-basis.de>
+
+	* MARK - Version 2.0
+	* Move to GPL/LGPL 3
+
+2010-??-??  Roger While <simrw@sim-basis.de>
+
+	* Added --info
+
+2008-10-20  Roger While <simrw@sim-basis.de>
+
+	* cobcrun.c : Allow help and version options
+
+2007-12-27  Roger While <simrw@sim-basis.de>
+
+	** Mark 1.0 RELEASE
+
+2006-10-23  Roger While <simrw@sim-basis.de>
+
+	* Makefile.am : Remove gcc options
+
+2005-12-31  Roger While <simrw@sim-basis.de>
+
+	* Makefile.am : Only generate version with shared library
+
+2005-08-04  Roger While <simrw@sim-basis.de>
+
+	* Change exit to cob_stop_run
+
+2005-05-27  Roger While <simrw@sim-basis.de>
+
+	* Fix Makefile again
+
+2005-05-03  Roger While <simrw@sim-basis.de>
+
+	* Fix makefile
+
+2005-02-02  Roger While <simrw@sim-basis.de>
+
+	* Forgot the GPL license
+
+2004-11-29  Roger While <simrw@sim-basis.de>
+
+	* Initial checkout
+	* cobcrun.c, Makefile.am, Makefile.in
+	* syntax : cobcrun MYPROG [ arguments to MYPROG]
+	* This allows complete applications to be compiled
+	  as modules and offers similar functionality to
+	  MF's cobrun and ACU's runcbl.
+	  In fact, you can run all three in the same
+	  directory and, if your scripts use an environment
+	  variable for the driver program (e.g. $COBEXEC),
+	  then you can switch easily.

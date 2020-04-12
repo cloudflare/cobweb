@@ -1,0 +1,37 @@
+
+2010-06-28  Roger While <simrw@sim-basis.de>
+
+	* MARK - Version 2.0
+	* Move to GPL/LGPL 3
+
+2007-12-27  Roger While <simrw@sim-basis.de>
+
+	** Mark 1.0 RELEASE
+
+2006-10-23  Roger While <simrw@sim-basis.de>
+
+	* Prototype in dummymac.c
+
+2005-10-25  Roger While <simrw@sim-basis.de>
+
+	* New element dummymac.c - Needed while some versions of
+	  "ar" are not capable of generating empty archives.
+
+2003-07-28  Keisuke Nishida  <knishida@netlab.jp>
+
+	* malloc.c, memcmp.c, realloc.c: Removed.
+
+2002-08-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* mkstemp.c, tempname.c: Removed.
+
+2002-08-28  Keisuke Nishida  <knishida@netlab.jp>
+
+	* Makefile.am: Use AC_LIBOBJ scheme.
+
+	* memcmp.c, mkstemp.c, tempname.c: Extracted from fileutils-4.1.11.
+
+2002-05-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* getopt.c, getopt.h, getopt1.c: Extracted from glibc-2.2.5.
+

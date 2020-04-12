@@ -1,0 +1,18 @@
+#!/bin/sh
+# Copyright 2019 The Emscripten Authors.  All rights reserved.
+# Emscripten is available under two separate licenses, the MIT license and the
+# University of Illinois/NCSA Open Source License.  Both these licenses can be
+# found in the LICENSE file.
+
+# Wrapper script that runs emsdk.py
+
+base_dir=$(dirname "$0")
+
+# Look for python3 first.  This is especially important on macOS (See:
+# https://github.com/emscripten-core/emsdk/pull/273)
+python=$(which python3 2> /dev/null)
+if [ $? != 0 ]; then
+  python=python
+fi
+
+exec "$python" "$0.py" "$@"

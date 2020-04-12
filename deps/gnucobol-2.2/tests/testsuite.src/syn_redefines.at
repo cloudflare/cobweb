@@ -1,0 +1,448 @@
+## Copyright (C) 2003-2012, 2016-2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While
+## 
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2002 13.16.42 REDEFINES clause
+
+## 13.16.42.2 Syntax rules
+
+
+# 1) DONE
+
+AT_SETUP([REDEFINES: not following entry-name])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+       01 Y             PIC 9 REDEFINES X.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: error: REDEFINES clause must follow entry-name
+])
+
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
+[prog.cob: 7: warning: REDEFINES clause should follow entry-name
+])
+
+AT_CLEANUP
+
+
+# 2) DONE
+
+AT_SETUP([REDEFINES: level 02 by 01])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X.
+       01 Y             REDEFINES X PIC 9.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: level number of REDEFINES entries must be identical
+])
+
+AT_CLEANUP
+
+AT_SETUP([REDEFINES: level 03 by 02])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 G2.
+           03 X         PIC X.
+         02 Y           REDEFINES X PIC 9.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 9: error: 'X' is not defined in 'G1'
+])
+
+AT_CLEANUP
+
+AT_SETUP([REDEFINES: level 66])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X.
+         66 A           RENAMES X.
+         66 B           REDEFINES A PIC 9.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 9: error: syntax error, unexpected REDEFINES, expecting RENAMES
+])
+
+AT_CLEANUP
+
+AT_SETUP([REDEFINES: level 88])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+         88 A           VALUE "A".
+         88 B           REDEFINES A VALUE "B".
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: syntax error, unexpected REDEFINES, expecting VALUE
+])
+
+AT_CLEANUP
+
+
+# 3) TODO
+
+# 4) TODO
+
+
+# 5) DONE
+
+AT_SETUP([REDEFINES: lower level number])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 G2.
+           03 X         PIC X.
+         02 G3.
+           03 A         REDEFINES X PIC 9.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: error: 'X' is not defined in 'G3'
+])
+
+AT_CLEANUP
+
+
+# 6) DONE
+
+AT_SETUP([REDEFINES: with OCCURS])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X OCCURS 2.
+         02 Y           REDEFINES X PIC XX.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 8: warning: the original definition 'X' should not have OCCURS clause
+])
+
+AT_CLEANUP
+
+AT_SETUP([REDEFINES: with subscript])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 G2          OCCURS 2.
+           03 X         PIC X.
+           03 Y         REDEFINES X(1) PIC X.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 9: error: 'X' cannot be subscripted here
+])
+
+AT_CLEANUP
+
+AT_SETUP([REDEFINES: with variable occurrence])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 X           PIC XX.
+         02 Y           REDEFINES X PIC X OCCURS 1 TO 2 DEPENDING ON I.
+       01 G2.
+         02 X           PIC XX.
+         02 Y           REDEFINES X.
+           03 A         PIC X OCCURS 1 TO 2 DEPENDING ON I.
+       01 G3.
+         02 X.
+           03 A         PIC X OCCURS 1 TO 2 DEPENDING ON I.
+         02 Y           REDEFINES X PIC X.
+       01 I             PIC 9.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: 'Y' cannot be variable length
+prog.cob: 11: error: 'Y' cannot be variable length
+prog.cob: 16: error: the original definition 'X' cannot be variable length
+])
+
+AT_CLEANUP
+
+
+# 7) DONE
+
+AT_SETUP([REDEFINES: with qualification])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 X           PIC X.
+       01 G2.
+         02 X           PIC X.
+         02 A           REDEFINES X IN G1.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: error: 'X' cannot be qualified here
+])
+
+AT_CLEANUP
+
+
+# 8) DONE
+
+AT_SETUP([REDEFINES: multiple redefinition])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 X           PIC X.
+         02 A           REDEFINES X PIC 9.
+         02 B           REDEFINES X PIC 9.
+         02 C           REDEFINES B PIC 9.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: error: 'B' is not the original definition
+])
+
+AT_CHECK([$COMPILE_ONLY -std=mvs prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+# 9) DONE
+
+AT_SETUP([REDEFINES: size exceeds])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 X           PIC X.
+         02 A           REDEFINES X PIC 99.
+       01 G2.
+         02 X           PIC X.
+         02 A           REDEFINES X PIC 9 OCCURS 2.
+       01 WRK-X         PIC X.
+       01 WRK-X-REDEF   REDEFINES WRK-X PIC 99.
+       01 EXT-X         PIC X EXTERNAL.
+       01 EXT-X-REDEF   REDEFINES EXT-X PIC 99.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: size of 'A' larger than size of 'X'
+prog.cob: 11: error: size of 'A' larger than size of 'X'
+prog.cob: 15: error: size of 'EXT-X-REDEF' larger than size of 'EXT-X'
+])
+
+AT_CLEANUP
+
+
+# 10) DONE
+
+AT_SETUP([REDEFINES: with VALUE])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+       01 A             REDEFINES X PIC X VALUE "A".
+       01 G             REDEFINES X.
+         02 B           PIC X VALUE "A".
+       01 Y             REDEFINES X PIC X.
+         88 C           VALUE "A".
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+# FIXME: add a compiler configuration as the COBOL standard forbids this
+#        default.conf will allow it (with a warning)
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 7: warning: initial VALUE clause ignored for REDEFINES item 'A'
+prog.cob: 9: warning: initial VALUE clause ignored for REDEFINES item 'B'
+])
+AT_CHECK([$COMPILE -frelax-syntax-checks prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+# 11) DONE
+
+AT_SETUP([REDEFINES: with intervention])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+       01 Y             PIC X.
+       01 A             REDEFINES X PIC X.
+       01 G.
+         02 G-X         PIC X.
+         02 G-Y         PIC X.
+         02 G-A         REDEFINES G-X PIC X.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: REDEFINES must follow the original definition
+prog.cob: 12: error: REDEFINES must follow the original definition
+])
+
+AT_CLEANUP
+
+
+# 12) DONE
+
+AT_SETUP([REDEFINES: within REDEFINES])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+       01 G             REDEFINES X.
+         02 A           PIC X.
+         02 B           REDEFINES A PIC 9.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([REDEFINES: non-referenced ambiguous item])
+AT_KEYWORDS([redefines])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+       01 X             PIC X.
+       01 G             REDEFINES X PIC 9.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 7: warning: redefinition of 'X'
+prog.cob: 6: warning: 'X' previously defined here
+])
+
+AT_CLEANUP
+
+
+# 13) TODO
+
+# 14) TODO
+
+# 15) TODO
+
+# 16) TODO

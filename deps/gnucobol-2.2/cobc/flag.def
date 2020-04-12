@@ -1,0 +1,168 @@
+/*
+   Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch
+
+   This file is part of GnuCOBOL.
+
+   The GnuCOBOL compiler is free software: you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   GnuCOBOL is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/* Compiler flag defines */
+
+/* Normal binary flags (standard: off) */
+/* CB_FLAG    (var, help switch, name, help) */
+
+/* Normal binary flags (standard: on) */
+/* CB_FLAG_ON (var, help switch, name, help) */
+
+/* Flags with required parameter (standard: default)*/
+/* CB_FLAG_RQ (var, help switch, name, default, getopt return, help) */
+
+/* Flags with required parameter and no associated variable */
+/* CB_FLAG_NQ (help switch, name, getopt return, help) */
+
+
+/* Flags with required parameter */
+
+CB_FLAG_RQ (cb_stack_size, 0, "stack-size", 255, 1,
+	_("  -fstack-size=<number>\tdefine PERFORM stack size\n"
+	  "                       - default: 255"))
+
+CB_FLAG_RQ (cb_if_cutoff, 0, "if-cutoff", 3, 2,
+	_("  -fif-cutoff=<number>  define cutoff depth for IF statements\n"
+	  "                        - default: 3"))
+
+CB_FLAG_RQ (cb_ebcdic_sign, 1, "sign", 0, 3,
+	_("  -fsign=[ASCII|EBCDIC]\tdefine display sign representation\n"
+	  "                        - default: machine native"))
+
+CB_FLAG_RQ (cb_fold_copy, 1, "fold-copy", 0, 4,
+	_("  -ffold-copy=[UPPER|LOWER]\tfold COPY subject to value\n"
+	  "                        - default: no transformation"))
+
+CB_FLAG_RQ (cb_fold_call, 1, "fold-call", 0, 5,
+	_("  -ffold-call=[UPPER|LOWER]\tfold PROGRAM-ID, CALL, CANCEL subject to value\n"
+	  "                        - default: no transformation"))
+
+CB_FLAG_RQ (cb_default_byte, 1, "defaultbyte", -1, 6,
+	_("  -fdefaultbyte=<value>\tinitialize fields without VALUE to value\n"
+	  "                        - decimal 0..255 or any quoted character\n"
+	  "                        - default: initialize to picture"))
+
+CB_FLAG_RQ (cb_max_errors, 1, "max-errors", 100, 7,
+	_("  -fmax-errors=<number>\tmaximum number of errors to report\n"
+	  "                        - default: 100"))
+
+/* Flags with required parameter and no associated variable */
+
+CB_FLAG_NQ (1, "intrinsics", 10,
+	_("  -fintrinsics=[ALL|intrinsic function name(,name,...)]\n"
+	  "                        intrinsics to be used without FUNCTION keyword\n"))
+
+/* Binary flags */
+
+/* Flags with suppressed help */
+CB_FLAG (cb_flag_static_call, 0, "static-call",
+	_("  -fstatic-call         output static function calls for the CALL statement"))
+
+CB_FLAG_ON (cb_flag_c_decl_for_static_call, 0, "gen-c-decl-static-call",
+	_("  -fno-gen-c-decl-static-call\tdisable generation of C function declations\n"
+	  "                        for subroutines with static CALL"))
+
+CB_FLAG_ON (cb_flag_recursive_check, 1, "recursive-check",
+	_("  -fno-recursive_check  disable check of recursive program call;\n"
+	  "                        effectively compiling as RECURSIVE program"))
+
+CB_FLAG (cb_flag_winmain, 0, "winmain",
+	_("  -fwinmain             generate WinMain instead of main when compiling\n"
+	  "                        as executable"))
+
+CB_FLAG (cb_flag_computed_goto, 0, "computed-goto",
+	_("  -fcomputed-goto       generate computed goto C statements"))
+
+CB_FLAG (cb_flag_alt_ebcdic, 0, "alternate-ebcdic",
+	_("  -falternate-ebcdic    use restricted ASCII to EBCDIC translate"))
+
+CB_FLAG (cb_flag_extra_brace, 0, "extra-brace",
+	_("  -fextra-brace         generate extra braces in generated C code"))
+
+CB_FLAG (cb_flag_correct_numeric, 0, "correct-numeric",
+	_("  -fcorrect-numeric     attempt correction of invalid numeric display items"))
+
+CB_FLAG (cb_flag_stack_on_heap, 0, "stack-on-heap",
+	_("  -fstack-on-heap       PERFORM stack allocated on heap"))
+
+/* Normal flags */
+CB_FLAG (cb_flag_trace, 1, "trace",
+	_("  -ftrace               generate trace code\n"
+	  "                        - executed SECTION/PARAGRAPH"))
+
+CB_FLAG (cb_flag_traceall, 1, "traceall",
+	_("  -ftraceall            generate trace code\n"
+	  "                        - executed SECTION/PARAGRAPH/STATEMENTS\n"
+	  "                        - turned on by -debug"))
+
+CB_FLAG (cb_flag_syntax_only, 1, "syntax-only",
+	_("  -fsyntax-only         syntax error checking only; don't emit any output"))
+
+CB_FLAG (cb_flag_debugging_line, 1, "debugging-line",
+	_("  -fdebugging-line      enable debugging lines\n"
+	  "                        - 'D' in indicator column or floating >>D"))
+
+CB_FLAG (cb_flag_source_location, 1, "source-location",
+	_("  -fsource-location     generate source location code\n"
+	  "                        - turned on by -debug/-g/-ftraceall"))
+
+CB_FLAG (cb_flag_implicit_init, 1, "implicit-init",
+	_("  -fimplicit-init       automatic initialization of the COBOL runtime system"))
+
+CB_FLAG (cb_flag_stack_check, 1, "stack-check",
+	_("  -fstack-check         PERFORM stack checking\n"
+	  "                        - turned on by -debug or -g"))
+
+CB_FLAG (cb_flag_write_after, 1, "write-after",
+	_("  -fwrite-after         use AFTER 1 for WRITE of LINE SEQUENTIAL\n"
+	  "                        - default: BEFORE 1"))
+
+CB_FLAG (cb_flag_mfcomment, 1, "mfcomment",
+	_("  -fmfcomment           '*' or '/' in column 1 treated as comment\n"
+	  "                        - FIXED format only"))
+
+CB_FLAG (cb_flag_acucomment, 1, "acucomment",
+	_("  -facucomment          '$' in indicator area treated as '*',\n"
+	  "                        '|' treated as floating comment"))
+
+CB_FLAG (cb_flag_notrunc, 1, "notrunc",
+	_("  -fnotrunc             allow numeric field overflow\n"
+	  "                        - non-ANSI behaviour"))
+
+CB_FLAG (cb_flag_odoslide, 1, "odoslide",
+	_("  -fodoslide            adjust items following OCCURS DEPENDING\n"
+	  "                        - requires implicit/explicit relaxed syntax"))
+
+CB_FLAG (cb_flag_apostrophe, 1, "single-quote",
+	_("  -fsingle-quote        use a single quote (apostrophe) for QUOTE\n"
+	  "                        - default: double quote"))
+
+#if 0 /* deactivated + untranslated as -frelaxed-syntax (compiler configuration) is available */
+CB_FLAG (cb_flag_relaxed_syntax, 1, "relax-syntax",
+	  "  -frelax-syntax        relax syntax checking\n"
+	  "                        - e.g. REDEFINES position")
+#endif
+
+CB_FLAG (cb_flag_optional_file, 1, "optional-file",
+	_("  -foptional-file       treat all files as OPTIONAL\n"
+	  "                        - unless NOT OPTIONAL specified"))
+

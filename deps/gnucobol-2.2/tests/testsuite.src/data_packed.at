@@ -1,0 +1,810 @@
+## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+## 
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### PACKED-DECIMAL
+
+
+# dump
+AT_SETUP([PACKED-DECIMAL dump])
+AT_KEYWORDS([packed])
+
+AT_DATA([dump.c], [
+#include <stdio.h>
+#define COB_LIB_EXPIMP
+#include <libcob.h>
+COB_EXPIMP int dump (unsigned char *);
+int dump (unsigned char *data)
+{
+  int i;
+  for (i = 0; i < 10; i++)
+    printf ("%02x", data[[i]]);
+  puts ("");
+  return 0;
+}
+])
+
+sed -e 's/@USAGE@/PACKED-DECIMAL/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
+
+AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[1f202020202020202020
+012f2020202020202020
+123f2020202020202020
+01234f20202020202020
+12345f20202020202020
+0123456f202020202020
+1234567f202020202020
+012345678f2020202020
+123456789f2020202020
+01234567890f20202020
+12345678901f20202020
+0123456789012f202020
+1234567890123f202020
+012345678901234f2020
+123456789012345f2020
+01234567890123456f20
+12345678901234567f20
+0123456789012345678f
+1d202020202020202020
+012d2020202020202020
+123d2020202020202020
+01234d20202020202020
+12345d20202020202020
+0123456d202020202020
+1234567d202020202020
+012345678d2020202020
+123456789d2020202020
+01234567890d20202020
+12345678901d20202020
+0123456789012d202020
+1234567890123d202020
+012345678901234d2020
+123456789012345d2020
+01234567890123456d20
+12345678901234567d20
+0123456789012345678d
+0f202020202020202020
+000f2020202020202020
+000f2020202020202020
+00000f20202020202020
+00000f20202020202020
+0000000f202020202020
+0000000f202020202020
+000000000f2020202020
+000000000f2020202020
+00000000000f20202020
+00000000000f20202020
+0000000000000f202020
+0000000000000f202020
+000000000000000f2020
+000000000000000f2020
+00000000000000000f20
+00000000000000000f20
+0000000000000000000f
+0c202020202020202020
+000c2020202020202020
+000c2020202020202020
+00000c20202020202020
+00000c20202020202020
+0000000c202020202020
+0000000c202020202020
+000000000c2020202020
+000000000c2020202020
+00000000000c20202020
+00000000000c20202020
+0000000000000c202020
+0000000000000c202020
+000000000000000c2020
+000000000000000c2020
+00000000000000000c20
+00000000000000000c20
+0000000000000000000c
+0f202020202020202020
+000f2020202020202020
+000f2020202020202020
+00000f20202020202020
+00000f20202020202020
+0000000f202020202020
+0000000f202020202020
+000000000f2020202020
+000000000f2020202020
+00000000000f20202020
+00000000000f20202020
+0000000000000f202020
+0000000000000f202020
+000000000000000f2020
+000000000000000f2020
+00000000000000000f20
+00000000000000000f20
+0000000000000000000f
+0c202020202020202020
+000c2020202020202020
+000c2020202020202020
+00000c20202020202020
+00000c20202020202020
+0000000c202020202020
+0000000c202020202020
+000000000c2020202020
+000000000c2020202020
+00000000000c20202020
+00000000000c20202020
+0000000000000c202020
+0000000000000c202020
+000000000000000c2020
+000000000000000c2020
+00000000000000000c20
+00000000000000000c20
+0000000000000000000c
+])
+
+AT_CLEANUP
+
+
+# Display
+AT_SETUP([PACKED-DECIMAL display])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-99          PIC 99   USAGE PACKED-DECIMAL.
+       01 X-S99         PIC S99  USAGE PACKED-DECIMAL.
+       01 X-999         PIC 999  USAGE PACKED-DECIMAL.
+       01 X-S999        PIC S999 USAGE PACKED-DECIMAL.
+       PROCEDURE        DIVISION.
+           MOVE    0 TO X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           MOVE   99 TO X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           MOVE    0 TO X-S99.
+           DISPLAY X-S99
+           END-DISPLAY.
+           MOVE   -1 TO X-S99.
+           DISPLAY X-S99
+           END-DISPLAY.
+           MOVE    0 TO X-999.
+           DISPLAY X-999
+           END-DISPLAY.
+           MOVE  123 TO X-999.
+           DISPLAY X-999
+           END-DISPLAY.
+           MOVE    0 TO X-S999.
+           DISPLAY X-S999
+           END-DISPLAY.
+           MOVE -123 TO X-S999.
+           DISPLAY X-S999
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[00
+99
++00
+-01
+000
+123
++000
+-123
+])
+
+AT_CLEANUP
+
+
+# Move
+AT_SETUP([PACKED-DECIMAL move])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-99          PIC 99   USAGE PACKED-DECIMAL.
+       01 X-S99         PIC S99  USAGE PACKED-DECIMAL.
+       01 X-999         PIC 999  USAGE PACKED-DECIMAL.
+       01 X-S999        PIC S999 USAGE PACKED-DECIMAL.
+       01 C-P1234       PIC 9999  VALUE 1234.
+       01 C-N1234       PIC S9999 VALUE -1234.
+       PROCEDURE        DIVISION.
+           MOVE C-P1234 TO X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           MOVE C-P1234 TO X-S99.
+           DISPLAY X-S99
+           END-DISPLAY.
+           MOVE C-P1234 TO X-999.
+           DISPLAY X-999
+           END-DISPLAY.
+           MOVE C-P1234 TO X-S999.
+           DISPLAY X-S999
+           END-DISPLAY.
+           MOVE C-N1234 TO X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           MOVE C-N1234 TO X-S99.
+           DISPLAY X-S99
+           END-DISPLAY.
+           MOVE C-N1234 TO X-999.
+           DISPLAY X-999
+           END-DISPLAY.
+           MOVE C-N1234 TO X-S999.
+           DISPLAY X-S999
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[34
++34
+234
++234
+34
+-34
+234
+-234
+])
+
+AT_CLEANUP
+
+
+# Initialize
+AT_SETUP([PACKED-DECIMAL arithmetic (1)])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-99          PIC 99   USAGE PACKED-DECIMAL.
+       01 X-S99         PIC S99  USAGE PACKED-DECIMAL.
+       01 X-999         PIC 999  USAGE PACKED-DECIMAL.
+       01 X-S999        PIC S999 USAGE PACKED-DECIMAL.
+       PROCEDURE        DIVISION.
+           INITIALIZE X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           INITIALIZE X-S99.
+           DISPLAY X-S99
+           END-DISPLAY.
+           INITIALIZE X-999.
+           DISPLAY X-999
+           END-DISPLAY.
+           INITIALIZE X-S999.
+           DISPLAY X-S999
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[00
++00
+000
++000
+])
+
+AT_CLEANUP
+
+
+# Arithmetic
+AT_SETUP([PACKED-DECIMAL arithmetic (2)])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC 99 USAGE PACKED-DECIMAL VALUE 0.
+       01 Y             PIC 99 USAGE PACKED-DECIMAL VALUE 9.
+       PROCEDURE        DIVISION.
+           COMPUTE X = 1
+           END-COMPUTE.
+           DISPLAY X
+           END-DISPLAY.
+           COMPUTE X = Y
+           END-COMPUTE.
+           DISPLAY X
+           END-DISPLAY.
+           COMPUTE X = X + Y
+           END-COMPUTE.
+           DISPLAY X
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[01
+09
+18
+])
+
+AT_CLEANUP
+
+
+# Numeric test
+AT_SETUP([PACKED-DECIMAL numeric test (1)])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X-2         PIC X(2).
+         02 N-2         REDEFINES X-2 PIC 999  USAGE PACKED-DECIMAL.
+         02 N-S2        REDEFINES X-2 PIC S999 USAGE PACKED-DECIMAL.
+       PROCEDURE        DIVISION.
+           MOVE X"0000" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           MOVE X"000c" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "OK"
+            END-DISPLAY
+           ELSE
+            DISPLAY "NG"
+            END-DISPLAY
+           END-IF.
+           MOVE X"000d" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "OK"
+            END-DISPLAY
+           ELSE
+            DISPLAY "NG"
+            END-DISPLAY
+           END-IF.
+           MOVE X"000f" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "OK"
+            END-DISPLAY
+           ELSE
+            DISPLAY "NG"
+            END-DISPLAY
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           MOVE X"1234" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           MOVE X"999f" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "OK"
+            END-DISPLAY
+           ELSE
+            DISPLAY "NG"
+            END-DISPLAY
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           MOVE X"ffff" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+])
+
+AT_CLEANUP
+
+AT_SETUP([PACKED-DECIMAL numeric test (2)])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X-2         PIC X(2).
+         02 N-2         REDEFINES X-2 PIC 999  USAGE PACKED-DECIMAL.
+         02 N-S2        REDEFINES X-2 PIC S999 USAGE PACKED-DECIMAL.
+       PROCEDURE        DIVISION.
+           MOVE X"0000" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+           ELSE
+            DISPLAY "OK"
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "NG"
+           ELSE
+            DISPLAY "OK"
+           END-IF.
+           MOVE X"000c" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+           ELSE
+            DISPLAY "OK"
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "OK"
+           ELSE
+            DISPLAY "NG"
+           END-IF.
+           MOVE X"000d" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+           ELSE
+            DISPLAY "OK"
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "OK"
+           ELSE
+            DISPLAY "NG"
+           END-IF.
+           MOVE X"000f" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "OK"
+           ELSE
+            DISPLAY "NG"
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "OK"
+           ELSE
+            DISPLAY "NG"
+           END-IF.
+           MOVE X"1234" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+           ELSE
+            DISPLAY "OK"
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "NG"
+           ELSE
+            DISPLAY "OK"
+           END-IF.
+           MOVE X"999f" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "OK"
+           ELSE
+            DISPLAY "NG"
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "OK"
+           ELSE
+            DISPLAY "NG"
+           END-IF.
+           MOVE X"ffff" TO X-2.
+           IF N-2  IS NUMERIC
+            DISPLAY "NG"
+           ELSE
+            DISPLAY "OK"
+           END-IF.
+           IF N-S2 IS NUMERIC
+            DISPLAY "NG"
+           ELSE
+            DISPLAY "OK"
+           END-IF.
+           STOP RUN.
+])
+
+# TODO: Check what actual option is tested here and directly use it
+AT_CHECK([$COMPILE -std=ibm prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+])
+
+AT_CLEANUP
+
+AT_SETUP([COMP-6 display])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-99          PIC 99   USAGE COMP-6.
+       01 X-999         PIC 999  USAGE COMP-6.
+       PROCEDURE        DIVISION.
+           MOVE    0 TO X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           MOVE   99 TO X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           MOVE    0 TO X-999.
+           DISPLAY X-999
+           END-DISPLAY.
+           MOVE  123 TO X-999.
+           DISPLAY X-999
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[00
+99
+000
+123
+])
+
+AT_CLEANUP
+
+AT_SETUP([COMP-6 move])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-99          PIC 99   USAGE COMP-6.
+       01 X-999         PIC 999  USAGE COMP-6.
+       01 B-99          USAGE BINARY-LONG.
+       01 B-999         USAGE BINARY-LONG.
+       PROCEDURE        DIVISION.
+           MOVE    0 TO B-99.
+           MOVE B-99 TO X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           MOVE   99 TO B-99.
+           MOVE B-99 TO X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           MOVE    0  TO B-999.
+           MOVE B-999 TO X-999.
+           DISPLAY X-999
+           END-DISPLAY.
+           MOVE  123  TO B-999.
+           MOVE B-999 TO X-999.
+           DISPLAY X-999
+           END-DISPLAY.
+           MOVE B-999 TO X-99.
+           DISPLAY X-99
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[00
+99
+000
+123
+23
+])
+
+AT_CLEANUP
+
+AT_SETUP([COMP-6 arithmetic])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-99          PIC 99   USAGE COMP-6.
+       01 X-999         PIC 999  USAGE COMP-6.
+       01 B-99          USAGE BINARY-LONG UNSIGNED.
+       01 B-999         USAGE BINARY-LONG UNSIGNED.
+       PROCEDURE        DIVISION.
+           MOVE   99 TO B-99.
+           MOVE B-99 TO X-99.
+           MOVE  123  TO B-999.
+           MOVE B-999 TO X-999.
+           ADD  X-99  X-999 GIVING B-99
+           END-ADD.
+           DISPLAY B-99
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[0000000222
+])
+
+AT_CLEANUP
+
+AT_SETUP([COMP-6 numeric test ])
+AT_KEYWORDS([packed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+          02 X-2         PIC X(2).
+          02 N-3         REDEFINES X-2 PIC 999  USAGE COMP-6.
+          02 N-4         REDEFINES X-2 PIC 9999 USAGE COMP-6.
+       PROCEDURE        DIVISION.
+           MOVE X"0000" TO X-2.
+           IF N-3  IS NUMERIC
+            DISPLAY "OK"
+            END-DISPLAY
+           ELSE
+            DISPLAY "NG"
+            END-DISPLAY
+           END-IF.
+           IF N-4  IS NUMERIC
+            DISPLAY "OK"
+            END-DISPLAY
+           ELSE
+            DISPLAY "NG"
+            END-DISPLAY
+           END-IF.
+           MOVE X"000c" TO X-2.
+           IF N-3  IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           IF N-4  IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           MOVE X"1234" TO X-2.
+           IF N-3  IS NUMERIC
+            DISPLAY "OK"
+            END-DISPLAY
+           ELSE
+            DISPLAY "NG"
+            END-DISPLAY
+           END-IF.
+           IF N-4  IS NUMERIC
+            DISPLAY "OK"
+            END-DISPLAY
+           ELSE
+            DISPLAY "NG"
+            END-DISPLAY
+           END-IF.
+           MOVE X"ffff" TO X-2.
+           IF N-3  IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           IF N-4  IS NUMERIC
+            DISPLAY "NG"
+            END-DISPLAY
+           ELSE
+            DISPLAY "OK"
+            END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK
+OK
+OK
+OK
+OK
+OK
+OK
+OK
+])
+
+AT_CLEANUP
+

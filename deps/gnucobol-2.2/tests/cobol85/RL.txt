@@ -1,0 +1,44 @@
+Filename    total pass fail deleted inspect
+--------    ----- ---- ---- ------- -------
+RL101A.CBL      1    1    0       0       0 OK
+RL102A.SUB     11   11    0       0       0 OK
+RL103A.SUB     11   11    0       0       0 OK
+RL104A.CBL     12   12    0       0       0 OK
+RL105A.CBL      4    4    0       0       0 OK
+RL106A.CBL      4    4    0       0       0 OK
+RL107A.CBL     19   19    0       0       0 OK
+RL108A.CBL      1    1    0       0       0 OK
+RL109A.SUB     11   11    0       0       0 OK
+RL110A.SUB     10   10    0       0       0 OK
+RL111A.CBL     24   24    0       0       0 OK
+RL112A.CBL     12   12    0       0       0 OK
+RL113A.CBL     11   11    0       0       0 OK
+RL114A.CBL     13   13    0       0       0 OK
+RL115A.CBL     13   13    0       0       0 OK
+RL116A.CBL      3    3    0       0       0 OK
+RL117A.CBL      8    6    0       2       0 OK
+RL118A.CBL      4    2    0       2       0 OK
+RL119A.CBL      1    1    0       0       0 OK
+RL201A.CBL      1    1    0       0       0 OK
+RL202A.SUB     11   11    0       0       0 OK
+RL203A.SUB     11   11    0       0       0 OK
+RL204A.CBL     12   12    0       0       0 OK
+RL205A.CBL     67   66    0       1       0 OK
+RL206A.CBL    501  501    0       0       0 OK
+RL207A.SUB     20   20    0       0       0 OK
+RL208A.SUB     11   11    0       0       0 OK
+RL209A.CBL      1    1    0       0       0 OK
+RL210A.CBL      1    1    0       0       0 OK
+RL211A.CBL    501  501    0       0       0 OK
+RL212A.CBL      1    1    0       0       0 OK
+RL213A.SUB    521  521    0       0       0 OK
+RL301M.CBL      0    0    0       0       0 OK
+RL302M.CBL      0    0    0       0       0 OK
+RL401M.CBL      0    0    0       0       0 OK
+--------    ----- ---- ---- ------- -------
+Total        1832 1827    0       5       0
+
+Number of programs:    35
+Successfully executed: 35
+Compile error:          0
+Execute error:          0

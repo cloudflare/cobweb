@@ -1,0 +1,51 @@
+Filename    total pass fail deleted inspect
+--------    ----- ---- ---- ------- -------
+IX101A.CBL      2    2    0       0       0 OK
+IX102A.SUB     11   11    0       0       0 OK
+IX103A.SUB     12   12    0       0       0 OK
+IX104A.CBL     13   13    0       0       0 OK
+IX105A.CBL      9    9    0       0       0 OK
+IX106A.CBL     10   10    0       0       0 OK
+IX107A.CBL     14   14    0       0       0 OK
+IX108A.CBL     32   32    0       0       0 OK
+IX109A.CBL     13   13    0       0       0 OK
+IX110A.SUB      4    4    0       0       0 OK
+IX111A.SUB      1    1    0       0       0 OK
+IX112A.CBL      7    7    0       0       0 OK
+IX113A.CBL      4    4    0       0       0 OK
+IX114A.SUB      3    3    0       0       0 OK
+IX115A.SUB      3    3    0       0       0 OK
+IX116A.SUB      3    3    0       0       0 OK
+IX117A.SUB      3    3    0       0       0 OK
+IX118A.SUB      3    3    0       0       0 OK
+IX119A.SUB      3    3    0       0       0 OK
+IX120A.SUB      2    2    0       0       0 OK
+IX121A.CBL      3    3    0       0       0 OK
+IX201A.CBL      2    2    0       0       0 OK
+IX202A.SUB     11   11    0       0       0 OK
+IX203A.SUB     12   12    0       0       0 OK
+IX204A.CBL     13   13    0       0       0 OK
+IX205A.CBL     12   12    0       0       0 OK
+IX206A.CBL     10   10    0       0       0 OK
+IX207A.CBL      8    8    0       0       0 OK
+IX208A.CBL     29   29    0       0       0 OK
+IX209A.CBL     56   56    0       0       0 OK
+IX210A.CBL     39   39    0       0       0 OK
+IX211A.CBL     17   17    0       0       0 OK
+IX212A.CBL     24   24    0       0       0 OK
+IX213A.CBL     21   21    0       0       0 OK
+IX214A.CBL     39   39    0       0       0 OK
+IX215A.CBL     33   33    0       0       0 OK
+IX216A.CBL     15   14    0       1       0 OK
+IX217A.CBL      6    6    0       0       0 OK
+IX218A.CBL      6    6    0       0       0 OK
+IX301M.CBL      0    0    0       0       0 OK
+IX302M.CBL      0    0    0       0       0 OK
+IX401M.CBL      0    0    0       0       0 OK
+--------    ----- ---- ---- ------- -------
+Total         508  507    0       1       0
+
+Number of programs:    42
+Successfully executed: 42
+Compile error:          0
+Execute error:          0

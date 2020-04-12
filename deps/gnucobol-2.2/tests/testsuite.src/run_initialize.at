@@ -1,0 +1,310 @@
+## Copyright (C) 2003-2012, 2014-2015, 2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2002 14.8.19 INITIALIZE statement
+
+## 14.8.19.3 General rules
+
+
+
+AT_SETUP([INITIALIZE group entry with OCCURS])
+AT_KEYWORDS([initialize])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 G2          OCCURS 2.
+           03 X1        PIC X.
+           03 X2        PIC 9.
+       PROCEDURE        DIVISION.
+           MOVE SPACE TO G1.
+           INITIALIZE G2 (2).
+           IF G1 NOT = "   0"
+              DISPLAY G1 NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([INITIALIZE OCCURS with numeric edited])
+AT_KEYWORDS([initialize editing])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 G2          OCCURS 5.
+           03 X         PIC Z9.
+       PROCEDURE        DIVISION.
+           INITIALIZE G1.
+           IF G1 NOT = " 0 0 0 0 0"
+              DISPLAY G1 NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([INITIALIZE complex group (1)])
+AT_KEYWORDS([initialize])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 X           PIC X.
+         02 G2          OCCURS 2.
+           03 Y         PIC 9.
+         02 Z           PIC 9.
+       PROCEDURE        DIVISION.
+           INITIALIZE G1.
+           IF G1 NOT = " 000"
+              DISPLAY G1 NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([INITIALIZE complex group (2)])
+AT_KEYWORDS([initialize])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 G2          OCCURS 2.
+           03 X         PIC 9.
+           03 Y         PIC X OCCURS 2.
+           03 Z         PIC X.
+       PROCEDURE        DIVISION.
+           INITIALIZE G1.
+           IF G1 NOT = "0   0   "
+              DISPLAY G1 NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([INITIALIZE with REDEFINES])
+AT_KEYWORDS([initialize])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 X           PIC X.
+         02 Y           REDEFINES X PIC 9.
+         02 Z           PIC 9.
+       PROCEDURE        DIVISION.
+           INITIALIZE G1.
+           IF G1 NOT = " 0"
+              DISPLAY G1 NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([INITIALIZE with FILLER])
+AT_KEYWORDS([initialize])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 X           PIC 99.
+         02 FILLER      PIC X.
+         02 Z           PIC 99.
+       01 MY-FILLER.
+         02 FILLER      PIC 9(6) VALUE 12345.
+       PROCEDURE        DIVISION.
+           MOVE ALL   'A' TO G1.
+           INITIALIZE G1.
+           IF G1 NOT = "00A00"
+              DISPLAY "G1 (INIT): " G1
+              END-DISPLAY
+           END-IF.
+           MOVE ALL   'A' TO G1.
+           INITIALIZE G1  WITH FILLER.
+           IF G1 NOT = "00 00"
+              DISPLAY "G1 (INIT FILLER):"   G1
+              END-DISPLAY
+           END-IF.
+
+           INITIALIZE MY-FILLER
+           IF MY-FILLER NOT = "012345"
+              DISPLAY "MY-FILLER (INIT): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
+           INITIALIZE MY-FILLER WITH FILLER
+           IF MY-FILLER NOT = "000000"
+              DISPLAY "MY-FILLER (INIT FILLER): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
+           INITIALIZE MY-FILLER ALL TO VALUE
+           IF MY-FILLER NOT = "000000"
+              DISPLAY "MY-FILLER (INIT TO VAL): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
+           INITIALIZE MY-FILLER WITH FILLER ALL TO VALUE
+           IF MY-FILLER NOT = "012345"
+              DISPLAY "MY-FILLER (INIT FILLER TO VAL): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
+           INITIALIZE MY-FILLER (2:3)
+           IF MY-FILLER NOT = "0   45"
+              DISPLAY "MY-FILLER (REF-MOD): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([INITIALIZE of EXTERNAL data items])
+AT_KEYWORDS([initialize])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR-01    PIC X(5) EXTERNAL.
+       01 EXT-VAR-GRP   EXTERNAL.
+         02  EXT-FIELD1 PIC 999.
+         02  EXT-FIELD2 PIC x(4).
+         02  EXT-FIELD3 PIC 9(6).
+         02  EXT-FIELD4 PIC s9(5)v99.
+       PROCEDURE        DIVISION.
+           MOVE "MOVE"  TO EXT-VAR-01.
+           MOVE 1       TO EXT-FIELD1.
+           MOVE "X"     TO EXT-FIELD2.
+           MOVE 123     TO EXT-FIELD3.
+           MOVE -2.1    TO EXT-FIELD4.
+           INITIALIZE EXT-VAR-01.
+           INITIALIZE EXT-VAR-GRP.
+           IF EXT-VAR-01 NOT = SPACES
+              DISPLAY "EXT-VAR-01 " EXT-VAR-01
+              END-DISPLAY
+           END-IF.
+           IF EXT-FIELD1 NOT = ZERO
+              DISPLAY "EXT-FIELD1 " EXT-FIELD1
+              END-DISPLAY
+           END-IF.
+           IF EXT-FIELD2 NOT = SPACES
+              DISPLAY "EXT-FIELD2 " EXT-FIELD2
+              END-DISPLAY
+           END-IF.
+           IF EXT-FIELD3 NOT = ZERO
+              DISPLAY "EXT-FIELD3 " EXT-FIELD3
+              END-DISPLAY
+           END-IF.
+           IF EXT-FIELD4 NOT = ZERO
+              DISPLAY "EXT-FIELD4 " EXT-FIELD4
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([INITIALIZE with reference modification])
+AT_KEYWORDS([initialize])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  MY-FLD       PIC X(6) VALUE "ABCDEF".
+       01  MY-OTHER-FLD PIC 9(4) VALUE ZERO.
+       PROCEDURE        DIVISION.
+       ASTART SECTION.
+       A01.
+           INITIALIZE MY-FLD (1:2).
+           IF MY-FLD NOT = "  CDEF"
+              DISPLAY "MY-FLD: " MY-FLD
+              END-DISPLAY
+           END-IF
+
+      *>  note: INITIALIZE with refmod => handle field as alphanumeric
+           INITIALIZE MY-OTHER-FLD (2:2)
+           MOVE "0  0" TO MY-FLD
+           IF MY-OTHER-FLD NOT = MY-FLD (1:4)
+               DISPLAY "MY-OTHER-FLD: " MY-OTHER-FLD
+               END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP

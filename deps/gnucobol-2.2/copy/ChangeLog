@@ -1,0 +1,42 @@
+
+2016-12-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.cpy: added COB-SCR-INSERT, COB-SCR-DELETE, COB-SCR-BACKSPACE,
+	  COB-SCR-KEY-HOME, COB-SCR-KEY-END for ACCEPT OMITTED
+	* screenio.cpy: renamed COB-SCR-PAGE_UP to COB-SCR-PAGE-UP,
+	  COB-SCR-PAGE_DOWN to COB-SCR-PAGE-DOWN
+
+2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* screenio.cpy: Add COB-SCR-TAB, COB-SCR-BACK-TAB,
+	  COB-SCR-KEY-LEFT and COB-SCR-KEY-RIGHT
+
+2010-06-28  Roger While <simrw@sim-basis.de>
+
+	* MARK - Version 2.0
+	* Move to GPL/LGPL 3
+
+20??-??-??  Roger While <simrw@sim-basis.de>
+
+	* screenio.cpy: Added COB-SCR-MAX-FIELD
+
+2009-??-??  Roger While <simrw@sim-basis.de>
+
+	* screenio.cpy: Added COB-SCR-TIME-OUT
+
+2008-08-09  Roger While <simrw@sim-basis.de>
+
+	* Add color definitions  to screenio.cpy
+
+2008-07-05  Roger While <simrw@sim-basis.de>
+
+	* Extend screenio.cpy
+
+2008-06-24  Roger While <simrw@sim-basis.de>
+
+	* Add screenio.cpy
+
+2008-04-16  Roger While <simrw@sim-basis.de>
+
+	* New directory "copy" for OC supplied COPY elements
+	* Add Makefile*, ChangeLog, sqlca.cpy, sqlda.cpy

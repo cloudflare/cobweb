@@ -1,0 +1,4193 @@
+## Copyright (C) 2003-2012, 2014-2015, 2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart, Ron Norman
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### Fundamental Tests
+
+AT_SETUP([DISPLAY literals])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           DISPLAY "abc"
+           END-DISPLAY.
+           DISPLAY  123
+           END-DISPLAY.
+           DISPLAY +123
+           END-DISPLAY.
+           DISPLAY -123
+           END-DISPLAY.
+           DISPLAY  12.3
+           END-DISPLAY.
+           DISPLAY +12.3
+           END-DISPLAY.
+           DISPLAY -12.3
+           END-DISPLAY.
+           DISPLAY 1.23E0
+           END-DISPLAY.
+           DISPLAY +1.23E0
+           END-DISPLAY.
+           DISPLAY -1.23E0
+           END-DISPLAY.
+           DISPLAY 12.3E-2
+           END-DISPLAY.
+           DISPLAY +12.3E-2
+           END-DISPLAY.
+           DISPLAY -12.3E-2
+           END-DISPLAY.
+           DISPLAY B'0101'
+           END-DISPLAY.
+           DISPLAY BX'EC'
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[abc
+123
++123
+-123
+12.3
++12.3
+-12.3
+1.23
++1.23
+-1.23
+.123
++.123
+-.123
+5
+236
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DISPLAY literals, DECIMAL-POINT is COMMA])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT    IS COMMA.
+       PROCEDURE        DIVISION.
+           DISPLAY  12,3
+           END-DISPLAY.
+           DISPLAY +12,3
+           END-DISPLAY.
+           DISPLAY -12,3
+           END-DISPLAY.
+           DISPLAY 1,23E0
+           END-DISPLAY.
+           DISPLAY +1,23E0
+           END-DISPLAY.
+           DISPLAY -1,23E0
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[12,3
++12,3
+-12,3
+1,23
++1,23
+-1,23
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Hexadecimal literal])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([dump.c], [
+#include <stdio.h>
+#define COB_LIB_EXPIMP
+#include <libcob.h>
+COB_EXPIMP int dump (unsigned char *);
+int dump (unsigned char *data)
+{
+  int i;
+  for (i = 0; i < 4; i++)
+    printf ("%02x", data[[i]]);
+  puts ("");
+  return 0;
+}
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+       >>IF CHARSET = 'EBCDIC'
+           DISPLAY X"F1F2F3"
+       >>ELSE
+           DISPLAY X"313233"
+       >>END-IF
+           END-DISPLAY.
+           CALL "dump" USING X"000102"
+           END-CALL.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[123
+00010200
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DISPLAY data items with VALUE clause])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-ABC         PIC XXX   VALUE "abc".
+       01 X-123         PIC 999   VALUE  123.
+       01 X-P123        PIC S999  VALUE +123.
+       01 X-N123        PIC S999  VALUE -123.
+       01 X-12-3        PIC 99V9  VALUE  12.3.
+       01 X-P12-3       PIC S99V9 VALUE +12.3.
+       01 X-N12-3       PIC S99V9 VALUE -12.3.
+       PROCEDURE        DIVISION.
+           DISPLAY X-ABC
+           END-DISPLAY.
+           DISPLAY X-123
+           END-DISPLAY.
+           DISPLAY X-P123
+           END-DISPLAY.
+           DISPLAY X-N123
+           END-DISPLAY.
+           DISPLAY X-12-3
+           END-DISPLAY.
+           DISPLAY X-P12-3
+           END-DISPLAY.
+           DISPLAY X-N12-3
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[abc
+123
++123
+-123
+12.3
++12.3
+-12.3
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DISPLAY data items with MOVE statement])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-ABC         PIC XXX   VALUE "abc".
+       01 X-123         PIC 999   VALUE  123.
+       01 X-P123        PIC S999  VALUE +123.
+       01 X-N123        PIC S999  VALUE -123.
+       01 X-12-3        PIC 99V9  VALUE  12.3.
+       01 X-P12-3       PIC S99V9 VALUE +12.3.
+       01 X-N12-3       PIC S99V9 VALUE -12.3.
+       PROCEDURE        DIVISION.
+           MOVE "abc" TO X-ABC.
+           DISPLAY X-ABC
+           END-DISPLAY.
+           MOVE  123  TO X-123.
+           DISPLAY X-123
+           END-DISPLAY.
+           MOVE +123  TO X-P123.
+           DISPLAY X-P123
+           END-DISPLAY.
+           MOVE -123  TO X-N123.
+           DISPLAY X-N123
+           END-DISPLAY.
+           MOVE  12.3 TO X-12-3.
+           DISPLAY X-12-3
+           END-DISPLAY.
+           MOVE +12.3 TO X-P12-3.
+           DISPLAY X-P12-3
+           END-DISPLAY.
+           MOVE -12.3 TO X-N12-3.
+           DISPLAY X-N12-3
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[abc
+123
++123
+-123
+12.3
++12.3
+-12.3
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE to edited item (1)])
+AT_KEYWORDS([fundamental editing])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  SRC-1        PIC S99V99  VALUE   1.10.
+       01  SRC-2        PIC S99V99  VALUE   0.02.
+       01  SRC-3        PIC S99V99  VALUE  -0.03.
+       01  SRC-4        PIC S99V99  VALUE  -0.04.
+       01  SRC-5        PIC S99V99  VALUE  -0.05.
+       01  EDT-1        PIC -(04)9.
+       01  EDT-2        PIC -(04)9.
+       01  EDT-3        PIC -(04)9.
+       01  EDT-4        PIC +(04)9.
+       01  EDT-5        PIC -(05).
+       PROCEDURE        DIVISION.
+           MOVE SRC-1   TO EDT-1.
+           MOVE SRC-2   TO EDT-2.
+           MOVE SRC-3   TO EDT-3.
+           MOVE SRC-4   TO EDT-4.
+           MOVE SRC-5   TO EDT-5.
+           DISPLAY '>' EDT-1 '<'
+           END-DISPLAY.
+           DISPLAY '>' EDT-2 '<'
+           END-DISPLAY.
+           DISPLAY '>' EDT-3 '<'
+           END-DISPLAY.
+           DISPLAY '>' EDT-4 '<'
+           END-DISPLAY.
+           DISPLAY '>' EDT-5 '<'
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[>    1<
+>    0<
+>    0<
+>   +0<
+>     <
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE to edited item (2)])
+AT_KEYWORDS([fundamental editing])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  SRC-1        PIC S99V99  VALUE  -0.06.
+       01  SRC-2        PIC S99V99  VALUE  -0.07.
+       01  SRC-3        PIC S99V99  VALUE  -0.08.
+       01  SRC-4        PIC S99V99  VALUE  -0.09.
+       01  SRC-5        PIC S99V99  VALUE  -1.10.
+       01  EDT-1        PIC 9(04)-.
+       01  EDT-2        PIC 9(04)+.
+       01  EDT-3        PIC Z(04)+.
+       01  EDT-4        PIC 9(04)DB.
+       01  EDT-5        PIC 9(04)DB.
+       PROCEDURE        DIVISION.
+           MOVE SRC-1   TO EDT-1.
+           MOVE SRC-2   TO EDT-2.
+           MOVE SRC-3   TO EDT-3.
+           MOVE SRC-4   TO EDT-4.
+           MOVE SRC-5   TO EDT-5.
+           DISPLAY '>' EDT-1 '<'
+           END-DISPLAY.
+           DISPLAY '>' EDT-2 '<'
+           END-DISPLAY.
+           DISPLAY '>' EDT-3 '<'
+           END-DISPLAY.
+           DISPLAY '>' EDT-4 '<'
+           END-DISPLAY.
+           DISPLAY '>' EDT-5 '<'
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[>0000 <
+>0000+<
+>     <
+>0000  <
+>0001DB<
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE to item with simple and floating insertion])
+AT_KEYWORDS([fundamental edited editing])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 num-1 PIC -*B*99.
+       01 num-2 PIC $BB**,***.**.
+
+       PROCEDURE DIVISION.
+           MOVE -123 TO num-1
+           DISPLAY ">" num-1 "<"
+
+           MOVE 1234.56 TO num-2
+           DISPLAY ">" num-2 "<"
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[>-**123<
+>$  *1,234.56<
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE to JUSTIFIED item])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  SRC-1        PIC S9(04)          VALUE  11.
+       01  SRC-2        PIC S9(04) COMP     VALUE  22.
+       01  SRC-3        PIC S9(04) COMP-5   VALUE  33.
+       01  SRC-4        PIC S9(04)PP        VALUE  4400.
+       01  SRC-5        PIC S9(04)PPPPP     VALUE  55500000.
+       01  EDT-FLD      PIC X(07)           JUSTIFIED RIGHT.
+       PROCEDURE        DIVISION.
+           MOVE SRC-1   TO EDT-FLD.
+           DISPLAY '>' EDT-FLD '<'
+           END-DISPLAY.
+           MOVE SRC-2   TO EDT-FLD.
+           DISPLAY '>' EDT-FLD '<'
+           END-DISPLAY.
+           MOVE SRC-3   TO EDT-FLD.
+           DISPLAY '>' EDT-FLD '<'
+           END-DISPLAY.
+           MOVE SRC-4   TO EDT-FLD.
+           DISPLAY '>' EDT-FLD '<'
+           END-DISPLAY.
+           MOVE SRC-5   TO EDT-FLD.
+           DISPLAY '>' EDT-FLD '<'
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[>   0011<
+>   0022<
+>   0033<
+> 004400<
+>5500000<
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE integer literal to alphanumeric])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC X(04) VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE 0 TO X.
+           DISPLAY X NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 8: warning: alphanumeric value is expected
+prog.cob: 6: warning: 'X' defined here as PIC X(04)
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0   ])
+
+AT_CLEANUP
+
+
+AT_SETUP([Check for equality of FLOAT-SHORT / FLOAT-LONG])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  SRC1          FLOAT-LONG VALUE 11.55.
+       01  DST1          FLOAT-SHORT.
+       01  SRC2          FLOAT-SHORT VALUE 11.55.
+       01  DST2          FLOAT-LONG.
+
+       PROCEDURE        DIVISION.
+           MOVE SRC1 TO DST1.
+           IF DST1 not = 11.55
+               DISPLAY "error: move/compare FLOAT-LONG to FLOAT-SHORT fa
+      -                "iled " DST1
+               END-DISPLAY
+           END-IF.
+
+           MOVE SRC1 TO DST2.
+           IF DST1 not = 11.55
+               DISPLAY "error: move/compare FLOAT-LONG to FLOAT-LONG fai
+      -                "led " DST2
+               END-DISPLAY
+           END-IF.
+
+           MOVE ZERO TO DST1.
+           MOVE ZERO TO DST2.
+
+           MOVE SRC2 TO DST1.
+           IF DST1 not = 11.55
+               DISPLAY "error: move/compare FLOAT-SHORT to FLOAT-SHORT f
+      -                "ailed: " DST1
+               END-DISPLAY
+           END-IF.
+
+           MOVE SRC2 TO DST2.
+           IF DST2 not = 11.55
+               DISPLAY "error: move/compare FLOAT-SHORT to FLOAT-LONG fa
+      -                "iled: " DST2
+               END-DISPLAY
+           END-IF.
+
+           MOVE ZERO TO DST1.
+           IF not (DST1 = 0 AND 0.0)
+               DISPLAY "Zero compare failed: " DST1 END-DISPLAY
+           END-IF.
+
+           MOVE -0.0 TO DST1.
+           IF not (DST1 = 0 AND 0.0)
+               DISPLAY "Negative Zero compare failed: " DST1
+               END-DISPLAY
+           END-IF.
+
+           MOVE 1.1234567 TO DST1.
+           MOVE DST1 TO DST2.
+           IF DST2 not = 1.1234567
+               DISPLAY "move/compare number to FLOAT to DOUBLE failed: "
+                       DST1 " - " DST2
+               END-DISPLAY
+           END-IF.
+
+      * Check for Tolerance
+           MOVE 1.1234567 TO DST1.
+           MOVE 1.1234568 TO DST2.
+           IF DST1 not = DST2 THEN
+               DISPLAY "move/compare of very near numbers failed (not id
+      -                "entical): " DST1 " - " DST2
+               END-DISPLAY
+           END-IF.
+
+      * Within tolerance by definition, therefore not checked
+      *     MULTIPLY 10000000000 BY DST1 DST2 END-MULTIPLY.
+      *     IF DST1 = DST2 THEN
+      *         DISPLAY "compare of very near numbers computed failed (id
+      *-                "entical): " DST1 " - " DST2
+      *         END-DISPLAY
+      *     END-IF.
+
+           MOVE 1.1234567 TO DST1.
+           MOVE 1.1234569 TO DST2.
+           IF DST1 = DST2 THEN
+               DISPLAY "move/compare of near equal numbers failed (ident
+      -                "ical): " DST1 " - " DST2
+               END-DISPLAY
+           END-IF.
+
+           MOVE 0.0001 TO DST1.
+           MOVE 0.0000 TO DST2.
+           IF DST1 = DST2 THEN
+               DISPLAY "move/compare of nearly equal very small numbers
+      -                "failed  (identical): " DST1 " - " DST2
+               END-DISPLAY
+           END-IF.
+
+           MOVE 1000001.0 TO DST1.
+           MOVE 1000000.0 TO DST2.
+           IF DST1 = DST2 THEN
+               DISPLAY "move/compare of nearly equal big numbers failed
+      -                "(identical): " DST1 " - " DST2
+               END-DISPLAY
+           END-IF.
+
+      * Within tolerance by definition, therefore not checked
+      *     MOVE 1000000000.0 TO DST1.
+      *     MOVE 1000000001.0 TO DST2.
+      *     IF DST1 = DST2 THEN
+      *         DISPLAY "move/compare of nearly equal very big numbers fa
+      *-                "iled (identical): " DST1 " - " DST2
+      *         END-DISPLAY
+      *     END-IF.
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Overlapping MOVE])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([subprog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. subprog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        LINKAGE SECTION.
+        01 F1 PIC X(10).
+        01 F2 PIC X(15).
+
+        PROCEDURE DIVISION USING F1 F2.
+        MOVE F2(1:6) TO F1 (1:8).
+        IF F1 not = "Hallo1  90"
+           DISPLAY "error: 3: " F1
+           END-DISPLAY
+        END-IF
+
+        GOBACK.
+])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 STRUCTURE.
+            05 FIELD1 PIC X(5).
+            05 FIELD2 PIC X(10).
+
+        PROCEDURE DIVISION.
+           MOVE "Hallo" TO FIELD1.
+           MOVE "1234567890" TO FIELD2.
+
+           MOVE FIELD2 TO STRUCTURE.
+           IF FIELD1 not = "12345"
+              DISPLAY "error: 1: " FIELD1
+              END-DISPLAY
+           END-IF
+           IF FIELD2 not = "67890     "
+              DISPLAY "error: 2: " FIELD2
+              END-DISPLAY
+           END-IF
+
+
+           MOVE "Hallo" TO FIELD1.
+           MOVE "1234567890" TO FIELD2.
+
+           CALL "subprog" USING BY REFERENCE FIELD2 STRUCTURE
+           END-CALL
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_MODULE subprog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 15: warning: overlapping MOVE may produce unpredictable results
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog2.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  FILLER.
+         05  TSTMOV1 PIC X(479).
+         05  TSTMOV2 PIC X(10).
+       PROCEDURE DIVISION.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (2:9) TO TSTMOV2 (1:9)
+           IF TSTMOV2 NOT = "1234567899"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (1:8) TO TSTMOV2 (2:8)
+           IF TSTMOV2 = "0000000009"
+              DISPLAY "IBM style MOVE: " TSTMOV2
+           ELSE IF TSTMOV2 NOT = "0012345679"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog2.cob], [0], [],
+[prog2.cob: 11: warning: overlapping MOVE may produce unpredictable results
+prog2.cob: 17: warning: overlapping MOVE may produce unpredictable results
+])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
+[  OK with MOVE: 1234567899
+  OK with MOVE: 0012345679
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Overlapping MOVE])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  FILLER.
+         05  TSTMOV1 PIC X(479).
+         05  TSTMOV2 PIC X(10).
+       PROCEDURE DIVISION.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (2:9) TO TSTMOV2 (1:9)
+           IF TSTMOV2 NOT = "1234567899"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (1:8) TO TSTMOV2 (2:8)
+           IF TSTMOV2 = "0000000009"
+              DISPLAY "IBM style MOVE: " TSTMOV2
+           ELSE IF TSTMOV2 NOT = "0012345679"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 11: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 17: warning: overlapping MOVE may produce unpredictable results
+])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[  OK with MOVE: 1234567899
+  OK with MOVE: 0012345679
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([IBM MOVE])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  FILLER.
+         05  TSTMOV1 PIC X(479).
+         05  TSTMOV2 PIC X(10).
+       PROCEDURE DIVISION.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (2:9) TO TSTMOV2 (1:9)
+           IF TSTMOV2 NOT = "1234567899"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (1:8) TO TSTMOV2 (2:8)
+           IF TSTMOV2 = "0000000009"
+              DISPLAY "IBM style MOVE: " TSTMOV2
+           ELSE IF TSTMOV2 NOT = "0012345679"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fmove-ibm prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[  OK with MOVE: 1234567899
+IBM style MOVE: 0000000009
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ALPHABETIC test])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC X(04) VALUE "AAAA".
+       01  FILLER REDEFINES X.
+           03  XBYTE    PIC X.
+           03  FILLER   PIC XXX.
+       PROCEDURE        DIVISION.
+           MOVE X"0D"   TO XBYTE.
+           IF X ALPHABETIC
+              DISPLAY "Fail - Alphabetic"
+              END-DISPLAY
+           END-IF.
+           MOVE "A"     TO XBYTE.
+           IF X NOT ALPHABETIC
+              DISPLAY "Fail - Not Alphabetic"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ALPHABETIC-UPPER test])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC X(04) VALUE "AAAA".
+       01  FILLER REDEFINES X.
+           03  XBYTE    PIC X.
+           03  FILLER   PIC XXX.
+       PROCEDURE        DIVISION.
+           MOVE X"0D"   TO XBYTE.
+           IF X ALPHABETIC-UPPER
+              DISPLAY "Fail - Not alphabetic upper"
+              END-DISPLAY
+           END-IF.
+           MOVE "A"     TO XBYTE.
+           IF X NOT ALPHABETIC-UPPER
+              DISPLAY "Fail - Alphabetic upper"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ALPHABETIC-LOWER test])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC X(04) VALUE "aaaa".
+       01  FILLER REDEFINES X.
+           03  XBYTE    PIC X.
+           03  FILLER   PIC XXX.
+       PROCEDURE        DIVISION.
+           MOVE X"0D"   TO XBYTE.
+           IF X ALPHABETIC-LOWER
+              DISPLAY "Fail - Not alphabetic lower"
+              END-DISPLAY
+           END-IF.
+           MOVE "a"     TO XBYTE.
+           IF X NOT ALPHABETIC-LOWER
+              DISPLAY "Fail - Alphabetic lower"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([GLOBAL at same level])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  X   PIC X(5) GLOBAL  VALUE "prog1".
+       PROCEDURE        DIVISION.
+           DISPLAY X
+           END-DISPLAY.
+           CALL "prog2"
+           END-CALL
+           CALL "prog3"
+           END-CALL
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01  X   PIC X(5) GLOBAL  VALUE "prog2".
+        PROCEDURE        DIVISION.
+            DISPLAY X
+            END-DISPLAY.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog3.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE        DIVISION.
+            DISPLAY X
+            END-DISPLAY.
+            EXIT PROGRAM.
+        END PROGRAM prog3.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[prog1
+prog2
+prog1
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([GLOBAL at lower level])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  X   PIC X(5) GLOBAL  VALUE "prog1".
+       PROCEDURE        DIVISION.
+           DISPLAY X
+           END-DISPLAY.
+           CALL "prog2"
+           END-CALL
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01  X   PIC X(5) GLOBAL  VALUE "prog2".
+        PROCEDURE        DIVISION.
+            DISPLAY X
+            END-DISPLAY.
+            CALL "prog3"
+            END-CALL
+            EXIT PROGRAM.
+         IDENTIFICATION   DIVISION.
+         PROGRAM-ID.      prog3.
+         DATA DIVISION.
+         WORKING-STORAGE SECTION.
+         PROCEDURE        DIVISION.
+             DISPLAY X
+             END-DISPLAY.
+             EXIT PROGRAM.
+         END PROGRAM prog3.
+        END PROGRAM prog2.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[prog1
+prog2
+prog2
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([GLOBAL CONSTANT])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE
+              ASSIGN    GLOB-PATH
+       .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE    GLOBAL.
+       01  TEST-REC     PIC X(4).
+       WORKING-STORAGE  SECTION.
+       78  GLOB-PATH           GLOBAL VALUE "GLOBP1".
+       01  GLOB-PATH2 CONSTANT GLOBAL       "GLOBP2".
+      * Test global vars because of implicitely defined ASSIGN var, too.
+       78  GLOB-VAR            GLOBAL VALUE "GLOBV1".
+       01  GLOB-VAR2  CONSTANT GLOBAL       "GLOBV2".
+       PROCEDURE        DIVISION.
+           DISPLAY GLOB-PATH GLOB-VAR
+           END-DISPLAY.
+           CALL "prog2"
+           END-CALL.
+           CALL "prog3"
+           END-CALL.
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        ENVIRONMENT      DIVISION.
+        INPUT-OUTPUT     SECTION.
+        FILE-CONTROL.
+        SELECT TEST2-FILE
+               ASSIGN    GLOB-PATH2
+        .
+        DATA             DIVISION.
+        FILE             SECTION.
+        FD  TEST2-FILE   GLOBAL.
+        01  TEST2-REC    PIC X(4).
+        WORKING-STORAGE  SECTION.
+        PROCEDURE        DIVISION.
+            DISPLAY GLOB-PATH2 GLOB-VAR2
+            END-DISPLAY.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+       END PROGRAM prog.
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST3-FILE
+              ASSIGN    GLOB-PATH
+       .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST3-FILE   GLOBAL.
+       01  TEST3-REC    PIC X(4).
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY 'in prog3'
+           END-DISPLAY
+           IF GLOB-PATH NOT = SPACES
+              DISPLAY GLOB-PATH
+              END-DISPLAY
+           END-IF
+           EXIT PROGRAM.
+       END PROGRAM prog3.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 60: warning: 'GLOB-PATH' will be implicitly defined
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[GLOBP1GLOBV1
+GLOBP2GLOBV2
+in prog3
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Entry point visibility (1)])
+AT_KEYWORDS([fundamental CALL])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       PROCEDURE        DIVISION.
+           CALL 'module'
+           CALL 'modulepart'
+           STOP RUN.
+])
+
+AT_DATA([module.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      module.
+       DATA DIVISION.
+       PROCEDURE        DIVISION.
+           DISPLAY 'A' WITH NO ADVANCING
+           GOBACK.
+       ENTRY 'modulepart'.
+           DISPLAY 'B' WITH NO ADVANCING
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE module.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [AB], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Entry point visibility (2)])
+AT_KEYWORDS([fundamental CALL])
+
+# TODO: skip on __OS400__
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       PROCEDURE        DIVISION.
+       CALL 'module'
+       STOP RUN.
+])
+
+AT_DATA([module.c], [
+#define COB_LIB_EXPIMP
+#include <libcob.h>
+COB_EXPIMP int some (void);
+int some (void)
+{
+  return 0;
+}
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE module.c], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob: 6: entry point 'module' not found
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Contained program visibility (1)])
+AT_KEYWORDS([fundamental CALL])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  X   PIC X(5) GLOBAL  VALUE "prog1".
+       PROCEDURE        DIVISION.
+           IF X NOT = "prog1"
+              DISPLAY X
+              END-DISPLAY
+           END-IF.
+           CALL "prog2"
+           END-CALL.
+           CALL "prog3"
+           END-CALL.
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01  X   PIC X(5) GLOBAL  VALUE "prog2".
+        PROCEDURE        DIVISION.
+            IF X NOT = "prog2"
+               DISPLAY X
+               END-DISPLAY
+            END-IF.
+            CALL "prog3"
+            END-CALL.
+            EXIT PROGRAM.
+         IDENTIFICATION   DIVISION.
+         PROGRAM-ID.      prog3.
+         DATA DIVISION.
+         WORKING-STORAGE SECTION.
+         PROCEDURE        DIVISION.
+             IF X NOT = "prog2"
+                DISPLAY X
+                END-DISPLAY
+             END-IF
+             EXIT PROGRAM.
+         END PROGRAM prog3.
+        END PROGRAM prog2.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob: 14: module 'prog3' not found
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Contained program visibility (2)])
+AT_KEYWORDS([fundamental CALL])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  X   PIC X(5) GLOBAL  VALUE "prog1".
+       PROCEDURE        DIVISION.
+           IF X NOT = "prog1"
+              DISPLAY X
+              END-DISPLAY
+           END-IF.
+           CALL "prog2"
+           END-CALL.
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01  X   PIC X(5) GLOBAL  VALUE "prog2".
+        PROCEDURE        DIVISION.
+            IF X NOT = "prog2"
+               DISPLAY X
+               END-DISPLAY
+            END-IF.
+            CALL "prog3"
+            END-CALL.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog3.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE        DIVISION.
+            IF X NOT = "prog2"
+               DISPLAY X
+               END-DISPLAY
+            END-IF.
+            EXIT PROGRAM.
+        END PROGRAM prog3.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob: 25: module 'prog3' not found
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Contained program visibility (3)])
+AT_KEYWORDS([fundamental CALL])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  X   PIC X(5) GLOBAL  VALUE "prog1".
+       PROCEDURE        DIVISION.
+           IF X NOT = "prog1"
+              DISPLAY X
+              END-DISPLAY
+           END-IF.
+           CALL "prog2"
+           END-CALL.
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01  X   PIC X(5) GLOBAL  VALUE "prog2".
+        PROCEDURE        DIVISION.
+            IF X NOT = "prog2"
+               DISPLAY X
+               END-DISPLAY
+            END-IF.
+            CALL "prog3"
+            END-CALL.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog3 COMMON.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE        DIVISION.
+            IF X NOT = "prog1"
+               DISPLAY X
+               END-DISPLAY
+            END-IF.
+            EXIT PROGRAM.
+        END PROGRAM prog3.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Contained program visibility (4)])
+AT_KEYWORDS([fundamental CALL])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "P1" NO ADVANCING
+           END-DISPLAY.
+           CALL "prog2"
+           END-CALL
+           CALL "prog3"
+           END-CALL
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE        DIVISION.
+            DISPLAY "P2" NO ADVANCING
+            END-DISPLAY.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+       END PROGRAM prog.
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "P3" NO ADVANCING
+           END-DISPLAY.
+           CALL "prog2"
+           END-CALL.
+           EXIT PROGRAM.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE        DIVISION.
+            DISPLAY "P4" NO ADVANCING
+            END-DISPLAY.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+       END PROGRAM prog3.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[P1P2P3P4])
+
+AT_CLEANUP
+
+
+AT_SETUP([CALL/CANCEL with program-prototype-name])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       ENVIRONMENT     DIVISION.
+       CONFIGURATION   SECTION.
+       REPOSITORY.
+           PROGRAM recursion-test
+           PROGRAM cancel-test
+           .
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  num         PIC 9 VALUE 0.
+
+       PROCEDURE       DIVISION.
+           CALL recursion-test USING num
+           DISPLAY "<"
+
+           CALL cancel-test
+           CALL cancel-test
+           CANCEL cancel-test
+           CALL cancel-test
+           DISPLAY "<"
+           .
+       END PROGRAM     prog.
+
+
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     recursion-test RECURSIVE.
+
+       DATA            DIVISION.
+       LINKAGE         SECTION.
+       01  x           PIC 9.
+
+       PROCEDURE       DIVISION USING x.
+           ADD 1 TO x
+           DISPLAY x NO ADVANCING
+           IF x = 1
+               CALL recursion-test USING x
+           END-IF
+           .
+       END PROGRAM     recursion-test.
+
+
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     cancel-test.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x           PIC 9 VALUE 1.
+
+       PROCEDURE       DIVISION.
+           DISPLAY x NO ADVANCING
+           ADD 1 TO x
+           .
+       END PROGRAM     cancel-test.
+])
+
+# TO-DO: Fix these warnings when program prototypes are added.
+AT_CHECK([$COMPILE -fno-program-name-redefinition prog.cob], [0], [],
+[prog.cob: 8: warning: no definition/prototype seen for program 'recursion-test'
+prog.cob: 9: warning: no definition/prototype seen for program 'cancel-test'
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[12<
+121<
+])
+AT_CLEANUP
+
+
+AT_SETUP([GLOBAL FD (1)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE
+              ASSIGN      "TESTFILE"
+              ACCESS       DYNAMIC
+              ORGANIZATION RELATIVE
+              STATUS       TESTSTAT
+              RELATIVE KEY TESTKEY
+       .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE    GLOBAL.
+       01  TEST-REC     PIC X(4).
+       WORKING-STORAGE  SECTION.
+       01  GLOBVALS.
+           03  TESTKEY  PIC 9(4).
+           03  TESTSTAT PIC XX.
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CALL  "prog2"
+           END-CALL.
+           CLOSE TEST-FILE.
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE        DIVISION.
+            READ TEST-FILE
+                 INVALID KEY
+                 DISPLAY "NOK"
+                 END-DISPLAY
+            END-READ.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([GLOBAL FD (2)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE
+              ASSIGN      "TESTFILE"
+              ACCESS       DYNAMIC
+              ORGANIZATION INDEXED
+              STATUS       TESTSTAT
+              RECORD KEY   TESTKEY
+       .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE    GLOBAL.
+       01  TEST-REC.
+           03  TESTKEY  PIC X(4).
+       WORKING-STORAGE  SECTION.
+       01  GLOBVALS.
+           03  TESTSTAT PIC XX.
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CALL  "prog2"
+           END-CALL.
+           CLOSE TEST-FILE.
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE        DIVISION.
+            READ TEST-FILE
+                 INVALID KEY
+                 DISPLAY "NOK"
+                 END-DISPLAY
+            END-READ.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([GLOBAL FD (3)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE
+              ASSIGN      "TESTFILE"
+              ACCESS       DYNAMIC
+              ORGANIZATION RELATIVE
+              STATUS       TESTSTAT
+              RELATIVE KEY TESTKEY
+       .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE    GLOBAL.
+       01  TEST-REC     PIC X(4).
+       WORKING-STORAGE  SECTION.
+       01  GLOBVALS.
+           03  TESTKEY  PIC 9(4).
+           03  TESTSTAT PIC XX.
+       PROCEDURE        DIVISION.
+           MOVE "00"    TO TESTSTAT.
+           CALL  "prog2"
+           END-CALL.
+           IF TESTSTAT = "00"
+              DISPLAY "Not OK"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE        DIVISION.
+            OPEN  INPUT TEST-FILE.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([GLOBAL FD (4)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE
+              ASSIGN      "TESTFILE"
+              ACCESS       DYNAMIC
+              ORGANIZATION INDEXED
+              STATUS       TESTSTAT
+              RECORD KEY   TESTKEY
+       .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE    GLOBAL.
+       01  TEST-REC.
+           03  TESTKEY  PIC X(4).
+       WORKING-STORAGE  SECTION.
+       01  GLOBVALS.
+           03  TESTSTAT PIC XX.
+       PROCEDURE        DIVISION.
+           MOVE "00"    TO TESTSTAT.
+           CALL  "prog2"
+           END-CALL.
+           IF TESTSTAT = "00"
+              DISPLAY "Not OK"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE        DIVISION.
+            OPEN  INPUT TEST-FILE.
+            EXIT PROGRAM.
+        END PROGRAM prog2.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([CANCEL test (1)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           CANCEL "notthere".
+           CANCEL "prog".
+           DISPLAY "NG" NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob: 8: attempt to CANCEL active program
+])
+AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [1], [],
+[libcob: prog.cob: 8: attempt to CANCEL active program
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([CANCEL test (2)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           CALL "prog2"
+           END-CALL.
+           DISPLAY "NG" NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           CANCEL "prog".
+           DISPLAY "NG" NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog2.cob: 7: attempt to CANCEL active program
+])
+AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [1], [],
+[libcob: prog2.cob: 7: attempt to CANCEL active program
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([CANCEL test (3)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           CALL "prog2"
+           END-CALL.
+           CALL "prog2"
+           END-CALL.
+           CANCEL "prog2".
+           CALL "prog2"
+           END-CALL.
+           CANCEL "prog2".
+           DISPLAY "NG" NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       77  VAR          PIC 9(01) value 1.
+       PROCEDURE        DIVISION.
+           DISPLAY VAR NO ADVANCING
+           END-DISPLAY.
+           ADD  1 TO VAR END-ADD.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [121NG], [])
+AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [0], [121NG], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Separate sign positions (1)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC S9 VALUE -1 SIGN LEADING SEPARATE.
+       01  Y            PIC S9 VALUE -1 SIGN TRAILING SEPARATE.
+       PROCEDURE        DIVISION.
+           DISPLAY X(1:1) X(2:1) NO ADVANCING
+           END-DISPLAY.
+           DISPLAY Y(1:1) Y(2:1) NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [-11-])
+
+AT_CLEANUP
+
+
+AT_SETUP([Separate sign positions (2)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC S9 SIGN LEADING SEPARATE.
+       01  Y            PIC S9 SIGN TRAILING SEPARATE.
+       PROCEDURE        DIVISION.
+           MOVE 0 TO X.
+           DISPLAY X NO ADVANCING
+           END-DISPLAY.
+           MOVE ZERO TO X.
+           DISPLAY X NO ADVANCING
+           END-DISPLAY.
+           MOVE 0 TO Y.
+           DISPLAY Y NO ADVANCING
+           END-DISPLAY.
+           MOVE ZERO TO Y.
+           DISPLAY Y NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE -fpretty-display prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [+0+00+0+])
+AT_CHECK([$COBCRUN prog], [0], [+0+00+0+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Context sensitive words (1)])
+AT_KEYWORDS([fundamental byte-length])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  BYTE-LENGTH  PIC 9.
+       01  X            CONSTANT AS BYTE-LENGTH OF BYTE-LENGTH.
+       PROCEDURE        DIVISION.
+           MOVE X TO BYTE-LENGTH.
+           DISPLAY BYTE-LENGTH NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [1])
+
+AT_CLEANUP
+
+
+AT_SETUP([Context sensitive words (2)])
+AT_KEYWORDS([fundamental yyyymmdd])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  YYYYMMDD     PIC 9 VALUE 0.
+       01  X            PIC X(16).
+       PROCEDURE        DIVISION.
+           ACCEPT X FROM DATE YYYYMMDD
+           END-ACCEPT.
+           DISPLAY YYYYMMDD NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Context sensitive words (3)])
+AT_KEYWORDS([fundamental yyyyddd])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  YYYYDDD      PIC 9 VALUE 0.
+       01  X            PIC X(16).
+       PROCEDURE        DIVISION.
+           ACCEPT X FROM DAY YYYYDDD
+           END-ACCEPT.
+           DISPLAY YYYYDDD NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Context sensitive words (4)])
+AT_KEYWORDS([fundamental intrinsic])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           FUNCTION ALL INTRINSIC.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  INTRINSIC    PIC 9 VALUE 0.
+       PROCEDURE        DIVISION.
+           DISPLAY INTRINSIC NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Context sensitive words (5)])
+AT_KEYWORDS([fundamental recursive])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog RECURSIVE.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  RECURSIVE    PIC 9 VALUE 0.
+       PROCEDURE        DIVISION.
+           DISPLAY RECURSIVE NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Context sensitive words (6)])
+AT_KEYWORDS([fundamental normal])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  NORMAL       PIC 9 VALUE 0.
+       PROCEDURE        DIVISION.
+           DISPLAY NORMAL NO ADVANCING
+           END-DISPLAY.
+           STOP RUN NORMAL.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Context sensitive words (7)])
+AT_KEYWORDS([fundamental compute away-from-zero])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X               PIC 9 VALUE 0.
+       01  AWAY-FROM-ZERO  PIC 9 VALUE 0.
+       PROCEDURE        DIVISION.
+           COMPUTE X ROUNDED MODE AWAY-FROM-ZERO
+                   AWAY-FROM-ZERO = 1.1
+           END-COMPUTE
+           DISPLAY X AWAY-FROM-ZERO NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [21])
+
+AT_CLEANUP
+
+
+AT_SETUP([ROUNDED AWAY-FROM-ZERO])
+AT_KEYWORDS([fundamental compute])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  M                PIC S9.
+       01  N                PIC S9.
+       01  O                PIC S9.
+       01  P                PIC S9.
+       01  Q                PIC S9.
+       01  R                PIC S9.
+       01  S                PIC S9.
+       01  T                PIC S9.
+       01  U                PIC S9.
+       01  V                PIC S9.
+       PROCEDURE DIVISION.
+           COMPUTE M ROUNDED MODE AWAY-FROM-ZERO
+                   = 2.49
+           END-COMPUTE
+           COMPUTE N ROUNDED MODE AWAY-FROM-ZERO
+                   = -2.49
+           END-COMPUTE
+           COMPUTE O ROUNDED MODE AWAY-FROM-ZERO
+                   = 2.50
+           END-COMPUTE
+           COMPUTE P ROUNDED MODE AWAY-FROM-ZERO
+                   = -2.50
+           END-COMPUTE
+           COMPUTE Q ROUNDED MODE AWAY-FROM-ZERO
+                   = 3.49
+           END-COMPUTE
+           COMPUTE R ROUNDED MODE AWAY-FROM-ZERO
+                   = -3.49
+           END-COMPUTE
+           COMPUTE S ROUNDED MODE AWAY-FROM-ZERO
+                   = 3.50
+           END-COMPUTE
+           COMPUTE T ROUNDED MODE AWAY-FROM-ZERO
+                   = -3.50
+           END-COMPUTE
+           COMPUTE U ROUNDED MODE AWAY-FROM-ZERO
+                   = 3.510
+           END-COMPUTE
+           COMPUTE V ROUNDED MODE AWAY-FROM-ZERO
+                   = -3.510
+           END-COMPUTE
+           DISPLAY M " " N " " O " " P " " Q " " R " " S " " T
+                   " " U " " V
+               NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [+3 -3 +3 -3 +4 -4 +4 -4 +4 -4])
+
+AT_CLEANUP
+
+
+AT_SETUP([ROUNDED NEAREST-AWAY-FROM-ZERO])
+AT_KEYWORDS([fundamental compute])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  M                PIC S9.
+       01  N                PIC S9.
+       01  O                PIC S9.
+       01  P                PIC S9.
+       01  Q                PIC S9.
+       01  R                PIC S9.
+       01  S                PIC S9.
+       01  T                PIC S9.
+       01  U                PIC S9.
+       01  V                PIC S9.
+       PROCEDURE DIVISION.
+           COMPUTE M ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = 2.49
+           END-COMPUTE
+           COMPUTE N ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = -2.49
+           END-COMPUTE
+           COMPUTE O ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = 2.50
+           END-COMPUTE
+           COMPUTE P ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = -2.50
+           END-COMPUTE
+           COMPUTE Q ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = 3.49
+           END-COMPUTE
+           COMPUTE R ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = -3.49
+           END-COMPUTE
+           COMPUTE S ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = 3.50
+           END-COMPUTE
+           COMPUTE T ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = -3.50
+           END-COMPUTE
+           COMPUTE U ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = 3.510
+           END-COMPUTE
+           COMPUTE V ROUNDED MODE NEAREST-AWAY-FROM-ZERO
+                   = -3.510
+           END-COMPUTE
+           DISPLAY M " " N " " O " " P " " Q " " R " " S " " T
+                   " " U " " V
+               NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [+2 -2 +3 -3 +3 -3 +4 -4 +4 -4])
+
+AT_CLEANUP
+
+
+AT_SETUP([ROUNDED NEAREST-EVEN])
+AT_KEYWORDS([fundamental compute])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  M                PIC S9.
+       01  N                PIC S9.
+       01  O                PIC S9.
+       01  P                PIC S9.
+       01  Q                PIC S9.
+       01  R                PIC S9.
+       01  S                PIC S9.
+       01  T                PIC S9.
+       01  U                PIC S9.
+       01  V                PIC S9.
+       PROCEDURE DIVISION.
+           COMPUTE M ROUNDED MODE NEAREST-EVEN
+                   = 2.49
+           END-COMPUTE
+           COMPUTE N ROUNDED MODE NEAREST-EVEN
+                   = -2.49
+           END-COMPUTE
+           COMPUTE O ROUNDED MODE NEAREST-EVEN
+                   = 2.50
+           END-COMPUTE
+           COMPUTE P ROUNDED MODE NEAREST-EVEN
+                   = -2.50
+           END-COMPUTE
+           COMPUTE Q ROUNDED MODE NEAREST-EVEN
+                   = 3.49
+           END-COMPUTE
+           COMPUTE R ROUNDED MODE NEAREST-EVEN
+                   = -3.49
+           END-COMPUTE
+           COMPUTE S ROUNDED MODE NEAREST-EVEN
+                   = 3.50
+           END-COMPUTE
+           COMPUTE T ROUNDED MODE NEAREST-EVEN
+                   = -3.50
+           END-COMPUTE
+           COMPUTE U ROUNDED MODE NEAREST-EVEN
+                   = 3.510
+           END-COMPUTE
+           COMPUTE V ROUNDED MODE NEAREST-EVEN
+                   = -3.510
+           END-COMPUTE
+           DISPLAY M " " N " " O " " P " " Q " " R " " S " " T
+                   " " U " " V
+               NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [+2 -2 +2 -2 +3 -3 +4 -4 +4 -4])
+
+AT_CLEANUP
+
+
+AT_SETUP([ROUNDED NEAREST-TOWARD-ZERO])
+AT_KEYWORDS([fundamental compute])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  M                PIC S9.
+       01  N                PIC S9.
+       01  O                PIC S9.
+       01  P                PIC S9.
+       01  Q                PIC S9.
+       01  R                PIC S9.
+       01  S                PIC S9.
+       01  T                PIC S9.
+       01  U                PIC S9.
+       01  V                PIC S9.
+       PROCEDURE DIVISION.
+           COMPUTE M ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = 2.49
+           END-COMPUTE
+           COMPUTE N ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = -2.49
+           END-COMPUTE
+           COMPUTE O ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = 2.50
+           END-COMPUTE
+           COMPUTE P ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = -2.50
+           END-COMPUTE
+           COMPUTE Q ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = 3.49
+           END-COMPUTE
+           COMPUTE R ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = -3.49
+           END-COMPUTE
+           COMPUTE S ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = 3.50
+           END-COMPUTE
+           COMPUTE T ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = -3.50
+           END-COMPUTE
+           COMPUTE U ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = 3.510
+           END-COMPUTE
+           COMPUTE V ROUNDED MODE NEAREST-TOWARD-ZERO
+                   = -3.510
+           END-COMPUTE
+           DISPLAY M " " N " " O " " P " " Q " " R " " S " " T
+                   " " U " " V
+               NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [+2 -2 +2 -2 +3 -3 +3 -3 +4 -4])
+
+AT_CLEANUP
+
+
+AT_SETUP([ROUNDED TOWARD-GREATER])
+AT_KEYWORDS([fundamental compute])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  M                PIC S9.
+       01  N                PIC S9.
+       01  O                PIC S9.
+       01  P                PIC S9.
+       01  Q                PIC S9.
+       01  R                PIC S9.
+       01  S                PIC S9.
+       01  T                PIC S9.
+       01  U                PIC S9.
+       01  V                PIC S9.
+       PROCEDURE DIVISION.
+           COMPUTE M ROUNDED MODE TOWARD-GREATER
+                   = 2.49
+           END-COMPUTE
+           COMPUTE N ROUNDED MODE TOWARD-GREATER
+                   = -2.49
+           END-COMPUTE
+           COMPUTE O ROUNDED MODE TOWARD-GREATER
+                   = 2.50
+           END-COMPUTE
+           COMPUTE P ROUNDED MODE TOWARD-GREATER
+                   = -2.50
+           END-COMPUTE
+           COMPUTE Q ROUNDED MODE TOWARD-GREATER
+                   = 3.49
+           END-COMPUTE
+           COMPUTE R ROUNDED MODE TOWARD-GREATER
+                   = -3.49
+           END-COMPUTE
+           COMPUTE S ROUNDED MODE TOWARD-GREATER
+                   = 3.50
+           END-COMPUTE
+           COMPUTE T ROUNDED MODE TOWARD-GREATER
+                   = -3.50
+           END-COMPUTE
+           COMPUTE U ROUNDED MODE TOWARD-GREATER
+                   = 3.510
+           END-COMPUTE
+           COMPUTE V ROUNDED MODE TOWARD-GREATER
+                   = -3.510
+           END-COMPUTE
+           DISPLAY M " " N " " O " " P " " Q " " R " " S " " T
+                   " " U " " V
+               NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [+3 -2 +3 -2 +4 -3 +4 -3 +4 -3])
+
+AT_CLEANUP
+
+
+AT_SETUP([ROUNDED TOWARD-LESSER])
+AT_KEYWORDS([fundamental compute])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  M                PIC S9.
+       01  N                PIC S9.
+       01  O                PIC S9.
+       01  P                PIC S9.
+       01  Q                PIC S9.
+       01  R                PIC S9.
+       01  S                PIC S9.
+       01  T                PIC S9.
+       01  U                PIC S9.
+       01  V                PIC S9.
+       PROCEDURE DIVISION.
+           COMPUTE M ROUNDED MODE TOWARD-LESSER
+                   = 2.49
+           END-COMPUTE
+           COMPUTE N ROUNDED MODE TOWARD-LESSER
+                   = -2.49
+           END-COMPUTE
+           COMPUTE O ROUNDED MODE TOWARD-LESSER
+                   = 2.50
+           END-COMPUTE
+           COMPUTE P ROUNDED MODE TOWARD-LESSER
+                   = -2.50
+           END-COMPUTE
+           COMPUTE Q ROUNDED MODE TOWARD-LESSER
+                   = 3.49
+           END-COMPUTE
+           COMPUTE R ROUNDED MODE TOWARD-LESSER
+                   = -3.49
+           END-COMPUTE
+           COMPUTE S ROUNDED MODE TOWARD-LESSER
+                   = 3.50
+           END-COMPUTE
+           COMPUTE T ROUNDED MODE TOWARD-LESSER
+                   = -3.50
+           END-COMPUTE
+           COMPUTE U ROUNDED MODE TOWARD-LESSER
+                   = 3.510
+           END-COMPUTE
+           COMPUTE V ROUNDED MODE TOWARD-LESSER
+                   = -3.510
+           END-COMPUTE
+           DISPLAY M " " N " " O " " P " " Q " " R " " S " " T
+                   " " U " " V
+               NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [+2 -3 +2 -3 +3 -4 +3 -4 +3 -4])
+
+AT_CLEANUP
+
+
+AT_SETUP([ROUNDED TRUNCATION])
+AT_KEYWORDS([fundamental compute])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  M                PIC S9.
+       01  N                PIC S9.
+       01  O                PIC S9.
+       01  P                PIC S9.
+       01  Q                PIC S9.
+       01  R                PIC S9.
+       01  S                PIC S9.
+       01  T                PIC S9.
+       01  U                PIC S9.
+       01  V                PIC S9.
+       PROCEDURE DIVISION.
+           COMPUTE M ROUNDED MODE TRUNCATION
+                   = 2.49
+           END-COMPUTE
+           COMPUTE N ROUNDED MODE TRUNCATION
+                   = -2.49
+           END-COMPUTE
+           COMPUTE O ROUNDED MODE TRUNCATION
+                   = 2.50
+           END-COMPUTE
+           COMPUTE P ROUNDED MODE TRUNCATION
+                   = -2.50
+           END-COMPUTE
+           COMPUTE Q ROUNDED MODE TRUNCATION
+                   = 3.49
+           END-COMPUTE
+           COMPUTE R ROUNDED MODE TRUNCATION
+                   = -3.49
+           END-COMPUTE
+           COMPUTE S ROUNDED MODE TRUNCATION
+                   = 3.50
+           END-COMPUTE
+           COMPUTE T ROUNDED MODE TRUNCATION
+                   = -3.50
+           END-COMPUTE
+           COMPUTE U ROUNDED MODE TRUNCATION
+                   = 3.510
+           END-COMPUTE
+           COMPUTE V ROUNDED MODE TRUNCATION
+                   = -3.510
+           END-COMPUTE
+           DISPLAY M " " N " " O " " P " " Q " " R " " S " " T
+                   " " U " " V
+               NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [+2 -2 +2 -2 +3 -3 +3 -3 +3 -3])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric operations (1)])
+AT_KEYWORDS([fundamental add subtract])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC S9V9.
+       01  Y            PIC S9V9 COMP-3.
+       PROCEDURE        DIVISION.
+           MOVE -0.1  TO X.
+           ADD 1      TO X.
+           IF X NOT = 0.9
+              DISPLAY X
+              END-DISPLAY
+           END-IF.
+           MOVE  0.1  TO X.
+           SUBTRACT 1 FROM X.
+           IF X NOT = -0.9
+              DISPLAY X
+              END-DISPLAY
+           END-IF.
+           MOVE -0.1 TO Y.
+           ADD 1     TO Y.
+           IF Y NOT = 0.9
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           MOVE  0.1  TO Y.
+           SUBTRACT 1 FROM Y.
+           IF Y NOT = -0.9
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric operations (2)])
+AT_KEYWORDS([fundamental add subtract])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  FIELD        PIC S9(1)V9(1).
+       01  FELD2        PIC S9(5)V9(5).
+       01  FELD3        PIC 9(1)V9(1).
+       01  FELD4        PIC S9(1).
+       PROCEDURE        DIVISION.
+           MOVE 0.2 TO FIELD
+           ADD 1 TO FIELD
+           IF FIELD  NOT = 1.2
+              DISPLAY "Test  1 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           ADD -1 TO FIELD
+           IF FIELD  NOT = -0.8
+              DISPLAY "Test  2 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           ADD 1 TO FIELD
+           IF FIELD  NOT = 0.8
+              DISPLAY "Test  3 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           ADD -1 TO FIELD
+           IF FIELD  NOT = -1.2
+              DISPLAY "Test  4 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           SUBTRACT 1 FROM FIELD
+           IF FIELD  NOT = -0.8
+              DISPLAY "Test  5 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           SUBTRACT -1 FROM FIELD
+           IF FIELD  NOT = 1.2
+              DISPLAY "Test  6 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           SUBTRACT 1 FROM FIELD
+           IF FIELD  NOT = -1.2
+              DISPLAY "Test  7 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           SUBTRACT -1 FROM FIELD
+           IF FIELD  NOT = 0.8
+              DISPLAY "Test  8 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           ADD 1 TO FELD2
+           IF FELD2  NOT = 1.2
+              DISPLAY "Test  9 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           ADD -1 TO FELD2
+           IF FELD2  NOT = -0.8
+              DISPLAY "Test 10 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           ADD 1 TO FELD2
+           IF FELD2  NOT = 0.8
+              DISPLAY "Test 11 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           ADD -1 TO FELD2
+           IF FELD2  NOT = -1.2
+              DISPLAY "Test 12 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           SUBTRACT 1 FROM FELD2
+           IF FELD2  NOT = -0.8
+              DISPLAY "Test 13 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           SUBTRACT -1 FROM FELD2
+           IF FELD2  NOT = 1.2
+              DISPLAY "Test 14 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           SUBTRACT 1 FROM FELD2
+           IF FELD2  NOT = -1.2
+              DISPLAY "Test 15 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           SUBTRACT -1 FROM FELD2
+           IF FELD2  NOT = 0.8
+              DISPLAY "Test 16 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           ADD 1 TO FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 17 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           ADD -1 TO FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 18 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           ADD 1 TO FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 19 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           ADD -1 TO FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 20 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           SUBTRACT 1 FROM FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 21 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           SUBTRACT -1 FROM FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 22 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           SUBTRACT 1 FROM FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 23 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           SUBTRACT -1 FROM FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 24 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           ADD 1 TO FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 25 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           ADD -1 TO FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 26 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           ADD 1 TO FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 27 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           ADD -1 TO FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 28 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           SUBTRACT 1 FROM FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 29 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           SUBTRACT -1 FROM FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 30 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           SUBTRACT 1 FROM FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 31 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           SUBTRACT -1 FROM FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 32 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           ADD 2 TO FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 33 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           ADD -2 TO FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 34 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           ADD 2 TO FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 35 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           ADD -2 TO FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 36 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           SUBTRACT 2 FROM FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 37 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           SUBTRACT -2 FROM FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 38 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           SUBTRACT 2 FROM FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 39 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           SUBTRACT -2 FROM FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 40 " FELD4
+              END-DISPLAY
+           END-IF.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 137: warning: ignoring sign
+prog.cob: 144: warning: ignoring sign
+prog.cob: 165: warning: ignoring sign
+prog.cob: 172: warning: ignoring sign
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric operations (3)])
+AT_KEYWORDS([fundamental add subtract])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  FIELD        PIC S9(1)V9(1) COMP-3.
+       01  FELD2        PIC S9(5)V9(5) COMP-3.
+       01  FELD3        PIC 9(1)V9(1)  COMP-3.
+       01  FELD4        PIC S9(1)      COMP-3.
+       PROCEDURE        DIVISION.
+           MOVE 0.2 TO FIELD
+           ADD 1 TO FIELD
+           IF FIELD  NOT = 1.2
+              DISPLAY "Test  1 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           ADD -1 TO FIELD
+           IF FIELD  NOT = -0.8
+              DISPLAY "Test  2 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           ADD 1 TO FIELD
+           IF FIELD  NOT = 0.8
+              DISPLAY "Test  3 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           ADD -1 TO FIELD
+           IF FIELD  NOT = -1.2
+              DISPLAY "Test  4 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           SUBTRACT 1 FROM FIELD
+           IF FIELD  NOT = -0.8
+              DISPLAY "Test  5 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           SUBTRACT -1 FROM FIELD
+           IF FIELD  NOT = 1.2
+              DISPLAY "Test  6 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           SUBTRACT 1 FROM FIELD
+           IF FIELD  NOT = -1.2
+              DISPLAY "Test  7 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           SUBTRACT -1 FROM FIELD
+           IF FIELD  NOT = 0.8
+              DISPLAY "Test  8 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           ADD 1 TO FELD2
+           IF FELD2  NOT = 1.2
+              DISPLAY "Test  9 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           ADD -1 TO FELD2
+           IF FELD2  NOT = -0.8
+              DISPLAY "Test 10 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           ADD 1 TO FELD2
+           IF FELD2  NOT = 0.8
+              DISPLAY "Test 11 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           ADD -1 TO FELD2
+           IF FELD2  NOT = -1.2
+              DISPLAY "Test 12 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           SUBTRACT 1 FROM FELD2
+           IF FELD2  NOT = -0.8
+              DISPLAY "Test 13 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           SUBTRACT -1 FROM FELD2
+           IF FELD2  NOT = 1.2
+              DISPLAY "Test 14 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           SUBTRACT 1 FROM FELD2
+           IF FELD2  NOT = -1.2
+              DISPLAY "Test 15 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           SUBTRACT -1 FROM FELD2
+           IF FELD2  NOT = 0.8
+              DISPLAY "Test 16 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           ADD 1 TO FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 17 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           ADD -1 TO FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 18 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           ADD 1 TO FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 19 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           ADD -1 TO FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 20 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           SUBTRACT 1 FROM FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 21 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           SUBTRACT -1 FROM FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 22 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           SUBTRACT 1 FROM FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 23 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           SUBTRACT -1 FROM FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 24 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           ADD 1 TO FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 25 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           ADD -1 TO FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 26 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           ADD 1 TO FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 27 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           ADD -1 TO FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 28 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           SUBTRACT 1 FROM FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 29 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           SUBTRACT -1 FROM FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 30 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           SUBTRACT 1 FROM FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 31 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           SUBTRACT -1 FROM FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 32 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           ADD 2 TO FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 33 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           ADD -2 TO FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 34 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           ADD 2 TO FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 35 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           ADD -2 TO FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 36 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           SUBTRACT 2 FROM FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 37 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           SUBTRACT -2 FROM FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 38 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           SUBTRACT 2 FROM FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 39 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           SUBTRACT -2 FROM FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 40 " FELD4
+              END-DISPLAY
+           END-IF.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 137: warning: ignoring sign
+prog.cob: 144: warning: ignoring sign
+prog.cob: 165: warning: ignoring sign
+prog.cob: 172: warning: ignoring sign
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric operations (4)])
+AT_KEYWORDS([fundamental add subtract])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  FIELD        PIC S9(1)V9(1) COMP.
+       01  FELD2        PIC S9(5)V9(5) COMP.
+       01  FELD3        PIC 9(1)V9(1)  COMP.
+       01  FELD4        PIC S9(1)      COMP.
+       PROCEDURE        DIVISION.
+           MOVE 0.2 TO FIELD
+           ADD 1 TO FIELD
+           IF FIELD  NOT = 1.2
+              DISPLAY "Test  1 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           ADD -1 TO FIELD
+           IF FIELD  NOT = -0.8
+              DISPLAY "Test  2 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           ADD 1 TO FIELD
+           IF FIELD  NOT = 0.8
+              DISPLAY "Test  3 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           ADD -1 TO FIELD
+           IF FIELD  NOT = -1.2
+              DISPLAY "Test  4 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           SUBTRACT 1 FROM FIELD
+           IF FIELD  NOT = -0.8
+              DISPLAY "Test  5 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           SUBTRACT -1 FROM FIELD
+           IF FIELD  NOT = 1.2
+              DISPLAY "Test  6 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           SUBTRACT 1 FROM FIELD
+           IF FIELD  NOT = -1.2
+              DISPLAY "Test  7 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           SUBTRACT -1 FROM FIELD
+           IF FIELD  NOT = 0.8
+              DISPLAY "Test  8 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           ADD 1 TO FELD2
+           IF FELD2  NOT = 1.2
+              DISPLAY "Test  9 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           ADD -1 TO FELD2
+           IF FELD2  NOT = -0.8
+              DISPLAY "Test 10 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           ADD 1 TO FELD2
+           IF FELD2  NOT = 0.8
+              DISPLAY "Test 11 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           ADD -1 TO FELD2
+           IF FELD2  NOT = -1.2
+              DISPLAY "Test 12 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           SUBTRACT 1 FROM FELD2
+           IF FELD2  NOT = -0.8
+              DISPLAY "Test 13 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           SUBTRACT -1 FROM FELD2
+           IF FELD2  NOT = 1.2
+              DISPLAY "Test 14 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           SUBTRACT 1 FROM FELD2
+           IF FELD2  NOT = -1.2
+              DISPLAY "Test 15 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           SUBTRACT -1 FROM FELD2
+           IF FELD2  NOT = 0.8
+              DISPLAY "Test 16 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           ADD 1 TO FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 17 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           ADD -1 TO FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 18 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           ADD 1 TO FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 19 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           ADD -1 TO FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 20 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           SUBTRACT 1 FROM FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 21 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           SUBTRACT -1 FROM FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 22 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           SUBTRACT 1 FROM FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 23 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           SUBTRACT -1 FROM FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 24 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           ADD 1 TO FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 25 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           ADD -1 TO FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 26 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           ADD 1 TO FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 27 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           ADD -1 TO FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 28 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           SUBTRACT 1 FROM FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 29 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           SUBTRACT -1 FROM FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 30 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           SUBTRACT 1 FROM FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 31 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           SUBTRACT -1 FROM FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 32 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           ADD 2 TO FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 33 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           ADD -2 TO FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 34 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           ADD 2 TO FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 35 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           ADD -2 TO FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 36 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           SUBTRACT 2 FROM FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 37 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           SUBTRACT -2 FROM FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 38 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           SUBTRACT 2 FROM FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 39 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           SUBTRACT -2 FROM FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 40 " FELD4
+              END-DISPLAY
+           END-IF.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 137: warning: ignoring sign
+prog.cob: 144: warning: ignoring sign
+prog.cob: 165: warning: ignoring sign
+prog.cob: 172: warning: ignoring sign
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric operations (5)])
+AT_KEYWORDS([fundamental add subtract])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  FIELD        PIC S9(1)V9(1) COMP-5.
+       01  FELD2        PIC S9(5)V9(5) COMP-5.
+       01  FELD3        PIC 9(1)V9(1)  COMP-5.
+       01  FELD4        PIC S9(1)      COMP-5.
+       PROCEDURE        DIVISION.
+           MOVE 0.2 TO FIELD
+           ADD 1 TO FIELD
+           IF FIELD  NOT = 1.2
+              DISPLAY "Test  1 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           ADD -1 TO FIELD
+           IF FIELD  NOT = -0.8
+              DISPLAY "Test  2 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           ADD 1 TO FIELD
+           IF FIELD  NOT = 0.8
+              DISPLAY "Test  3 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           ADD -1 TO FIELD
+           IF FIELD  NOT = -1.2
+              DISPLAY "Test  4 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           SUBTRACT 1 FROM FIELD
+           IF FIELD  NOT = -0.8
+              DISPLAY "Test  5 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FIELD
+           SUBTRACT -1 FROM FIELD
+           IF FIELD  NOT = 1.2
+              DISPLAY "Test  6 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           SUBTRACT 1 FROM FIELD
+           IF FIELD  NOT = -1.2
+              DISPLAY "Test  7 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FIELD
+           SUBTRACT -1 FROM FIELD
+           IF FIELD  NOT = 0.8
+              DISPLAY "Test  8 " FIELD
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           ADD 1 TO FELD2
+           IF FELD2  NOT = 1.2
+              DISPLAY "Test  9 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           ADD -1 TO FELD2
+           IF FELD2  NOT = -0.8
+              DISPLAY "Test 10 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           ADD 1 TO FELD2
+           IF FELD2  NOT = 0.8
+              DISPLAY "Test 11 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           ADD -1 TO FELD2
+           IF FELD2  NOT = -1.2
+              DISPLAY "Test 12 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           SUBTRACT 1 FROM FELD2
+           IF FELD2  NOT = -0.8
+              DISPLAY "Test 13 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD2
+           SUBTRACT -1 FROM FELD2
+           IF FELD2  NOT = 1.2
+              DISPLAY "Test 14 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           SUBTRACT 1 FROM FELD2
+           IF FELD2  NOT = -1.2
+              DISPLAY "Test 15 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD2
+           SUBTRACT -1 FROM FELD2
+           IF FELD2  NOT = 0.8
+              DISPLAY "Test 16 " FELD2
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           ADD 1 TO FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 17 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           ADD -1 TO FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 18 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           ADD 1 TO FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 19 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           ADD -1 TO FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 20 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           SUBTRACT 1 FROM FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 21 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 0.2 TO FELD3
+           SUBTRACT -1 FROM FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 22 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           SUBTRACT 1 FROM FELD3
+           IF FELD3  NOT = 0.8
+              DISPLAY "Test 23 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE -0.2 TO FELD3
+           SUBTRACT -1 FROM FELD3
+           IF FELD3  NOT = 1.2
+              DISPLAY "Test 24 " FELD3
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           ADD 1 TO FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 25 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           ADD -1 TO FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 26 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           ADD 1 TO FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 27 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           ADD -1 TO FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 28 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           SUBTRACT 1 FROM FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 29 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 2 TO FELD4
+           SUBTRACT -1 FROM FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 30 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           SUBTRACT 1 FROM FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 31 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -2 TO FELD4
+           SUBTRACT -1 FROM FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 32 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           ADD 2 TO FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 33 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           ADD -2 TO FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 34 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           ADD 2 TO FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 35 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           ADD -2 TO FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 36 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           SUBTRACT 2 FROM FELD4
+           IF FELD4  NOT = -1
+              DISPLAY "Test 37 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE 1 TO FELD4
+           SUBTRACT -2 FROM FELD4
+           IF FELD4  NOT = 3
+              DISPLAY "Test 38 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           SUBTRACT 2 FROM FELD4
+           IF FELD4  NOT = -3
+              DISPLAY "Test 39 " FELD4
+              END-DISPLAY
+           END-IF.
+
+           MOVE -1 TO FELD4
+           SUBTRACT -2 FROM FELD4
+           IF FELD4  NOT = 1
+              DISPLAY "Test 40 " FELD4
+              END-DISPLAY
+           END-IF.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 137: warning: ignoring sign
+prog.cob: 144: warning: ignoring sign
+prog.cob: 165: warning: ignoring sign
+prog.cob: 172: warning: ignoring sign
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric operations (6)])
+AT_KEYWORDS([fundamental add])
+
+AT_DATA([dump.c], [
+#include <stdio.h>
+#define COB_LIB_EXPIMP
+#include <libcob.h>
+COB_EXPIMP int dump (char *);
+int dump (char *p)
+{
+  printf ("%c%c", p[[0]], p[[1]]);
+  return 0;
+}
+])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+
+        01 P-FIELD1 PIC 99PPP.
+        01 P-FIELD2 PIC PPP99.
+
+        PROCEDURE DIVISION.
+
+        MOVE 5000 TO P-FIELD1.
+        ADD 5 TO P-FIELD1 END-ADD
+        IF P-FIELD1 NOT = 5000
+            DISPLAY "Error: Add 5 to PIC 99PPP."
+            END-DISPLAY
+        END-IF
+        CALL "dump" USING P-FIELD1 END-CALL
+
+        ADD 5000 TO P-FIELD1 END-ADD
+        IF P-FIELD1 NOT = 10000
+            DISPLAY "Error: Add 5000 to PIC 99PPP."
+            END-DISPLAY
+        END-IF
+        CALL "dump" USING P-FIELD1 END-CALL
+
+        MOVE 0.00055 TO P-FIELD2.
+        ADD 0.00033 TO P-FIELD2 END-ADD
+        IF P-FIELD2 NOT = 0.00088
+            DISPLAY "Error: Add 0.00033 to PIC PPP99."
+            END-DISPLAY
+        END-IF
+        CALL "dump" USING P-FIELD2 END-CALL
+
+        MOVE 0.00055 TO P-FIELD2.
+        ADD 0.00300 TO P-FIELD2 END-ADD
+        IF P-FIELD2 NOT = 0.00055
+            DISPLAY "Error: Add 0.00300 to PIC PPP99."
+            END-DISPLAY
+        END-IF
+        CALL "dump" USING P-FIELD2 END-CALL
+
+        STOP RUN.
+
+])
+
+AT_CHECK([$COMPILE_MODULE dump.c])
+AT_CHECK([$COMPILE prog.cob], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [05108855], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric operations (7)])
+AT_KEYWORDS([fundamental add compute literal])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  FIELD         PIC S9(4)V9(2) COMP-5.
+       01  FIELD-DISP    PIC S9(4)V9(2) DISPLAY.
+       PROCEDURE        DIVISION.
+           MOVE 0.2 TO FIELD.
+           ADD 1
+               2
+               3
+               4
+               5
+               6
+               7
+               8
+               9
+               10
+               11
+               12
+               13
+               14
+               15
+               16
+               17
+               18
+               19
+               20
+               21
+               22
+               23
+               24
+               25
+               26
+               27
+               28
+               29
+               30
+               31
+               32
+               33
+               34
+               35
+               36
+               37
+               38
+               39
+               40
+               41
+               42
+               43
+               44
+               45
+               46
+               47
+               48
+               49
+               50
+               51
+               52
+               53
+               54
+               55
+               56
+               57
+               58
+               59
+               60
+               61
+               62
+               63
+               64
+               65
+               66
+               67
+               68
+               69
+               70
+               71
+               72
+               73
+               74
+               75
+               76
+               77
+               78
+               79
+               80
+               81
+               82
+               83
+               84
+               85
+               86
+               87
+               88
+               89
+               90
+               91
+               92
+               93
+               94
+               95
+               96
+               97
+               98
+               99
+               100
+               101
+               102
+               103
+               104
+               105
+               106
+               107
+               108
+               109
+               110
+               111
+               112
+               113
+               114
+               115
+               116
+               117
+               118
+               119
+               120
+               121
+               122
+               123
+               124
+               125
+               126
+               127
+               128
+               129
+               TO FIELD
+           END-ADD.
+           IF FIELD NOT = 8385.2
+              MOVE FIELD TO FIELD-DISP
+              DISPLAY 'ADD with wrong result: ' FIELD-DISP
+              END-DISPLAY
+           END-IF.
+           COMPUTE FIELD = (0.2
+                         + 2
+                         + 3
+                         + 4
+                         + 5
+                         + 6
+                         + 7
+                         + 8
+                         + 9
+                         + 10
+                         + 11
+                         + 12
+                         + 13
+                         + 14
+                         + 15
+                         + 16
+                         + 17
+                         + 18
+                         + 19
+                         + 20
+                         + 21
+                         + 22
+                         + 23
+                         + 24
+                         + 25
+                         + 26
+                         + 27
+                         + 28
+                         + 29
+                         + 30
+                         + 31
+                         + 32
+                         + 33
+                         + 34
+                         + 35
+                         + 36
+                         + 37
+                         + 38
+                         + 39
+                         + 40
+                         + 41
+                         + 42
+                         + 43
+                         + 44
+                         + 45
+                         + 46
+                         + 47
+                         + 48
+                         + 49
+                         + 50
+                         + 51
+                         + 52
+                         + 53
+                         + 54
+                         + 55
+                         + 56
+                         + 57
+                         + 58
+                         - 59
+                         - 60
+                         - 61
+                         - 62
+                         - 63
+                         - 64
+                         - 65
+                         - 66
+                         - 67
+                         - 68
+                         - 69
+                         - 70
+                         - 71
+                         - 72
+                         - 73
+                         - 74
+                         - 75
+                         - 76
+                         - 77
+                         - 78
+                         - 79
+                         - 80
+                         - 81
+                         - 82
+                         - 83
+                         - 84
+                         - 85
+                         - 86
+                         - 87
+                         - 88
+                         - 89
+                         - 90
+                         - 91
+                         - 92
+                         - 93
+                         - 94
+                         - 95
+                         - 96
+                         - 97
+                         - 98
+                         - 99
+                         - 100
+                         - 101
+                         - 102
+                         - 103
+                         - 104
+                         - 105
+                         - 106
+                         - 107
+                         - 108
+                         - 109
+                         - 110
+                         - 111
+                         - 112
+                         - 113
+                         - 114
+                         - 115
+                         - 116
+                         - 117
+                         - 118
+                         - 119
+                         - 120
+                         - 121
+                         - 122
+                         - 123
+                         - 124
+                         - 125
+                         - 126
+                         - 127)
+                         * 12800000000
+                         / 12900000000
+           END-COMPUTE.
+           IF FIELD NOT = -4670.31
+              MOVE FIELD TO FIELD-DISP
+              DISPLAY 'COMPUTE with wrong result: ' FIELD-DISP
+              END-DISPLAY
+           END-IF.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric operations (8)])
+AT_KEYWORDS([fundamental compute literal])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+          1 COMPUTE-DATA.
+           2 COMPUTE-8             PICTURE 999       VALUE ZERO.
+       PROCEDURE        DIVISION.
+           COMPUTE COMPUTE-8 = (((24.0 + 1) * (60 - 10)) / 125) ** 2
+           IF COMPUTE-8 NOT = 100
+              DISPLAY 'COMPUTE with wrong result: ' COMPUTE-8
+              END-DISPLAY
+           END-IF
+           COMPUTE COMPUTE-8 = 55 / (1 - 2 + 1)
+              NOT ON SIZE ERROR
+                 DISPLAY 'SIZE ERROR not set from divide by zero!'
+                 END-DISPLAY
+           END-COMPUTE
+           COMPUTE COMPUTE-8 = 0 ** 1
+           IF COMPUTE-8 NOT = 0
+              DISPLAY '0 ** 1 <> 0: ' COMPUTE-8
+              END-DISPLAY
+           END-IF
+           COMPUTE COMPUTE-8 = 55 ** 0
+           IF COMPUTE-8 NOT = 1
+              DISPLAY '55 ** 0 <> 1: ' COMPUTE-8
+              END-DISPLAY
+           END-IF
+           COMPUTE COMPUTE-8 = 1 ** 55
+           IF COMPUTE-8 NOT = 1
+              DISPLAY '11 ** 55 <> 1: ' COMPUTE-8
+              END-DISPLAY
+           END-IF
+           
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 14: warning: divide by constant ZERO
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+# CORRESPONDING
+
+AT_SETUP([ADD CORRESPONDING])
+AT_KEYWORDS([fundamental corresponding])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 GROUP-1.
+          05 FIELD-A           PIC 9 VALUE 1.
+          05 FIELD-B           USAGE BINARY-CHAR VALUE 2.
+          05 INNER-GROUP.
+             10 FIELD-C        USAGE FLOAT-SHORT VALUE 3.
+          05 FIELD-D           PIC X VALUE "A".
+       01 GROUP-2.
+          05 FIELD-A           PIC 9.
+          05 FIELD-B           USAGE BINARY-LONG.
+          05 INNER-GROUP.
+             10 FIELD-C        PIC 9.
+          05 FIELD-D           PIC 9.
+
+       PROCEDURE DIVISION.
+       ADD CORRESPONDING GROUP-1 TO GROUP-2.
+       IF FIELD-A IN GROUP-2 NOT EQUAL 1 THEN
+           DISPLAY "BAD FIELD-A " FIELD-A IN GROUP-2
+           END-DISPLAY
+       END-IF.
+       IF FIELD-B IN GROUP-2 NOT EQUAL 2 THEN
+           DISPLAY "BAD FIELD-B " FIELD-B IN GROUP-2
+           END-DISPLAY
+       END-IF.
+       IF FIELD-C IN GROUP-2 NOT EQUAL 3 THEN
+           DISPLAY "BAD FIELD-C " FIELD-C IN GROUP-2
+           END-DISPLAY
+       END-IF.
+       IF FIELD-D IN GROUP-2 NOT EQUAL 0 THEN
+           DISPLAY "BAD FIELD-D " FIELD-D IN GROUP-2
+           END-DISPLAY
+       END-IF.
+       STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ADD CORRESPONDING no match])
+AT_KEYWORDS([fundamental corresponding])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 GROUP-1.
+          05 FIELD-A           PIC X.
+          05 FIELD-B           PIC Z9.
+          05 INNER-GROUP.
+             10 FIELD-C        PIC X.
+          05 FIELD-D           PIC 9.
+       01 GROUP-2.
+          05 FIELD-A           PIC 9 VALUE 1.
+          05 FIELD-B           USAGE BINARY-CHAR VALUE 2.
+          05 INNER-GROUP.
+             10 FIELD-C        USAGE FLOAT-SHORT VALUE 3.
+          05 FIELD-D           PIC X VALUE "A".
+
+       PROCEDURE DIVISION.
+       SUBTRACT CORRESPONDING GROUP-2 FROM GROUP-1.
+       IF FIELD-A IN GROUP-2 NOT EQUAL 1 THEN
+           DISPLAY "BAD FIELD-A " FIELD-A IN GROUP-2
+           END-DISPLAY
+       END-IF.
+       IF FIELD-B IN GROUP-2 NOT EQUAL 2 THEN
+           DISPLAY "BAD FIELD-B " FIELD-B IN GROUP-2
+           END-DISPLAY
+       END-IF.
+       IF FIELD-C IN GROUP-2 NOT EQUAL 3 THEN
+           DISPLAY "BAD FIELD-C " FIELD-C IN GROUP-2
+           END-DISPLAY
+       END-IF.
+       IF FIELD-D IN GROUP-2 NOT EQUAL "A" THEN
+           DISPLAY "BAD FIELD-D " FIELD-D IN GROUP-2
+           END-DISPLAY
+       END-IF.
+       STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 20: warning: no CORRESPONDING items found
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SYNC in OCCURS])
+AT_KEYWORDS([fundamental SYNCHRONIZE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01 x.
+           03  ptrs                     OCCURS 5 TIMES.
+               05  misalign-1           PIC X.
+               05  ptr                  POINTER, SYNC.
+               05  ptr-num              REDEFINES ptr,
+       >>IF P64 SET
+                                        USAGE BINARY-DOUBLE UNSIGNED.
+       >>ELSE
+                                        USAGE BINARY-LONG UNSIGNED.
+       >>END-IF
+               05  misalign-2           PIC X.
+
+       01  num                          BINARY-LONG.
+
+       PROCEDURE       DIVISION.
+           SET ptr (2) TO ADDRESS OF ptr (2)
+           SET ptr (3) TO ADDRESS OF ptr (3)
+
+           SUBTRACT ptr-num (2) FROM ptr-num (3) GIVING num
+           DISPLAY FUNCTION MOD (num, FUNCTION LENGTH (ptr (1)))
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[000000000
+])
+
+AT_CLEANUP

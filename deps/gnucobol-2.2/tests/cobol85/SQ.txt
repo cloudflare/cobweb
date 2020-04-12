@@ -1,0 +1,94 @@
+Filename    total pass fail deleted inspect
+--------    ----- ---- ---- ------- -------
+SQ101M.CBL     57    0    0       0      57 OK
+SQ102A.CBL     11   11    0       0       0 OK
+SQ103A.CBL     30   30    0       0       0 OK
+SQ104A.CBL     11   11    0       0       0 OK
+SQ105A.CBL     22   22    0       0       0 OK
+SQ106A.CBL     75   75    0       0       0 OK
+SQ107A.CBL      6    6    0       0       0 OK
+SQ108A.CBL      8    8    0       0       0 OK
+SQ109M.CBL      6    6    0       0       0 OK
+SQ110M.CBL      6    6    0       0       0 OK
+SQ111A.CBL      1    1    0       0       0 OK
+SQ112A.CBL      7    7    0       0       0 OK
+SQ113A.CBL     22   22    0       0       0 OK
+SQ114A.CBL     15   15    0       0       0 OK
+SQ115A.CBL      3    3    0       0       0 OK
+SQ116A.CBL     10   10    0       0       0 OK
+SQ117A.CBL      8    8    0       0       0 OK
+SQ121A.CBL      3    3    0       0       0 OK
+SQ122A.CBL      7    7    0       0       0 OK
+SQ123A.CBL      9    9    0       0       0 OK
+SQ124A.CBL     19   19    0       0       0 OK
+SQ125A.CBL      2    2    0       0       0 OK
+SQ126A.CBL      7    7    0       0       0 OK
+SQ127A.CBL      6    6    0       0       0 OK
+SQ128A.CBL      9    9    0       0       0 OK
+SQ129A.CBL      1    1    0       0       0 OK
+SQ130A.CBL      1    1    0       0       0 OK
+SQ131A.CBL      2    2    0       0       0 OK
+SQ132A.CBL      1    1    0       0       0 OK
+SQ133A.CBL     15   15    0       0       0 OK
+SQ134A.CBL     15   15    0       0       0 OK
+SQ135A.CBL      1    1    0       0       0 OK
+SQ136A.CBL      1    1    0       0       0 OK
+SQ137A.CBL      1    1    0       0       0 OK
+SQ138A.CBL      1    1    0       0       0 OK
+SQ139A.CBL      1    1    0       0       0 OK
+SQ140A.CBL      1    1    0       0       0 OK
+SQ141A.CBL      1    1    0       0       0 OK
+SQ142A.CBL      1    1    0       0       0 OK
+SQ143A.CBL      1    1    0       0       0 OK
+SQ144A.CBL      1    1    0       0       0 OK
+SQ146A.CBL      1    1    0       0       0 OK
+SQ147A.CBL      1    1    0       0       0 OK
+SQ148A.CBL      2    2    0       0       0 OK
+SQ149A.CBL      1    1    0       0       0 OK
+SQ150A.CBL      1    1    0       0       0 OK
+SQ151A.CBL      1    1    0       0       0 OK
+SQ152A.CBL      1    1    0       0       0 OK
+SQ153A.CBL      1    1    0       0       0 OK
+SQ154A.CBL      1    1    0       0       0 OK
+SQ155A.CBL      1    1    0       0       0 OK
+SQ156A.CBL      1    1    0       0       0 OK
+SQ201M.CBL     23   12    0       0      11 OK
+SQ202A.CBL      1    1    0       0       0 OK
+SQ203A.SUB      4    4    0       0       0 OK
+SQ204A.CBL      2    2    0       0       0 OK
+SQ205A.CBL      2    2    0       0       0 OK
+SQ206A.CBL      4    4    0       0       0 OK
+SQ207M.CBL      8    0    0       0       8 OK
+SQ208M.CBL      7    0    0       0       7 OK
+SQ209M.CBL      3    0    0       0       3 OK
+SQ210M.CBL      3    0    0       0       3 OK
+SQ211A.CBL      4    4    0       0       0 OK
+SQ212A.CBL      1    1    0       0       0 OK
+SQ213A.CBL      7    7    0       0       0 OK
+SQ214A.CBL      5    5    0       0       0 OK
+SQ215A.CBL      4    4    0       0       0 OK
+SQ216A.CBL      7    7    0       0       0 OK
+SQ217A.CBL      7    7    0       0       0 OK
+SQ218A.CBL      6    6    0       0       0 OK
+SQ219A.CBL      6    6    0       0       0 OK
+SQ220A.CBL      6    6    0       0       0 OK
+SQ221A.CBL      6    6    0       0       0 OK
+SQ222A.CBL      6    6    0       0       0 OK
+SQ223A.CBL      6    6    0       0       0 OK
+SQ224A.CBL      3    3    0       0       0 OK
+SQ225A.CBL      3    3    0       0       0 OK
+SQ226A.CBL     37   37    0       0       0 OK
+SQ227A.CBL     16   16    0       0       0 OK
+SQ228A.CBL      1    1    0       0       0 OK
+SQ229A.CBL      1    1    0       0       0 OK
+SQ230A.CBL      1    1    0       0       0 OK
+SQ302M.CBL      0    0    0       0       0 OK
+SQ303M.CBL      0    0    0       0       0 OK
+SQ401M.CBL      0    0    0       0       0 OK
+--------    ----- ---- ---- ------- -------
+Total         607  518    0       0      89
+
+Number of programs:    85
+Successfully executed: 85
+Compile error:          0
+Execute error:          0

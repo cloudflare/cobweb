@@ -1,0 +1,15 @@
+Filename    total pass fail deleted inspect
+--------    ----- ---- ---- ------- -------
+RW101A.CBL      8    8    0       0       0 OK
+RW102A.CBL      4    4    0       0       0 OK
+RW103A.CBL     14   14    0       0       0 OK
+RW104A.CBL     14   14    0       0       0 OK
+RW301M.CBL      1    1    0       0       0 OK
+RW302M.CBL      1    1    0       0       0 OK
+--------    ----- ---- ---- ------- -------
+Total          42   42    0       0       0
+
+Number of programs:     6
+Successfully executed:  6
+Compile error:          0
+Execute error:          0

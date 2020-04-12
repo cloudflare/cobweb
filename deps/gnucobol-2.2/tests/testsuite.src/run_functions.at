@@ -1,0 +1,3984 @@
+## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2002 15 Intrinsic Functions
+### ISO+IEC+1989-2002 9.4 User-Defined Functions
+
+AT_SETUP([FUNCTION ABS])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   S9(4)V9(4) VALUE -1.2345.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION ABS ( X ) NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[+0001.2345])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION ACOS])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z   PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION ACOS ( -0.2345 ) TO Z.
+           IF Z NOT = 1.80750052110824343510150043852321026
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION ANNUITY])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z   PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION ANNUITY ( 3, 5 ) TO Z.
+           IF Z NOT = 3.00293255131964809384164222873900293
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION ASIN])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION ASIN ( -0.2345 ) TO Y.
+           IF Y NOT = -0.23670419431334681587017874688345882
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION ATAN])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION ATAN ( 1 ) TO Y.
+           IF Y NOT = 0.78539816339744830961566084581987572
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION BYTE-LENGTH])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC      X(4).
+       01  Z   PIC      N(4).
+       01  TEST-FLD     PIC S9(04)V9(08).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION BYTE-LENGTH ( X )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 4
+              DISPLAY 'BYTE-LENGTH X(4) wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION BYTE-LENGTH ( Z )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 8
+              DISPLAY 'BYTE-LENGTH N(4) wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 7: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION CHAR])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC   S9(4)V9(4) VALUE 108.
+       01  TEST-FLD.
+           05  TEST-DATA  PIC X(01).
+               88  VALID-DATA   VALUE 'k'.
+           05  TEST-UNSET PIC X VALUE '_'.
+               88  VALID-UNSET  VALUE '_'.
+       PROCEDURE        DIVISION.
+           STRING FUNCTION CHAR ( X )
+                  DELIMITED BY SIZE
+                  INTO TEST-FLD
+           END-STRING.
+           EVALUATE TRUE
+              WHEN NOT VALID-UNSET
+                 DISPLAY "FUNCTION result too long"
+                 END-DISPLAY
+              WHEN VALID-DATA
+                 CONTINUE
+              WHEN OTHER
+                 DISPLAY TEST-DATA
+                 END-DISPLAY
+           END-EVALUATE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION COMBINED-DATETIME])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(04)V9(08).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION COMBINED-DATETIME ( 987, 345.6 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 987.003456
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION CONCATENATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y            PIC   X(4).
+       01  TEST-FLD.
+           05  TEST-DATA  PIC X(14).
+               88  VALID-DATA   VALUE 'defxabczz55666'.
+           05  TEST-UNSET PIC X VALUE '_'.
+               88  VALID-UNSET  VALUE '_'.
+       PROCEDURE        DIVISION.
+           MOVE "defx" TO Y.
+           STRING FUNCTION CONCATENATE ( Y "abc" "zz" "55" "666" )
+                  DELIMITED BY SIZE
+                  INTO TEST-FLD
+           END-STRING.
+           EVALUATE TRUE
+              WHEN NOT VALID-UNSET
+                 DISPLAY "FUNCTION result too long"
+                 END-DISPLAY
+              WHEN VALID-DATA
+                 CONTINUE
+              WHEN OTHER
+                 DISPLAY TEST-DATA
+                 END-DISPLAY
+           END-EVALUATE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION CONCATENATE with reference modding])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y            PIC X(4).
+       01  TEST-FLD     PIC X(9) VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE 'defx' TO Y.
+           MOVE FUNCTION CONCATENATE
+                ( Y "abc" "zz" "55" "666" ) (2 : 9)
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 'efxabczz5'
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION as CALL parameter BY CONTENT])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       PROCEDURE DIVISION.
+       PROG-MAIN.
+           CALL "subprog" USING BY CONTENT 
+                                FUNCTION CONCATENATE("Abc" "D")
+           STOP RUN.
+           END PROGRAM prog.
+
+       *> *****************************
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. subprog.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01 TESTING PIC X ANY LENGTH.
+
+       PROCEDURE DIVISION USING TESTING.
+       SUBPROG-MAIN.
+           DISPLAY TESTING
+           GOBACK.
+       END PROGRAM subprog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [AbcD
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION COS])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y            PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION COS ( -0.2345 ) TO Y.
+           IF Y NOT = 0.97263064125625818471341696241456141
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION CURRENCY-SYMBOL])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-FLD     PIC X(8) VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION CURRENCY-SYMBOL TO TEST-FLD.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION CURRENT-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-FLD.
+           02  WS-YEAR            PIC 9(04).
+               88 VALID-YEAR      VALUE 1980 THRU 9999.
+           02  WS-MONTH           PIC 9(02).
+               88 VALID-MONTH     VALUE 01 THRU 12.
+           02  WS-DAY             PIC 9(02).
+               88 VALID-DAY       VALUE 01 THRU 31.
+           02  WS-HOUR            PIC 9(02).
+               88 VALID-HOUR      VALUE 00 THRU 23.
+           02  WS-MIN             PIC 9(02).
+               88 VALID-MIN       VALUE 00 THRU 59.
+           02  WS-SEVALIDD        PIC 9(02).
+               88 VALID-SEC       VALUE 00 THRU 59.
+           02  WS-HUNDSEC         PIC 9(02).
+               88 VALID-HUNDSEC   VALUE 00 THRU 99.
+           02  WS-GREENW          PIC X.
+               88 VALID-GREENW    VALUE "-", "+", "0".
+               88 ZERO-GREENW     VALUE "0".
+           02  WS-OFFSET          PIC 9(02).
+               88 VALID-OFFSET    VALUE 00 THRU 13.
+               88 ZERO-OFFSET     VALUE 00.
+           02  WS-OFFSET2         PIC 9(02).
+               88 VALID-OFFSET2   VALUE 00 THRU 59.
+               88 ZERO-OFFSET2    VALUE 00.
+           02  WS-UNSET           PIC X VALUE '_'.
+               88 VALID-UNSET     VALUE '_'.
+       PROCEDURE        DIVISION.
+           STRING FUNCTION CURRENT-DATE
+                  DELIMITED BY SIZE
+                  INTO TEST-FLD
+           END-STRING.
+           EVALUATE TRUE
+              WHEN NOT VALID-UNSET
+                 DISPLAY "FUNCTION result too long"
+                 END-DISPLAY
+              WHEN VALID-YEAR     AND
+                 VALID-MONTH    AND
+                 VALID-DAY      AND
+                 VALID-HOUR     AND
+                 VALID-MIN      AND
+                 VALID-SEC      AND
+                 VALID-HUNDSEC  AND
+                 VALID-GREENW   AND
+                 VALID-OFFSET   AND
+                 VALID-OFFSET2  AND
+                 VALID-UNSET    AND
+                 ((NOT ZERO-GREENW) OR (ZERO-OFFSET AND ZERO-OFFSET2))
+                 CONTINUE
+              WHEN OTHER
+                 DISPLAY "CURRENT-DATE with wrong format: "
+                         TEST-FLD (01:21)
+                 END-DISPLAY
+           END-EVALUATE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION DATE-OF-INTEGER])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(09)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION DATE-OF-INTEGER ( 146000 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 20000925
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION DATE-TO-YYYYMMDD])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(09)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION DATE-TO-YYYYMMDD ( 981002, -10, 1994 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 018981002
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION DAY-OF-INTEGER])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(09)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION DAY-OF-INTEGER ( 146000 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 2000269
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION DAY-TO-YYYYDDD])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(09)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION DAY-TO-YYYYDDD ( 95005, -10, 2013 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 001995005
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION E])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE    FUNCTION E TO Y.
+           IF Y NOT = 2.71828182845904523536028747135266249
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION EXCEPTION-FILE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+           SELECT TEST-FILE ASSIGN "NOTEXIST"
+           FILE STATUS IS TEST-STATUS.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE.
+       01  TEST-REC      PIC X(4).
+       WORKING-STORAGE SECTION.
+       01  TEST-STATUS  PIC XX.
+       PROCEDURE        DIVISION.
+           OPEN INPUT TEST-FILE.
+           DISPLAY FUNCTION EXCEPTION-FILE
+                   NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[35TEST-FILE], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION EXCEPTION-LOCATION])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+           SELECT TEST-FILE ASSIGN "NOTEXIST"
+           FILE STATUS IS TEST-STATUS.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE.
+       01  TEST-REC      PIC X(4).
+       WORKING-STORAGE SECTION.
+       01  TEST-STATUS  PIC XX.
+       PROCEDURE        DIVISION.
+       A00-MAIN SECTION.
+       A00.
+           OPEN INPUT TEST-FILE.
+       B00-MAIN SECTION.
+       B00.
+           DISPLAY FUNCTION EXCEPTION-LOCATION
+                   NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[prog; A00 OF A00-MAIN; 18], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION EXCEPTION-STATEMENT])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+           SELECT TEST-FILE ASSIGN "NOTEXIST"
+           FILE STATUS IS TEST-STATUS.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE.
+       01  TEST-REC      PIC X(4).
+       WORKING-STORAGE SECTION.
+       01  TEST-STATUS  PIC XX.
+       PROCEDURE        DIVISION.
+           OPEN INPUT TEST-FILE.
+           DISPLAY FUNCTION EXCEPTION-STATEMENT
+                   NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OPEN                           ], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION EXCEPTION-STATUS])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+           SELECT TEST-FILE ASSIGN "NOTEXIST"
+           FILE STATUS IS TEST-STATUS.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE.
+       01  TEST-REC      PIC X(4).
+       WORKING-STORAGE SECTION.
+       01  TEST-STATUS  PIC XX.
+       PROCEDURE        DIVISION.
+           OPEN INPUT TEST-FILE.
+           DISPLAY FUNCTION EXCEPTION-STATUS
+                   NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[EC-I-O-PERMANENT-ERROR         ], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION EXP])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S99V9(34).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION EXP ( 3 ) TO Y.
+           IF Y NOT = 20.0855369231876677409285296545817178
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION EXP10])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(09)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION EXP10 ( 4 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 000010000
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FACTORIAL])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(09)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION FACTORIAL ( 6 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 000000720
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FORMATTED-CURRENT-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Datetime-Format CONSTANT "YYYYMMDDThhmmss.ss+hhmm".
+       01  str             PIC X(25).
+       PROCEDURE        DIVISION.
+      *>   Test normal inputs.
+           MOVE FUNCTION FORMATTED-CURRENT-DATE ( Datetime-Format )
+             TO str
+           IF FUNCTION TEST-FORMATTED-DATETIME ( Datetime-Format, str)
+                   <> 0
+              DISPLAY "Test 1 failed: " str END-DISPLAY
+           END-IF.
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FORMATTED-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  str          PIC X(10).
+       PROCEDURE        DIVISION.
+      *>   Test normal inputs.
+           MOVE FUNCTION FORMATTED-DATE ( "YYYYMMDD", 1 ) TO str
+           IF str <> "16010101"
+              DISPLAY "Test 1 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-DATE ( "YYYY-MM-DD", 1 ) TO str
+           IF str <> "1601-01-01"
+              DISPLAY "Test 2 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-DATE ( "YYYYDDD", 1 ) TO str
+           IF str <> "1601001"
+              DISPLAY "Test 3 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-DATE ( "YYYY-DDD", 1 ) TO str
+           IF str <> "1601-001"
+              DISPLAY "Test 4 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-DATE ( "YYYYWwwD", 1 ) TO str
+           IF str <> "1601W011"
+              DISPLAY "Test 5 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-DATE ( "YYYY-Www-D", 1 ) TO str
+           IF str <> "1601-W01-1"
+              DISPLAY "Test 6 failed: " str END-DISPLAY
+           END-IF
+
+      *>   Test week number edge cases.
+      *>   For 2012-01-01.
+           MOVE FUNCTION FORMATTED-DATE ( "YYYYWwwD", 150115 ) TO str
+           IF str <> "2011W527"
+              DISPLAY "Test 7 failed: " str END-DISPLAY
+           END-IF
+
+      *>   and for 2013-12-30.
+           MOVE FUNCTION FORMATTED-DATE ( "YYYYWwwD", 150844 ) TO str
+           IF str <> "2014W011"
+              DISPLAY "Test 8 failed: " str END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FORMATTED-DATE with ref modding])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  str          PIC X(04).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION FORMATTED-DATE ("YYYYMMDD", 1) (3:4)
+             TO STR
+           IF STR NOT = '0101'
+              DISPLAY STR
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FORMATTED-DATETIME])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  str          PIC X(40).
+       PROCEDURE        DIVISION.
+      *>   Test normal inputs.
+           MOVE FUNCTION FORMATTED-DATETIME
+                   ("YYYYMMDDThhmmss", 1, 45296)
+               TO str
+           IF str <> "16010101T123456"
+               DISPLAY "Test 1 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-DATETIME
+                   ("YYYY-MM-DDThh:mm:ss", 1, 45296)
+               TO str
+           IF str <> "1601-01-01T12:34:56"
+               DISPLAY "Test 2 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-DATETIME
+                    ("YYYYDDDThhmmss+hhmm", 1, 45296, -754)
+               TO str
+           IF str <> "1601001T123456-1234"
+               DISPLAY "Test 3 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-DATETIME
+                    ("YYYYDDDThhmmss+hhmm", 1, 45296)
+               TO str
+           IF str <> "1601001T123456+0000"
+               DISPLAY "Test 4 failed: " str END-DISPLAY
+           END-IF
+
+           *> Test underflow to next day due to offset
+           MOVE FUNCTION FORMATTED-DATETIME
+                    ("YYYYDDDThhmmss.sssssssssZ", 150846, 0,
+                     1)
+               TO str
+           IF str <> "2013365T235900.000000000Z"
+               DISPLAY "Test 5 failed: " str END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FORMATTED-DATETIME with ref modding])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  str          PIC X(04).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION FORMATTED-DATETIME
+               ("YYYYMMDDThhmmss", 1, 1) (3:4)
+             TO STR
+           IF STR NOT = '0101'
+              DISPLAY STR
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FORMATTED-TIME])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  str          PIC X(20).
+       PROCEDURE        DIVISION.
+      *>   Test normal inputs.
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmss", 45296 ) TO str
+           IF str <> "123456"
+               DISPLAY "Test 1 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ss", 45296 ) TO str
+           IF str <> "12:34:56"
+               DISPLAY "Test 2 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmssZ", 86399, -1 ) TO str
+           IF str <> "000059Z"
+               DISPLAY "Test 3 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ssZ", 45296)
+               TO str
+           IF str <> "12:34:56Z"
+               DISPLAY "Test 4 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmss.ss", 45296.78 ) TO str
+           IF str <> "123456.78"
+               DISPLAY "Test 5 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ss.ssZ", 0, 120)
+               TO str
+           IF str <> "22:00:00.00Z"
+               DISPLAY "Test 6 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 45296)
+               TO str
+           IF str <> "123456+0000"
+               DISPLAY "Test 7 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ss+hh:mm", 45296, 0 )
+               TO str
+           IF str <> "12:34:56+00:00"
+               DISPLAY "Test 8 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 45296, -754)
+               TO str
+           IF str <> "123456-1234"
+               DISPLAY "Test 9 failed: " str END-DISPLAY
+           END-IF
+
+      *>   Test with invalid/missing offset times.
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 1, 3000 )
+               TO str
+           IF str <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 60"
+               DISPLAY "Test 10 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 1, -3000 )
+               TO str
+           IF str <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 68"
+               DISPLAY "Test 11 failed: " str END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FORMATTED-TIME DP.COMMA])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT IS COMMA.
+
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  str          PIC X(11).
+
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION FORMATTED-TIME ("hh:mm:ss,ss", 45296) TO str
+           IF str <> "12:34:56,00"
+               DISPLAY "Test 1 failed: " str END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FORMATTED-TIME with ref modding])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  str          PIC X(04).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION FORMATTED-TIME ("hhmmss", 45296) (3:4)
+             TO STR
+           IF STR NOT = '3456'
+              DISPLAY STR
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION FRACTION-PART])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(04)V9(08).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION FRACTION-PART ( 3.12345 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = +0000.12345
+              DISPLAY 'FRACTION-PART ( +3.12345 ) wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION FRACTION-PART ( -3.12345 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = -0000.12345
+              DISPLAY 'FRACTION-PART ( -3.12345 ) wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION HIGHEST-ALGEBRAIC])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  F1           PIC S999.
+       01  F2           PIC S9(4) BINARY.
+       01  F3           PIC 99V9(3).
+       01  F4           PIC $**,**9.99BCR.
+       01  F5           PIC $**,**9.99.
+       01  F6           USAGE BINARY-CHAR SIGNED.
+       01  F7           USAGE BINARY-CHAR UNSIGNED.
+       01  TEST-FLD     PIC S9(08)V9(04).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION HIGHEST-ALGEBRAIC (F1)
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 999
+              DISPLAY "Test 1 fail: " TEST-FLD
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION HIGHEST-ALGEBRAIC (F2)
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 9999
+              DISPLAY "Test 2 fail: " TEST-FLD
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION HIGHEST-ALGEBRAIC (F3)
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 99.999
+              DISPLAY "Test 3 fail: " TEST-FLD
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION HIGHEST-ALGEBRAIC (F4)
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 99999.99
+              DISPLAY "Test 4 fail: " TEST-FLD
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION HIGHEST-ALGEBRAIC (F5)
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 99999.99
+              DISPLAY "Test 5 fail: " TEST-FLD
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION HIGHEST-ALGEBRAIC (F6)
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 127
+              DISPLAY "Test 6 fail: " TEST-FLD
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION HIGHEST-ALGEBRAIC (F7)
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 255
+              DISPLAY "Test 7 fail: " TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION INTEGER])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC   S9(4)V9(4) VALUE -1.5.
+       01  Y            PIC   9(12)      VALUE 600851475143.
+       01  TEST-FLD     PIC S9(14)V9(08).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION INTEGER ( X )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = -2
+              DISPLAY 'INTEGER ( X ) wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION INTEGER ( Y / 71 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 8462696833
+              DISPLAY 'INTEGER ( Y / 71 ) wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION INTEGER-OF-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(09)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION INTEGER-OF-DATE ( 20000925 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 000146000
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION INTEGER-OF-DAY])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  TEST-FLD     PIC S9(09)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION INTEGER-OF-DAY ( 2000269 )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 000146000
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION INTEGER-OF-FORMATTED-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  day-int      PIC 9(9).
+
+       PROCEDURE        DIVISION.
+           *> The date 2013-12-30 is used as it can also be used to
+           *> check the conversion of dates in week form.
+           MOVE FUNCTION INTEGER-OF-FORMATTED-DATE
+                   ("YYYY-MM-DD", "2013-12-30")
+               TO day-int
+           IF day-int <> 150844
+               DISPLAY "Test 1 failed: " day-int END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION INTEGER-OF-FORMATTED-DATE
+                   ("YYYY-DDD", "2013-364")
+               TO day-int
+           IF day-int <> 150844
+               DISPLAY "Test 2 failed: " day-int END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION INTEGER-OF-FORMATTED-DATE
+                   ("YYYY-Www-D", "2014-W01-1")
+               TO day-int
+           IF day-int <> 150844
+               DISPLAY "Test 3 failed: " day-int END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION INTEGER-OF-FORMATTED-DATE
+                   ("YYYY-MM-DDThh:mm:ss", "2013-12-30T12:34:56")
+               TO day-int
+           IF day-int <> 150844
+               DISPLAY "Test 4 failed: " day-int END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION INTEGER-PART])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   S9(4)V9(4) VALUE -1.5.
+       01  TEST-FLD     PIC S9(04)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION INTEGER-PART ( X )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = -1
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LENGTH])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC      S9(4)V9(4) VALUE -1.5.
+       01  TEST-FLD     PIC S9(04)V9(02).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION LENGTH ( X )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 8
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LOCALE-COMPARE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           IF FUNCTION LOCALE-COMPARE ("A", "B") NOT = "<"
+              DISPLAY "Test 1 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION LOCALE-COMPARE ("B", "A") NOT = ">"
+              DISPLAY "Test 2 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION LOCALE-COMPARE ("A", "A") NOT = "="
+              DISPLAY "Test 3 fail"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LOCALE-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(32)   VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION LOCALE-DATE ( "19630302" ) TO X.
+           IF X NOT = SPACES
+                DISPLAY "OK"
+                END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LOCALE-TIME])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(32)   VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION LOCALE-TIME ( "233012" ) TO X.
+           IF X NOT = SPACES
+                DISPLAY "OK"
+                END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LOCALE-TIME-FROM-SECONDS])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(32)   VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION LOCALE-TIME-FROM-SECONDS ( 33012 ) TO X.
+           IF X NOT = SPACES
+              DISPLAY "OK"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LOG])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION LOG ( 1.5 ) TO Y.
+           IF Y NOT = 0.40546510810816438197801311546434913
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LOG10])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION LOG10 ( 1.5 ) TO Y.
+           IF Y NOT = 0.17609125905568124208128900853062228
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LOWER-CASE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC X(10) VALUE "A#B.C%D+E$".
+       01  TEST-FLD     PIC X(12) VALUE ALL '_'.
+       PROCEDURE        DIVISION.
+           STRING FUNCTION LOWER-CASE ( X )
+                  DELIMITED BY SIZE
+                  INTO TEST-FLD
+           END-STRING
+           IF TEST-FLD NOT = 'a#b.c%d+e$__'
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LOWER-CASE with reference modding])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC X(10) VALUE "A#B.C%D+E$".
+       01  TEST-FLD     PIC X(03).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION LOWER-CASE ( X ) (1 : 3)
+             TO TEST-FLD
+           IF TEST-FLD NOT = 'a#b'
+              DISPLAY TEST-FLD
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LOWEST-ALGEBRAIC])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  F1           PIC S999.
+       01  F2           PIC S9(4) BINARY.
+       01  F3           PIC 99V9(3).
+       01  F4           PIC $**,**9.99BCR.
+       01  F5           PIC $**,**9.99.
+       01  F6           USAGE BINARY-CHAR SIGNED.
+       01  F7           USAGE BINARY-CHAR UNSIGNED.
+       PROCEDURE        DIVISION.
+           IF FUNCTION LOWEST-ALGEBRAIC (F1) NOT = -999
+              DISPLAY "Test 1 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION LOWEST-ALGEBRAIC (F2) NOT = -9999
+              DISPLAY "Test 2 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION LOWEST-ALGEBRAIC (F3) NOT = 0
+              DISPLAY "Test 3 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION LOWEST-ALGEBRAIC (F4) NOT = -99999.99
+              DISPLAY "Test 4 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION LOWEST-ALGEBRAIC (F5) NOT = 0
+              DISPLAY "Test 5 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION LOWEST-ALGEBRAIC (F6) NOT = -128
+              DISPLAY "Test 6 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION LOWEST-ALGEBRAIC (F7) NOT = 0
+              DISPLAY "Test 7 fail"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MAX])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION MAX ( 3 -14 0 8 -3 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[8
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MEAN])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION MEAN ( 3 -14 0 8 -3 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[-00000001.2
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MEDIAN])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION MEDIAN ( 3 -14 0 8 -3 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[0
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MIDRANGE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION MIDRANGE ( 3 -14 0 8 -3 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[-000000003
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MIN])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION MIN ( 3 -14 0 8 -3 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[-14
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MOD])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   9(12)      VALUE 600851475143.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION MOD ( -11 5 )
+           END-DISPLAY.
+           DISPLAY FUNCTION MOD ( Y, 71 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[000000004
+000000000
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MODULE-CALLER-ID])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           CALL "prog2"
+           END-CALL.
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION MODULE-CALLER-ID NO ADVANCING
+           END-DISPLAY.
+           EXIT PROGRAM.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [prog])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MODULE-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-DATE    PIC 9(8) VALUE 0.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MODULE-DATE TO TEST-DATE.
+           IF   TEST-DATE NOT = 0
+             DISPLAY "OK" NO ADVANCING
+             END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MODULE-FORMATTED-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-DATE    PIC X(16) VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MODULE-FORMATTED-DATE TO TEST-DATE.
+           IF   TEST-DATE NOT = SPACES
+             DISPLAY "OK" NO ADVANCING
+             END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MODULE-ID])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION MODULE-ID NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [prog])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MODULE-PATH])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-PATH    PIC X(16) VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MODULE-PATH TO TEST-PATH.
+           IF   TEST-PATH NOT = SPACES
+             DISPLAY "OK" NO ADVANCING
+             END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MODULE-SOURCE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION MODULE-SOURCE NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [prog.cob])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MODULE-TIME])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-TIME    PIC 9(6) VALUE 0.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MODULE-TIME TO TEST-TIME.
+           IF   TEST-TIME NOT = 0
+             DISPLAY "OK" NO ADVANCING
+             END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MONETARY-DECIMAL-POINT])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-FLD     PIC X(8) VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MONETARY-DECIMAL-POINT TO TEST-FLD.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MONETARY-THOUSANDS-SEPARATOR])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-FLD     PIC X(8) VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MONETARY-THOUSANDS-SEPARATOR TO TEST-FLD.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION NUMERIC-DECIMAL-POINT])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-FLD     PIC X(8) VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION NUMERIC-DECIMAL-POINT TO TEST-FLD.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION NUMERIC-THOUSANDS-SEPARATOR])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TEST-FLD     PIC X(8) VALUE SPACES.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION NUMERIC-THOUSANDS-SEPARATOR TO TEST-FLD.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION NUMVAL])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X1  PIC   X(12) VALUE " -9876.1234 ".
+       01  X2  PIC   X(18) VALUE " 19876.1234 CR".
+       01  N   PIC   s9(5)v9(5).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION NUMVAL ( X1 ) TO N
+           IF N NOT = -9876.1234
+              DISPLAY N
+              END-DISPLAY
+           END-IF
+           MOVE FUNCTION NUMVAL ( X2 ) TO N
+           IF N NOT = -19876.1234
+              DISPLAY N
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION NUMVAL-C])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X1  PIC   X(14) VALUE " % -9876.1234 ".
+       01  X2  PIC   X(20) VALUE " % 19,876.1234 DB".
+       01  N   PIC   s9(5)v9(5).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION NUMVAL-C ( X1 , "%" ) TO N
+           IF N NOT = -9876.1234
+              DISPLAY N
+              END-DISPLAY
+           END-IF
+           MOVE FUNCTION NUMVAL-C ( X2 , "%" ) TO N
+           IF N NOT = -19876.1234
+              DISPLAY N
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION NUMVAL-C DP.COMMA])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT IS COMMA
+           .
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X1  PIC   X(20) VALUE " % 19.876,1234 DB".
+       01  N   PIC   s9(5)v9(5).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION NUMVAL-C ( X1 , "%" ) TO N
+           IF N NOT = -19876,1234
+              DISPLAY N
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION NUMVAL-F])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(12) VALUE " -0.1234E+4 ".
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION NUMVAL-F ( X )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[-000001234
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION ORD])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION ORD ( "k" )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[000000108
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION ORD-MAX])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION ORD-MAX ( 3 -14 0 8 -3 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[000000004
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION ORD-MIN])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION ORD-MIN ( 3 -14 0 8 -3 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[000000002
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION PI])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE    FUNCTION PI TO Y.
+           IF Y NOT = 3.14159265358979323846264338327950288
+              DISPLAY Y
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION PRESENT-VALUE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION PRESENT-VALUE ( 3 2 1 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[00000.5625
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION RANDOM])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S99V99   COMP VALUE -1.0.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION RANDOM ( ) TO Y.
+           IF Y < 0
+                   DISPLAY Y
+                   END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION RANGE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z            PIC S9(4)V9(4) COMP-5.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION RANGE ( 3 -14 0 8 -3 ) TO Z.
+           IF Z NOT = 22
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION REM])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z            PIC S9(4)V9(4) COMP-5.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION REM ( -11 5 ) TO Z.
+           IF Z NOT = -1
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION REVERSE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(10) VALUE "A#B.C%D+E$".
+       01  Z   PIC   X(10).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION REVERSE ( X ) TO Z.
+           IF Z NOT = "$E+D%C.B#A"
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION REVERSE with reference modding])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(10) VALUE "A#B.C%D+E$".
+       01  Z   PIC   X(10).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION REVERSE ( X ) (1 : 4) TO Z.
+           IF Z NOT = "$E+D      "
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SECONDS-FROM-FORMATTED-TIME])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  result       PIC 9(8)V9(9) COMP-5.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hhmmss", "010203")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 1 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hh:mm:ss", "01:02:03")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 2 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hhmmss.ssssssss", "010203.04050607")
+               TO result.
+           IF result NOT = 3723.04050607
+                   DISPLAY "Test 3 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hhmmssZ", "010203Z")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 4 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hhmmss+hhmm", "010203+0405")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 5 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("YYYYMMDDThhmmss", "16010101T010203")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 6 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SECONDS-PAST-MIDNIGHT])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC      9(8)   COMP-5.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION SECONDS-PAST-MIDNIGHT TO Y.
+           IF Y NOT < 86402
+                   DISPLAY Y
+                   END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SIGN])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z            USAGE BINARY-LONG SIGNED.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION SIGN ( 3.12345 ) TO Z.
+           IF Z NOT = 1
+              DISPLAY "Sign 1 " Z
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION SIGN ( -0.0 ) TO Z.
+           IF Z NOT = 0
+              DISPLAY "Sign 2 " Z
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION SIGN ( 0.0 ) TO Z.
+           IF Z NOT = 0
+              DISPLAY "Sign 3 " Z
+              END-DISPLAY
+           END-IF.
+           MOVE FUNCTION SIGN ( -3.12345 ) TO Z.
+           IF Z NOT = -1
+              DISPLAY "Sign 4 " Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SIN])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION SIN ( 1.5 ) TO Y.
+           IF Y NOT = 0.99749498660405443094172337114148732
+                   DISPLAY Y
+                   END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SQRT])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION SQRT ( 1.5 ) TO Y.
+           IF Y NOT = 1.22474487139158904909864203735294569
+                   DISPLAY Y
+                   END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION STANDARD-DEVIATION])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S9V9(35).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION STANDARD-DEVIATION ( 3 -14 0 8 -3 ) TO Y.
+           IF Y NOT = 7.35934779718963954877237043574538183
+                   DISPLAY Y
+                   END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION STORED-CHAR-LENGTH])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   X(24).
+       01  Z   USAGE BINARY-LONG.
+       PROCEDURE        DIVISION.
+           MOVE "123456789012" TO Y.
+           MOVE FUNCTION STORED-CHAR-LENGTH ( Y ) TO Z.
+           IF Z NOT = 12
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SUBSTITUTE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   X(20).
+       01  Z   PIC   X(20) VALUE ALL '_'.
+       PROCEDURE        DIVISION.
+           MOVE "abc111444555defxxabc" TO Y.
+           STRING FUNCTION SUBSTITUTE ( Y "abc" "zz" "55" "666" )
+                  DELIMITED BY SIZE
+                  INTO Z
+           END-STRING
+           IF Z NOT = "zz1114446665defxxzz_"
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SUBSTITUTE with reference modding])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   X(20).
+       01  Z   PIC   X(20).
+       PROCEDURE        DIVISION.
+           MOVE "abc111444555defxxabc" TO Y.
+           MOVE FUNCTION SUBSTITUTE
+                   ( Y "abc" "zz" "55" "666" ) (2 : 9)
+                TO Z.
+           IF Z NOT = "z11144466"
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SUBSTITUTE-CASE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   X(20).
+       01  Z   PIC   X(20).
+       PROCEDURE        DIVISION.
+           MOVE "ABC111444555defxxabc" TO Y.
+           MOVE FUNCTION SUBSTITUTE-CASE (Y "abc" "zz" "55" "666")
+                TO Z.
+           IF Z NOT = "zz1114446665defxxzz"
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SUBSTITUTE-CASE with reference mod])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   X(20).
+       01  Z   PIC   X(20).
+       PROCEDURE        DIVISION.
+           MOVE "abc111444555defxxabc" TO Y.
+           MOVE FUNCTION SUBSTITUTE-CASE
+                   ( Y "ABC" "zz" "55" "666" ) (2 : 9)
+                TO Z.
+           IF Z NOT = "z11144466"
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION SUM])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z            USAGE BINARY-LONG.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION SUM ( 3 -14 0 8 -3 ) TO Z.
+           IF Z NOT = -6
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TAN])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Y   PIC   S99V9(34).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION TAN ( 1.5 ) TO Y.
+           IF Y NOT = 14.1014199471717193876460836519877564
+                   DISPLAY Y
+                   END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TEST-DATE-YYYYMMDD])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION TEST-DATE-YYYYMMDD ( 20020231 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[000000003
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TEST-DAY-YYYYDDD])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION TEST-DAY-YYYYDDD ( 2002400 )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[000000002
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TEST-FORMATTED-DATETIME with dates])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog.
+        DATA             DIVISION.
+        WORKING-STORAGE  SECTION.
+        PROCEDURE        DIVISION.
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16010101") <> 0
+                DISPLAY "Test 1 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYY-MM-DD", "1601-01-01") <> 0
+                DISPLAY "Test 2 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYDDD", "1601001") <> 0
+                DISPLAY "Test 3 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYY-DDD", "1601-001") <> 0
+                DISPLAY "Test 4 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601W011") <> 0
+                DISPLAY "Test 5 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYY-Www-D", "1601-W01-1") <> 0
+                DISPLAY "Test 6 failed" END-DISPLAY
+            END-IF
+
+
+            *> How will this work with zero-length items?
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "1") <> 2
+                DISPLAY "Test 7 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "160A0101") <> 4
+                DISPLAY "Test 8 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "00000101") <> 1
+                DISPLAY "Test 9 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16000101") <> 4
+                DISPLAY "Test 10 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16010001") <> 6
+                DISPLAY "Test 11 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16011301") <> 6
+                DISPLAY "Test 12 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16010190") <> 7
+                DISPLAY "Test 13 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "18000229") <> 8
+                DISPLAY "Test 14 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYY-MM-DD", "1601 01 01") <> 5
+                DISPLAY "Test 15 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "160101010") <> 9
+                DISPLAY "Test 16 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601A011") <> 5
+                DISPLAY "Test 17 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601W531") <> 7
+                DISPLAY "Test 18 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601W601") <> 6
+                DISPLAY "Test 19 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "2009W531") <> 0
+                DISPLAY "Test 20 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601W018") <> 8
+                DISPLAY "Test 21 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYDDD", "1601366") <> 7
+                DISPLAY "Test 22 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYDDD", "1601370") <> 6
+                DISPLAY "Test 23 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYDDD", "1601400") <> 5
+                DISPLAY "Test 24 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "01") <> 1
+                DISPLAY "Test 25 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "1601010") <> 8
+                DISPLAY "Test 26 failed" END-DISPLAY
+            END-IF
+
+            STOP RUN
+            .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TEST-FORMATTED-DATETIME with times])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog.
+        DATA             DIVISION.
+        WORKING-STORAGE  SECTION.
+        PROCEDURE        DIVISION.
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss.sssssssssZ", "000000.000000000Z") <> 0
+                DISPLAY "Test 1 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hh:mm:ss.sssssssssZ", "00:00:00.000000000Z") <> 0
+                DISPLAY "Test 2 failed" END-DISPLAY
+            END-IF
+            *> 0 instead of +/- valid in sending fields with offset of zero.
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss.sssssssss+hhmm", "000000.00000000000000")
+                    <> 0
+                DISPLAY "Test 3 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hh:mm:ss.sssssssss+hh:mm",
+                    "00:00:00.000000000+00:00")
+                    <> 0
+                DISPLAY "Test 4 failed" END-DISPLAY
+            END-IF
+
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", "300000") <> 1
+                DISPLAY "Test 5 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", "250000") <> 2
+                DISPLAY "Test 6 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", "006000") <> 3
+                DISPLAY "Test 7 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", "000060") <> 5
+                DISPLAY "Test 8 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hh:mm:ss", "00-00-00") <> 3
+                DISPLAY "Test 9 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss.ss", "000000,00") <> 7
+                DISPLAY "Test 10 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss+hhmm", "000000 0000") <> 7
+                DISPLAY "Test 11 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss+hhmm", "00000000001") <> 11
+                DISPLAY "Test 12 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmssZ", "000000A") <> 7
+                DISPLAY "Test 13 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", SPACE) <> 1
+                DISPLAY "Test 14 failed" END-DISPLAY
+            END-IF
+
+            STOP RUN
+            .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TEST-FORMATTED-DATETIME with datetimes])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog.
+        DATA             DIVISION.
+        WORKING-STORAGE  SECTION.
+        77 RESULT        PIC 9(02).
+        PROCEDURE        DIVISION.
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", "16010101T000000")
+              TO RESULT
+            IF RESULT <> 0
+               DISPLAY "Test 1 failed: " RESULT END-DISPLAY
+            END-IF
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYY-MM-DDThh:mm:ss.sssssssss+hh:mm",
+                    "1601-01-01T00:00:00.000000000+00:00")
+              TO RESULT
+            IF RESULT <> 0
+               DISPLAY "Test 2 failed: " RESULT END-DISPLAY
+            END-IF
+
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", "16010101 000000")
+              TO RESULT
+            IF RESULT <> 9
+               DISPLAY "Test 3 failed: " RESULT END-DISPLAY
+            END-IF
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", SPACE)
+              TO RESULT
+            IF RESULT <> 1
+               DISPLAY "Test 4 failed: " RESULT END-DISPLAY
+            END-IF
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", "16010101T      ")
+              TO RESULT
+            IF RESULT <> 10
+               DISPLAY "Test 5 failed: " RESULT END-DISPLAY
+            END-IF
+
+            STOP RUN
+            .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TEST-FORMATTED-DATETIME DP.COMMA])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog.
+        ENVIRONMENT      DIVISION.
+        CONFIGURATION    SECTION.
+        SPECIAL-NAMES.
+            DECIMAL-POINT IS COMMA.
+        DATA             DIVISION.
+        WORKING-STORAGE  SECTION.
+        PROCEDURE        DIVISION.
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss,ss", "000000,00") <> 0
+                DISPLAY "Test 1 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss,ss", "16010101T000000,00") <> 0
+                DISPLAY "Test 2 failed" END-DISPLAY
+            END-IF
+
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss,ss", "000000.00") <> 7
+                DISPLAY "Test 3 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss,ss", "16010101T000000.00") <> 16
+                DISPLAY "Test 4 failed" END-DISPLAY
+            END-IF
+
+            STOP RUN
+            .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TEST-NUMVAL])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           IF FUNCTION TEST-NUMVAL ("+ 1")     NOT = 0
+              DISPLAY "Test 1  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL (" + 1")    NOT = 0
+              DISPLAY "Test 2  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("- 1")     NOT = 0
+              DISPLAY "Test 3  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL (" - 1")    NOT = 0
+              DISPLAY "Test 4  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("+- 1")    NOT = 2
+              DISPLAY "Test 5  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1 +")     NOT = 0
+              DISPLAY "Test 6  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1 -")     NOT = 0
+              DISPLAY "Test 7  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1 +-")    NOT = 4
+              DISPLAY "Test 8  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1 -+")    NOT = 4
+              DISPLAY "Test 9  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("+ 1.1")   NOT = 0
+              DISPLAY "Test 10 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("- 1.1")   NOT = 0
+              DISPLAY "Test 11 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1.1 +")   NOT = 0
+              DISPLAY "Test 12 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1.1 -")   NOT = 0
+              DISPLAY "Test 13 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1.1 CR")  NOT = 0
+              DISPLAY "Test 14 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1.1 DB")  NOT = 0
+              DISPLAY "Test 15 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1.1 -CR") NOT = 6
+              DISPLAY "Test 16 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1.1 +DB") NOT = 6
+              DISPLAY "Test 17 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("1.1 CDB") NOT = 6
+              DISPLAY "Test 18 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("+1.1 CR") NOT = 6
+              DISPLAY "Test 19 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL ("+      ") NOT = 8
+              DISPLAY "Test 20 fail"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TEST-NUMVAL-C])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           IF FUNCTION TEST-NUMVAL-C ("+ 1")     NOT = 0
+              DISPLAY "Test 1  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C (" + 1")    NOT = 0
+              DISPLAY "Test 2  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("- 1")     NOT = 0
+              DISPLAY "Test 3  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C (" - 1")    NOT = 0
+              DISPLAY "Test 4  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("+- 1")    NOT = 2
+              DISPLAY "Test 5  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("1 +")     NOT = 0
+              DISPLAY "Test 6  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("1 -")     NOT = 0
+              DISPLAY "Test 7  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("1 +-")    NOT = 4
+              DISPLAY "Test 8  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("1 -+")    NOT = 4
+              DISPLAY "Test 9  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("+ 1.1")   NOT = 0
+              DISPLAY "Test 10 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("- 1.1")   NOT = 0
+              DISPLAY "Test 11 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("1.1 +")   NOT = 0
+              DISPLAY "Test 12 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("1.1 -")   NOT = 0
+              DISPLAY "Test 13 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("1.1 CR")  NOT = 0
+              DISPLAY "Test 14 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("1.1 DB")  NOT = 0
+              DISPLAY "Test 15 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("1.1 -CR") NOT = 6
+              DISPLAY "Test 16 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("+ $1.1 ") NOT = 0
+              DISPLAY "Test 17 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("- $1.1 ") NOT = 0
+              DISPLAY "Test 18 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("+ X1.1 ", "X") NOT = 0
+              DISPLAY "Test 19 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-C ("- X1.1 ", "X") NOT = 0
+              DISPLAY "Test 20 fail"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TEST-NUMVAL-F])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           IF FUNCTION TEST-NUMVAL-F ("+ 1")     NOT = 0
+              DISPLAY "Test 1  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F (" + 1")    NOT = 0
+              DISPLAY "Test 2  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("- 1")     NOT = 0
+              DISPLAY "Test 3  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F (" - 1")    NOT = 0
+              DISPLAY "Test 4  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("+- 1")    NOT = 2
+              DISPLAY "Test 5  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1 +")     NOT = 0
+              DISPLAY "Test 6  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1 -")     NOT = 0
+              DISPLAY "Test 7  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1 +-")    NOT = 4
+              DISPLAY "Test 8  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1 -+")    NOT = 4
+              DISPLAY "Test 9  fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("+ 1.1")   NOT = 0
+              DISPLAY "Test 10 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("- 1.1")   NOT = 0
+              DISPLAY "Test 11 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1.1 +")   NOT = 0
+              DISPLAY "Test 12 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1.1 -")   NOT = 0
+              DISPLAY "Test 13 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1.1   ")  NOT = 0
+              DISPLAY "Test 14 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1.1   ")  NOT = 0
+              DISPLAY "Test 15 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1.1 -CR") NOT = 6
+              DISPLAY "Test 16 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1.1 E+1") NOT = 0
+              DISPLAY "Test 17 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1.1 E -1") NOT = 0
+              DISPLAY "Test 18 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("1.1 EE") NOT = 6
+              DISPLAY "Test 19 fail"
+              END-DISPLAY
+           END-IF.
+           IF FUNCTION TEST-NUMVAL-F ("+1.1 E001") NOT = 7
+              DISPLAY "Test 20 fail"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TRIM])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(12) VALUE " a#b.c%d+e$ ".
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION TRIM ( X )
+           END-DISPLAY.
+           DISPLAY FUNCTION TRIM ( X TRAILING )
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[a#b.c%d+e$
+ a#b.c%d+e$
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TRIM with reference modding])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(12) VALUE " a#b.c%d+e$ ".
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION TRIM ( X ) (2 : 3)
+           END-DISPLAY.
+           DISPLAY FUNCTION TRIM ( X TRAILING ) (2 : 3)
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[#b.
+a#b
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION TRIM zero length])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(4) VALUE "NOOK".
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION TRIM ( "  " ) TO X.
+           DISPLAY ">" X "<"
+           END-DISPLAY.
+           DISPLAY ">" FUNCTION TRIM ( "   " ) "<"
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[>    <
+><
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION UPPER-CASE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(10) VALUE "a#b.c%d+e$".
+       01  Z   PIC   X(10).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION UPPER-CASE ( X ) TO Z.
+           IF Z NOT = "A#B.C%D+E$"
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION UPPER-CASE with reference modding])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X   PIC   X(10) VALUE "a#b.c%d+e$".
+       01  Z   PIC   X(4).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION UPPER-CASE ( X ) (1 : 3) TO Z.
+           IF Z NOT = "A#B "
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION VARIANCE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z            PIC S9(4)V9(4) COMP-5.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION VARIANCE ( 3 -14 0 8 -3 ) TO Z.
+           IF Z NOT = 54.16
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION WHEN-COMPILED])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  XYZ.
+           03 X         PIC X.
+           03 FILLER    PIC X(20).
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION WHEN-COMPILED TO XYZ.
+           IF X NOT = "2"
+              DISPLAY "NOT OK"
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION YEAR-TO-YYYY])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z            USAGE BINARY-LONG.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION YEAR-TO-YYYY ( 50 ) TO Z.
+           IF Z NOT = 2050
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Formatted funcs w/ invalid variable format])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  invalid-date-format          PIC X(10) VALUE "yyyymmdd".
+       01  invalid-datetime-format      PIC X(17)
+                                        VALUE "yyyymmddtHHMMSS".
+       01  invalid-time-format          PIC X(6) VALUE "HHMMSS".
+       PROCEDURE        DIVISION.
+           IF FUNCTION FORMATTED-CURRENT-DATE
+                           (invalid-date-format) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 11"
+               DISPLAY "Test 1 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION FORMATTED-DATE (invalid-date-format, 1) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 18"
+               DISPLAY "Test 2 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION FORMATTED-DATETIME
+                           (invalid-datetime-format, 1, 1) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 24"
+               DISPLAY "Test 3 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION FORMATTED-TIME (invalid-time-format, 1) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 31"
+               DISPLAY "Test 4 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION INTEGER-OF-FORMATTED-DATE
+                           (invalid-date-format, 1) <> ZERO
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 37"
+               DISPLAY "Test 5 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION SECONDS-FROM-FORMATTED-TIME
+                           (invalid-time-format, 1) <> ZERO
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 44"
+               DISPLAY "Test 6 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION TEST-FORMATTED-DATETIME
+                           (invalid-datetime-format, 1) <> ZERO
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 51"
+               DISPLAY "Test 7 failed" END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([echo "$COB_HAS_UTC_OFFSET"], [0], [no
+], [],
+
+# Previous test "failed" --> UTC offset available
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 11: warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
+prog.cob: 18: warning: FUNCTION 'FORMATTED-DATE' has format in variable
+prog.cob: 24: warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
+prog.cob: 31: warning: FUNCTION 'FORMATTED-TIME' has format in variable
+prog.cob: 37: warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
+prog.cob: 44: warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
+prog.cob: 51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
+])
+
+,
+
+# Previous test "passed" --> UTC offset is not available
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 11: warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
+prog.cob: 11: warning: cannot find the UTC offset on this system
+prog.cob: 18: warning: FUNCTION 'FORMATTED-DATE' has format in variable
+prog.cob: 24: warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
+prog.cob: 31: warning: FUNCTION 'FORMATTED-TIME' has format in variable
+prog.cob: 37: warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
+prog.cob: 44: warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
+prog.cob: 51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
+])
+
+)
+
+# running the program
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CLEANUP
+
+
+AT_SETUP([FORMATTED-(DATE)TIME with SYSTEM-OFFSET])
+AT_KEYWORDS([functions FORMATTED-TIME FORMATTED-DATETIME extensions])
+
+AT_SKIP_IF([test "$COB_HAS_UTC_OFFSET" = "no"])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  str         PIC X(30).
+       77  val         pic 9(02).
+
+       PROCEDURE DIVISION.
+           MOVE FUNCTION FORMATTED-DATETIME
+                    ("YYYYDDDThhmmss+hhmm", 1, 45296, SYSTEM-OFFSET)
+               TO str
+           MOVE FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYDDDThhmmss+hhmm", str) TO val
+           IF val not = 0
+               DISPLAY "Test 1 failed: " str ' - ' val END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-TIME
+                    ("hhmmss.ssZ", 45296, SYSTEM-OFFSET)
+               TO str
+           MOVE FUNCTION TEST-FORMATTED-DATETIME
+                   ("hhmmss.ssZ", str) TO val
+           IF val not = 0
+               DISPLAY "Test 2 failed: " str ' - ' val END-DISPLAY
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0])
+
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsics without FUNCTION keyword (1)])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z            PIC 99V99.
+       PROCEDURE        DIVISION.
+           MOVE PI TO Z.
+           MOVE E TO Z.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fintrinsics=all prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsics without FUNCTION keyword (2)])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z            PIC 99V99.
+       PROCEDURE        DIVISION.
+           MOVE PI TO Z.
+           MOVE E TO Z.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fintrinsics=pi,e prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+### ISO+IEC+1989-2002 9.4 User-Defined Functions
+
+AT_SETUP([User-Defined FUNCTION with/without parameter])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     WITHPAR.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR-IN        PIC 9.
+       01 PAR-OUT       PIC 9.
+       PROCEDURE DIVISION USING PAR-IN RETURNING PAR-OUT.
+           ADD 1 TO PAR-IN GIVING PAR-OUT END-ADD.
+           GOBACK.
+       END FUNCTION WITHPAR.
+
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     WITHOUTPAR.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR           PIC 9.
+       PROCEDURE DIVISION RETURNING PAR.
+           MOVE 1 TO PAR.
+           GOBACK.
+       END FUNCTION WITHOUTPAR.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           FUNCTION     WITHPAR
+           FUNCTION     WITHOUTPAR.
+       PROCEDURE        DIVISION.
+           IF WITHPAR(1) NOT = 2
+              DISPLAY WITHPAR(1)
+              END-DISPLAY
+           END-IF.
+           IF WITHOUTPAR NOT = 1
+              DISPLAY WITHOUTPAR
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([UDF in COMPUTE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. func.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  num PIC 999.
+       
+       PROCEDURE DIVISION RETURNING num.
+           MOVE 100 TO num
+           .
+       END FUNCTION func.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION func.
+           
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC 999.
+       
+       PROCEDURE DIVISION.
+           COMPUTE x = 101 + FUNCTION func
+           DISPLAY x
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[201
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([UDF replacing intrinsic function])
+AT_KEYWORDS([functions SUBSTITUTE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. SUBSTITUTE.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  func-in  PIC X(15).
+       01  func-sub PIC X.
+       01  func-out PIC X(15).
+
+       PROCEDURE DIVISION USING func-in, func-sub RETURNING func-out.
+           MOVE func-in TO func-out
+           INSPECT func-out REPLACING ALL '%' BY func-sub
+           .
+       END FUNCTION SUBSTITUTE.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION SUBSTITUTE
+           .
+       PROCEDURE DIVISION.
+           DISPLAY '"' FUNCTION SUBSTITUTE(" % C%O%B%O%L % ", "_") '"' 
+           DISPLAY '"' FUNCTION SUBSTITUTE(" % C%O%B%O%L % ", "-") '"' 
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE -fnot-intrinsic=substitute prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[" _ C_O_B_O_L _ "
+" - C-O-B-O-L - "
+])
+
+AT_CLEANUP

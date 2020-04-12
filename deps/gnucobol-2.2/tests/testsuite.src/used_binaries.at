@@ -1,0 +1,458 @@
+## Copyright (C) 2014-2017 Free Software Foundation, Inc.
+## Written by Simon Sobisch, Brian Tiffin
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+AT_SETUP([Compiler outputs (general)])
+AT_KEYWORDS([runmisc cobc])
+
+AT_DATA([prog.cob],[
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 BLA PIC X(5) VALUE 'bluBb'.
+        PROCEDURE DIVISION.
+        DISPLAY BLA NO ADVANCING END-DISPLAY
+        STOP RUN.
+])
+
+AT_CHECK([$COBC -C prog.cob], [0], [], [])
+AT_CHECK([$COBC -c prog.c], [0], [], [])
+AT_CHECK([$COBC prog.$COB_OBJECT_EXT])
+AT_CHECK([$COBCRUN prog], [0], [bluBb], [])
+AT_CHECK([$COBC -x -C prog.cob], [0], [], [])
+AT_CHECK([$COBC -x -c prog.c], [0], [], [])
+AT_CHECK([$COBC -x prog.$COB_OBJECT_EXT])
+AT_CHECK([$COBC -E prog.cob], [0], [], [])
+AT_CHECK([$COBC -x prog.i], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [bluBb], [])
+AT_CLEANUP
+
+
+AT_SETUP([Compiler outputs (assembler)])
+AT_KEYWORDS([runmisc cobc])
+
+AT_DATA([prog.cob],[
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 BLA PIC X(5) VALUE 'bluBb'.
+        PROCEDURE DIVISION.
+        DISPLAY BLA NO ADVANCING END-DISPLAY
+        STOP RUN.
+])
+
+AT_CHECK([$COBC -S prog.cob], [0], [], [])
+AT_CHECK([test -f prog.s], [0], [], [],
+# Previous test "failed" --> prog.s not available --> likely a VS build
+[AT_CHECK([test -f prog.asm], [0], [], [])],
+# Previous test "passed" --> prog.s is available, test compilation and run
+[AT_CHECK([$COBC prog.s])
+ AT_CHECK([$COBCRUN prog], [0], [bluBb], [])])
+AT_CHECK([$COBC -x -S prog.cob], [0], [], [])
+AT_CHECK([test -f prog.s], [0], [], [],
+# Previous test "failed" --> prog.s not available --> likely a VS build
+[AT_CHECK([test -f prog.asm], [0], [], [])],
+# Previous test "passed" --> prog.s is available, test compilation and run
+[AT_CHECK([$COBC -x prog.s])
+ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [bluBb], [])])
+AT_CLEANUP
+
+
+AT_SETUP([Source file not found])
+AT_KEYWORDS([cobc runmisc])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[cobc: prog.cob: No such file or directory
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Compiler help and information])
+AT_KEYWORDS([runmisc cobc])
+
+AT_CHECK([$COBC --version], [0], [ignore], [])
+AT_CHECK([$COBC --help], [0], [ignore], [])
+AT_CHECK([$COBC --info], [0], [ignore], [])
+AT_CHECK([$COBC --list-reserved], [0], [ignore], [])
+AT_CHECK([$COBC --list-registers], [0], [ignore], [])
+AT_CHECK([$COBC --list-intrinsics], [0], [ignore], [])
+AT_CHECK([$COBC --list-mnemonics], [0], [ignore], [])
+AT_CHECK([$COBC -std=mf --list-reserved], [0], [ignore], [])
+AT_CHECK([$COBC -std=acu --list-registers], [0], [ignore], [])
+AT_CHECK([$COBC -std=cobol2002 --list-intrinsics], [0], [ignore], [])
+AT_CHECK([$COBC -std=ibm --list-mnemonics], [0], [ignore], [])
+AT_CHECK([$COBC --list-system], [0], [ignore], [])
+AT_CLEANUP
+
+
+AT_SETUP([Using full path for cobc])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY.
+           EXIT PROGRAM.
+])
+
+AT_CHECK([$COMPILE "$(_return_path "$(pwd)/prog.cob")"], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([C Compiler optimizations])
+AT_KEYWORDS([runmisc cobc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY.
+           EXIT PROGRAM.
+])
+
+AT_CHECK([$COMPILE -O  -o prog  prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog],  [0], [OK], [])
+
+AT_CHECK([$COMPILE -O2 -o prog2 prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [OK], [])
+
+AT_CHECK([$COMPILE -Os -o progs prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./progs], [0], [OK], [])
+
+AT_CHECK([$COMPILE -O3 -o prog3 prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog3], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Invalid cobc option])
+AT_KEYWORDS([runmisc cobc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+])
+
+# normal option
+AT_CHECK([$COMPILE -q --thisoptiondoesntexist prog.cob], [1], [],
+[cobc: unrecognized option '--thisoptiondoesntexist'
+])
+# flag
+AT_CHECK([$COMPILE -q -flagdoesntexist prog.cob], [1], [],
+[cobc: unrecognized option '-flagdoesntexist'
+])
+# warning
+AT_CHECK([$COMPILE -q -Wdoesntexist prog.cob], [1], [],
+[cobc: unrecognized option '-Wdoesntexist'
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobcrun validation])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 WRK-VAR       PIC X(5).
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           DISPLAY EXT-VAR NO ADVANCING
+           END-DISPLAY.
+           MOVE "World" TO EXT-VAR.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       01 WRK-VAR       PIC X(5).
+       PROCEDURE        DIVISION.
+           MOVE "Hello" TO EXT-VAR.
+           CALL "callee"
+           END-CALL.
+           DISPLAY EXT-VAR NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE caller.cob], [0], [], [])
+AT_CHECK([$COBCRUN caller], [0], [HelloWorld])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobcrun -M DSO entry argument])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           DISPLAY EXT-VAR END-DISPLAY.
+           MOVE "World" TO EXT-VAR.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           MOVE "Hello" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           STOP RUN.
+       END PROGRAM caller.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      inside.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       01 CLA-VAR       PIC X(5).
+       PROCEDURE        DIVISION.
+           MOVE "Aloha" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           ACCEPT CLA-VAR FROM COMMAND-LINE END-ACCEPT.
+           DISPLAY CLA-VAR END-DISPLAY.
+           STOP RUN.
+       END PROGRAM inside.
+])
+
+AT_CHECK([$COMPILE_MODULE callee.cob])
+AT_CHECK([$COMPILE_MODULE caller.cob])
+AT_CHECK([$COBCRUN -M ./caller inside again], [0],
+[Aloha
+World
+again
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobcrun -M directory/ default])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           DISPLAY EXT-VAR END-DISPLAY.
+           MOVE "World" TO EXT-VAR.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           MOVE "Hello" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_MODULE callee.cob])
+AT_CHECK([$COMPILE_MODULE caller.cob])
+AT_CHECK([$COBCRUN -M ./ caller], [0],
+[Hello
+World
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobcrun -M directory/dso alternate])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           DISPLAY EXT-VAR END-DISPLAY.
+           MOVE "World" TO EXT-VAR.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           MOVE "Hello" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           STOP RUN.
+       END PROGRAM caller.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      inside.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           MOVE "Aloha" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           STOP RUN.
+       END PROGRAM inside.
+])
+
+AT_CHECK([$COMPILE_MODULE callee.cob])
+AT_CHECK([$COMPILE_MODULE caller.cob])
+AT_CHECK([$COBCRUN -M ./caller inside], [0],
+[Aloha
+World
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobcrun -M DSO entry multiple arguments])
+AT_KEYWORDS([runmisc])
+
+# Test that modules can be called with ARGUMENT-VALUES
+AT_DATA([called.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      called.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 CLI-ARGS      PIC X(27).
+       01 ARG-TWO       PIC X(6).
+       PROCEDURE        DIVISION.
+           ACCEPT CLI-ARGS FROM COMMAND-LINE END-ACCEPT.
+           DISPLAY 2 UPON ARGUMENT-NUMBER END-DISPLAY.
+           ACCEPT ARG-TWO FROM ARGUMENT-VALUE END-ACCEPT.
+           DISPLAY CLI-ARGS ":" ARG-TWO END-DISPLAY.
+           EXIT PROGRAM.
+])
+
+AT_DATA([mainer.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      mainer.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+       END PROGRAM mainer.
+])
+
+AT_CHECK([$COBC -b ${FLAGS} mainer.cob called.cob])
+AT_CHECK([$COBCRUN -M ./mainer called "first argument" "second" "third"], [0],
+[first argument second third:second
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Compile from stdin])
+AT_KEYWORDS([runmisc stdin])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      a.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN WITH NORMAL STATUS.
+])
+
+AT_CHECK([cat prog.cob | $COMPILE -], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./a.out], [0], [], [])
+
+AT_CHECK([cat prog.cob | $COMPILE_MODULE -], [0], [], [])
+AT_CHECK([$COBCRUN a], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Run job after compilation])
+AT_KEYWORDS([runmisc job])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "job" WITH NO ADVANCING END-DISPLAY
+           STOP RUN WITH NORMAL STATUS.
+])
+
+AT_CHECK([$COMPILE -jd prog.cob], [0], [job])
+AT_CHECK([$COMPILE_MODULE -jd prog.cob], [0], [job], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Run job with optional arguments])
+AT_KEYWORDS([runmisc job])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 CLI           PIC X(8).
+       PROCEDURE        DIVISION.
+           ACCEPT CLI FROM COMMAND-LINE
+           DISPLAY CLI WITH NO ADVANCING END-DISPLAY
+           STOP RUN WITH NORMAL STATUS.
+])
+
+AT_CHECK([$COMPILE -j="job 123" prog.cob], [0], [job 123 ], [])
+AT_CHECK([$COMPILE -jdg prog.cob], [0], [        ], [])
+AT_CHECK([$COMPILE_MODULE --job=job123 prog.cob], [0], [job123  ], [])
+
+AT_CLEANUP

@@ -1,0 +1,94 @@
+/*
+   Copyright (C) 2003-2012, 2016-2017 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch
+
+   This file is part of GnuCOBOL.
+
+   The GnuCOBOL compiler is free software: you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   GnuCOBOL is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/* CB_WARNDEF (var, name, doc) */
+
+/* Always active, start doc with do not warn...  */
+/* CB_ONWARNDEF (var, name, doc) */
+
+/* Do not include warning with -Wall */
+/* CB_NOWARNDEF (var, name, doc) */
+
+CB_ONWARNDEF (cb_warn_unfinished, "unfinished",
+	_("  -Wno-unfinished       do not warn if unfinished features are used"))
+
+CB_ONWARNDEF (cb_warn_pending, "pending",
+	_("  -Wno-pending          do not warn if pending features are mentioned"))
+
+CB_WARNDEF (cb_warn_obsolete, "obsolete",
+	_("  -Wobsolete            warn if obsolete features are used"))
+
+CB_WARNDEF (cb_warn_archaic, "archaic",
+	_("  -Warchaic             warn if archaic features are used"))
+
+CB_WARNDEF (cb_warn_redefinition, "redefinition",
+	_("  -Wredefinition        warn incompatible redefinition of data items"))
+
+CB_WARNDEF (cb_warn_truncate, "truncate",
+	_("  -Wtruncate            warn field truncation from constant assignments"))
+
+CB_NOWARNDEF (cb_warn_pos_truncate, "possible-truncate",
+	_("  -Wpossible-truncate   warn possible field truncation"))
+
+CB_WARNDEF (cb_warn_overlap, "overlap",
+	_("  -Woverlap             warn overlapping MOVE items"))
+
+CB_NOWARNDEF (cb_warn_pos_overlap, "possible-overlap",
+	_("  -Wpossible-overlap    warn MOVE items that may overlap depending on variables"))
+
+CB_WARNDEF (cb_warn_parentheses, "parentheses",
+	_("  -Wparentheses         warn lack of parentheses around AND within OR"))
+
+CB_WARNDEF (cb_warn_strict_typing, "strict-typing",
+	_("  -Wstrict-typing       warn type mismatch strictly"))
+
+CB_WARNDEF (cb_warn_implicit_define, "implicit-define",
+	_("  -Wimplicit-define     warn implicitly defined data items"))
+
+CB_WARNDEF (cb_warn_corresponding, "corresponding",
+	_("  -Wcorresponding       warn CORRESPONDING with no matching items"))
+
+CB_WARNDEF (cb_warn_ignored_initial_val, "initial-value",
+	_("  -Winitial-value       warn if initial VALUE clause is ignored"))
+
+CB_WARNDEF (cb_warn_prototypes, "prototypes",
+	_("  -Wprototypes          warn missing FUNCTION prototypes/definitions"))
+
+CB_WARNDEF (cb_warn_arithmetic_osvs, "arithmetic-osvs",
+	_("  -Warithmetic-osvs     warn if arithmetic expression precision has changed"))
+
+CB_NOWARNDEF (cb_warn_call_params, "call-params",
+	_("  -Wcall-params         warn non 01/77 items for CALL params"))
+
+CB_WARNDEF (cb_warn_constant_expr, "constant-expression",
+	_("  -Wconstant-expression  warn expressions that always resolve to true/false"))
+
+CB_NOWARNDEF (cb_warn_column_overflow, "column-overflow",
+	_("  -Wcolumn-overflow     warn text after program-text area, FIXED format"))
+
+CB_NOWARNDEF (cb_warn_terminator, "terminator",
+	_("  -Wterminator          warn lack of scope terminator END-XXX"))
+
+CB_NOWARNDEF (cb_warn_linkage, "linkage",
+	_("  -Wlinkage             warn dangling LINKAGE items"))
+
+CB_NOWARNDEF (cb_warn_unreachable, "unreachable",
+	_("  -Wunreachable         warn likely unreachable statements"))

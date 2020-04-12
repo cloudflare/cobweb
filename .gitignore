@@ -1,0 +1,7 @@
+dist/
+*.i
+deps/gnucobol-2.2/config.log
+deps/gnucobol-2.2/bin/.deps/
+deps/gnucobol-2.2/cobc/.deps/
+deps/gmp.js/config.log
+deps/gmp.js/.libs/

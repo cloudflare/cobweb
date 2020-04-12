@@ -1,0 +1,15 @@
+Entries MUST be L/GPL. That's Lesser General Public License and/or
+General Public Licence.
+
+Authors MUST be willing to hand copyright over to the FSF.
+That's the Free Software Foundation, Inc..
+
+COBOL source modules MUST compile warning/error free with both
+1) -std=default -W -fixed
+2) -std=default -W -free
+
+Ideally they SHOULD compile error-free with any of
+the non-strict -std options, too.
+
+Further these COBOL modules MUST execute correctly however
+they have been compiled (-std=default / non-strict options).

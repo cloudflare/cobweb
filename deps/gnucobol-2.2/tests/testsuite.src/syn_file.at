@@ -1,0 +1,944 @@
+## Copyright (C) 2003-2012, 2014, 2016-2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+
+AT_SETUP([ASSIGN to device-name])
+AT_KEYWORDS([file DISK device])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       TO DISK
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       TO DISK 'TFILE'
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       TO DISK FNAME OF F1
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       WORKING-STORAGE  SECTION.
+       01 F1.
+          05 FNAME      PIC X(255) VALUE 'TFILEOF'.
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=acu prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=acu prog3.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ASSIGN to printer-name])
+AT_KEYWORDS([file PRINTER PRINT device])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       TO PRINT
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       TO PRINTER 'PFILE'
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       TO PRINTER-1 FNAME OF F1
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       WORKING-STORAGE  SECTION.
+       01 F1.
+          05 FNAME      PIC X(255) VALUE 'PFILEOF'.
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=acu prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=acu prog3.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ASSIGN to lsq-device-name])
+AT_KEYWORDS([file PRINTER device])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TST-FILE1 ASSIGN       TO CARD-PUNCH  "F1".
+       SELECT TST-FILE2 ASSIGN       TO CARD-READER "F2".
+       SELECT TST-FILE3 ASSIGN       TO CASSETTE    "F3".
+       SELECT TST-FILE4 ASSIGN       TO INPUT       "F4".
+       SELECT TST-FILE5 ASSIGN       TO INPUT-OUTPUT.
+       SELECT TST-FILE6 ASSIGN       TO MAGNETIC-TAPE.
+       SELECT TST-FILE7 ASSIGN       TO OUTPUT      "F7".
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TST-FILE1.
+       01 TST1-REC      PIC X(4).
+       FD TST-FILE2.
+       01 TST2-REC      PIC X(4).
+       FD TST-FILE3.
+       01 TST3-REC      PIC X(4).
+       FD TST-FILE4.
+       01 TST4-REC      PIC X(4).
+       FD TST-FILE5.
+       01 TST5-REC      PIC X(4).
+       FD TST-FILE6.
+       01 TST6-REC      PIC X(4).
+       FD TST-FILE7.
+       01 TST7-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TST-FILE1.
+           CLOSE TST-FILE1.
+           OPEN  INPUT TST-FILE2.
+           CLOSE TST-FILE2.
+           OPEN  INPUT TST-FILE3.
+           CLOSE TST-FILE3.
+           OPEN  INPUT TST-FILE4.
+           CLOSE TST-FILE4.
+           OPEN  INPUT TST-FILE5.
+           CLOSE TST-FILE5.
+           OPEN  INPUT TST-FILE6.
+           CLOSE TST-FILE6.
+           OPEN  INPUT TST-FILE7.
+           CLOSE TST-FILE7.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SELECT without ASSIGN])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE
+              ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: error: ASSIGN clause is required for file 'TEST-FILE'
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([START on SEQUENTIAL file])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       "./TEST-FILE"
+                        ORGANIZATION IS LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           START TEST-FILE KEY EQUAL TEST-REC
+           END-START.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 15: error: START not allowed on SEQUENTIAL files
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([valid key items])
+AT_KEYWORDS([file record alternate])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-SOME ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION  IS INDEXED
+                        ACCESS MODE   IS DYNAMIC
+                        RECORD    KEY IS TEST-P2 IN TEST-SOME
+                        ALTERNATE KEY IS TEST-P3 IN TEST-SOME.
+       SELECT TEST-FILE ASSIGN TO 'FILE-TEST2'
+                        ORGANIZATION  IS INDEXED
+                        ACCESS MODE   IS DYNAMIC
+                        RECORD    KEY IS TEST-P1
+                        ALTERNATE KEY IS TEST-P4.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-SOME.
+       01  SOME-REC.
+           05  TEST-P2   PIC S9(4) COMP.
+           05  TEST-P3   PIC S9(5) COMP-3.
+       FD TEST-FILE.
+       01  TEST-REC.
+           05 TEST-P1   PIC X(4).
+           05 FILLER    PIC X(4).
+           05 TEST-P4   PIC X(4).
+       WORKING-STORAGE  SECTION.
+       01  WS-REC.
+           05  TEST-P2   PIC S9(4) COMP.
+           05  TEST-P3   PIC S9(5) COMP-3.
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE
+           CLOSE TEST-FILE
+           OPEN  OUTPUT TEST-SOME
+           MOVE CORRESPONDING WS-REC TO SOME-REC
+           WRITE SOME-REC
+           CLOSE TEST-SOME
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([invalid key items])
+AT_KEYWORDS([file record alternate])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-SOME ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION  IS INDEXED
+                        ACCESS MODE   IS DYNAMIC
+                        RECORD    KEY IS TEST-P2
+                        ALTERNATE KEY IS TEST-P1
+                        ALTERNATE KEY IS TEST-P3.
+       SELECT TEST-FILE ASSIGN TO 'FILE-TEST2'
+                        ORGANIZATION  IS INDEXED
+                        ACCESS MODE   IS DYNAMIC
+                        RECORD    KEY IS TEST-P1
+                        ALTERNATE KEY IS TEST-P4
+                        ALTERNATE KEY IS NOT-THERE
+                        ALTERNATE KEY IS SOME-REC.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-SOME.
+       01  SOME-REC  PIC X(20).
+       FD TEST-FILE.
+       01  TEST-REC.
+           05 TEST-P1   PIC X(4).
+           05 FILLER    PIC X(4).
+           05 TEST-P4   PIC X(4).
+       WORKING-STORAGE  SECTION.
+       77  TEST-P2   PIC S9(4) COMP.
+       77  TEST-P3   PIC S9(5) COMP-3.
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+# FIXME: "is not defined" should be changed in "is not defined in file ..."
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: error: 'TEST-P2' is not defined
+prog.cob: 11: error: 'TEST-P1' is not defined
+prog.cob: 12: error: 'TEST-P3' is not defined
+prog.cob: 18: error: 'NOT-THERE' is not defined
+prog.cob: 13: error: invalid KEY item 'SOME-REC', not in file 'TEST-FILE'
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([variable record length])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE
+           RECORD IS VARYING IN SIZE
+           RECORD CONTAINS  1 TO 1250 CHARACTERS.
+       01  TEST-REC.
+           05 TEST-P1   PIC X(4).
+           05 TEST-P2   PIC S9(4) COMP.
+           05 TEST-P3   PIC S9(5) COMP-3.
+           05 TEST-P4   PIC S9(5).
+           05 TEST-P5   PIC S9(2) BINARY.
+           05 FILLER    PIC X(129).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION IS INDEXED
+                        ACCESS MODE  IS DYNAMIC
+                        RECORD KEY IS TEST-P2
+                        ALTERNATE KEY IS TEST-P1
+                        ALTERNATE KEY IS TEST-P3.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE
+           RECORD IS VARYING IN SIZE 
+              FROM 2 TO 1250 CHARACTERS.
+       01  TEST-REC.
+           05 TEST-P1   PIC X(4).
+           05 TEST-P2   PIC S9(4) COMP.
+           05 TEST-P3   PIC S9(5) COMP-3.
+           05 TEST-P4   PIC S9(5).
+           05 TEST-P5   PIC S9(2) BINARY.
+           05 FILLER    PIC X(129).
+       01  RECORDSIZE   PIC X(04).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE
+           RECORD CONTAINS  5 TO 10 CHARACTERS.
+       01  TEST-REC-1.
+           05 FILLER    PIC X(4).
+       01  TEST-REC-2.
+           05 FILLER    PIC X(50).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 13: error: duplicate RECORD clause
+])
+
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
+[prog.cob: 13: warning: duplicate RECORD clause
+])
+
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob: 20: error: minimal record length 2 can not hold the key item 'TEST-P2'; needs to be at least 6
+prog2.cob: 19: error: minimal record length 2 can not hold the key item 'TEST-P1'; needs to be at least 4
+prog2.cob: 21: error: minimal record length 2 can not hold the key item 'TEST-P3'; needs to be at least 9
+])
+
+AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
+[prog3.cob: 13: error: size of record 'TEST-REC-1' (4) smaller than minimum of file 'TEST-FILE' (5)
+prog3.cob: 15: error: size of record 'TEST-REC-2' (50) larger than maximum of file 'TEST-FILE' (10)
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([variable record length DEPENDING item])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION IS SEQUENTIAL.
+       SELECT TEST-FIL2 ASSIGN TO 'FILE-TEST-2'
+                        ORGANIZATION IS SEQUENTIAL.
+       SELECT TEST-FIL3 ASSIGN TO 'FILE-TEST-3'
+                        ORGANIZATION IS SEQUENTIAL.
+       SELECT TEST-FIL4 ASSIGN TO 'FILE-TEST-4'
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE
+           RECORD IS VARYING IN SIZE 
+              FROM 12 TO 125 CHARACTERS
+                 DEPENDING ON RECORDSIZE.
+       01  TEST-REC.
+           05 FILLER    PIC X(40).
+       FD TEST-FIL2
+           RECORD IS VARYING IN SIZE 
+              FROM 20 TO 250 CHARACTERS
+                 DEPENDING ON TEST-FILE.
+       01  TEST-REC2.
+           05 FILLER       PIC X(129).
+           05 RECORDSIZE3  PIC 9(04).
+           05 RECORDSIZE4  PIC X(04).
+       FD TEST-FIL3
+           RECORD IS VARYING IN SIZE 
+              FROM 40 TO 50  CHARACTERS
+                 DEPENDING ON RECORDSIZE3.
+       01  TEST-REC3.
+           05 FILLER    PIC X(50).
+       FD TEST-FIL4
+           RECORD IS VARYING IN SIZE 
+              FROM 1 TO 2  CHARACTERS
+                 DEPENDING ON RECORDSIZE4.
+       01  TEST-REC4.
+           05 FILLER    PIC X(2).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           OPEN  INPUT TEST-FIL2.
+           CLOSE TEST-FIL2.
+           OPEN  INPUT TEST-FIL3.
+           CLOSE TEST-FIL3.
+           OPEN  INPUT TEST-FIL4.
+           CLOSE TEST-FIL4.
+           STOP RUN.
+])
+
+# FIXME: the check misses "prog.cob: 40: error: RECORD DEPENDING item must be unsigned numeric"
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 20: error: 'RECORDSIZE' is not defined
+prog.cob: 26: error: RECORD DEPENDING must reference a data-item
+prog.cob: 34: error: RECORD DEPENDING item 'RECORDSIZE3' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
+prog.cob: 40: error: RECORD DEPENDING item 'RECORDSIZE4' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
+])
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [1], [],
+[prog.cob: 20: error: 'RECORDSIZE' is not defined
+prog.cob: 26: error: RECORD DEPENDING must reference a data-item
+prog.cob: 34: warning: RECORD DEPENDING item 'RECORDSIZE3' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
+prog.cob: 40: warning: RECORD DEPENDING item 'RECORDSIZE4' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DECLARATIVES invalid procedure reference])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT GO-FILE   ASSIGN       "./TEST-FILE"
+                        ORGANIZATION IS LINE SEQUENTIAL.
+       SELECT PERF-FILE ASSIGN       "./TEST-FILE"
+                        ORGANIZATION IS LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD GO-FILE.
+       01 GO-REC      PIC X(4).
+       FD PERF-FILE.
+       01 PERF-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+       DECLARATIVES.
+       G01 SECTION.
+           USE AFTER ERROR PROCEDURE ON GO-FILE.
+       G02.
+           DISPLAY "OK"
+           END-DISPLAY.
+           GO TO GG02.
+       P01 SECTION.
+           USE AFTER ERROR PROCEDURE ON PERF-FILE.
+       P02.
+           DISPLAY "OK"
+           END-DISPLAY.
+      * programs may do this -> nothing happens there with PERF-FILE
+           PERFORM PPOK.
+      * programs should not do this
+      * (the compiler currently cannot distinguish this)
+           PERFORM PP02.
+       END DECLARATIVES.
+       GG01 SECTION.
+       GG02.
+           OPEN  INPUT GO-FILE.
+           CLOSE GO-FILE.
+       PP01 SECTION.
+       PP02.
+           OPEN  INPUT PERF-FILE.
+           CLOSE PERF-FILE.
+       PP03.
+           DISPLAY 'LOG OUTPUT HERE'.
+       PPOK.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: in section 'G01':
+prog.cob: in paragraph 'G02':
+prog.cob: 24: warning: 'GG02' is not in DECLARATIVES
+prog.cob: in section 'P01':
+prog.cob: in paragraph 'P02':
+prog.cob: 31: warning: 'PPOK' is not in DECLARATIVES
+prog.cob: 34: warning: 'PP02' is not in DECLARATIVES
+])
+
+AT_CHECK([$COMPILE_ONLY -freference-out-of-declaratives=ok prog.cob], [0], [], [])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob: in section 'G01':
+prog.cob: in paragraph 'G02':
+prog.cob: 24: error: 'GG02' is not in DECLARATIVES
+prog.cob: in section 'P01':
+prog.cob: in paragraph 'P02':
+prog.cob: 31: error: 'PPOK' is not in DECLARATIVES
+prog.cob: 34: error: 'PP02' is not in DECLARATIVES
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 -frelax-syntax prog.cob], [0], [],
+[prog.cob: in section 'G01':
+prog.cob: in paragraph 'G02':
+prog.cob: 24: warning: 'GG02' is not in DECLARATIVES
+prog.cob: in section 'P01':
+prog.cob: in paragraph 'P02':
+prog.cob: 31: warning: 'PPOK' is not in DECLARATIVES
+prog.cob: 34: warning: 'PP02' is not in DECLARATIVES
+])
+
+
+AT_CLEANUP
+
+
+AT_SETUP([DECLARATIVES invalid procedure reference (3)])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       "./TEST-FILE"
+                        ORGANIZATION IS LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+       DECLARATIVES.
+       P01 SECTION.
+           USE AFTER ERROR PROCEDURE ON TEST-FILE.
+       P02.
+           DISPLAY "OK"
+           END-DISPLAY.
+       END DECLARATIVES.
+       PP01 SECTION.
+       PP02.
+           OPEN  INPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           PERFORM P02.
+           GO TO P02.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: in section 'PP01':
+prog.cob: in paragraph 'PP02':
+prog.cob: 26: error: invalid reference to 'P02' (in DECLARATIVES)
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([RECORDING MODE])
+AT_KEYWORDS([file extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "f.dat" LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f RECORDING MODE IS U.
+       01  x PIC X.
+
+       PROCEDURE DIVISION.
+           OPEN INPUT f
+           CLOSE f
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: error: RECORDING MODE U or S can only be used with RECORD SEQUENTIAL files
+])
+AT_CLEANUP
+
+
+AT_SETUP([CODE-SET clause])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           ALPHABET A IS ASCII.
+
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f, ASSIGN "f.dat", LINE SEQUENTIAL.
+           SELECT g, ASSIGN "g.dat", LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f CODE-SET A.
+       01  f-rec PIC X(10).
+
+       FD  g CODE-SET foo.
+       01  g-rec PIC X(10).
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 17: warning: ignoring CODE-SET 'A'
+prog.cob: 17: warning: CODE-SET is not implemented
+prog.cob: 20: error: 'foo' is not defined
+prog.cob: 20: error: 'foo' is not an alphabet-name
+prog.cob: 20: warning: CODE-SET is not implemented
+])
+AT_CLEANUP
+
+
+AT_SETUP([CODE-SET FOR clause])
+AT_KEYWORDS([file extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           ALPHABET A IS EBCDIC.
+
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "f.dat" LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f CODE-SET A FOR x, y, z.
+       01  x.
+           03  y PIC X(10).
+       01  x-2.
+           03  z PIC X(10).
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 16: warning: FOR sub-records is not implemented
+prog.cob: 16: warning: CODE-SET is not implemented
+prog.cob: 16: error: FOR item 'x' is a record
+prog.cob: 16: error: FOR item 'z' is in different record to 'x'
+])
+AT_CLEANUP
+
+
+AT_SETUP([WRITE / REWRITE FROM clause and FILE])
+AT_KEYWORDS([file record 88])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       ENVIRONMENT    DIVISION.
+       INPUT-OUTPUT   SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION IS INDEXED
+                        ACCESS MODE  IS DYNAMIC
+                        RECORD KEY   IS TEST-P1.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01  TEST-REC.
+           05 TEST-P1   PIC X(4).
+           05 TEST-P2   PIC S9(4) COMP.
+       WORKING-STORAGE  SECTION.
+       01  SOME-REC     PIC X(04).
+           88  SOME-VAL VALUE 'ABCD'.
+       PROCEDURE        DIVISION.
+           OPEN  I-O TEST-FILE.
+           WRITE   SOME-VAL.
+           WRITE   SOME-REC.
+           WRITE   TEST-REC.
+           WRITE   TEST-REC FROM SOME-REC.
+           WRITE   TEST-FILE.
+           WRITE   FILE TEST-REC.
+           WRITE   FILE TEST-FILE.
+           WRITE   FILE TEST-FILE FROM TEST-REC.
+           WRITE   FILE TEST-FILE FROM SOME-REC.
+           REWRITE SOME-VAL.
+           REWRITE SOME-REC.
+           REWRITE TEST-REC.
+           REWRITE TEST-REC FROM SOME-REC.
+           REWRITE TEST-FILE.
+           REWRITE FILE TEST-REC.
+           REWRITE FILE TEST-FILE.
+           REWRITE FILE TEST-FILE FROM TEST-REC.
+           REWRITE FILE TEST-FILE FROM SOME-REC.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 22: error: invalid use of 88 level item
+prog.cob: 23: error: WRITE subject does not refer to a record name
+prog.cob: 26: error: WRITE requires a record name as subject
+prog.cob: 27: error: 'TEST-REC' is not a file name
+prog.cob: 28: error: WRITE FILE requires a FROM clause
+prog.cob: 31: error: invalid use of 88 level item
+prog.cob: 32: error: REWRITE subject does not refer to a record name
+prog.cob: 35: error: REWRITE requires a record name as subject
+prog.cob: 36: error: 'TEST-REC' is not a file name
+prog.cob: 37: error: REWRITE FILE requires a FROM clause
+])
+AT_CLEANUP
+
+
+AT_SETUP([Clauses following invalid ACCESS clause])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    syntax.
+
+       ENVIRONMENT    DIVISION.
+       INPUT-OUTPUT   SECTION.
+       FILE-CONTROL.
+           SELECT testfile
+               ASSIGN TO filename
+               ORGANIZATION RELATIVE
+               ACCESS IS sequentia
+               STATUS IS stat.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 11: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
+prog.cob: 13: warning: 'filename' will be implicitly defined
+])
+AT_CLEANUP
+
+
+AT_SETUP([RELATIVE KEY type checks])
+AT_KEYWORDS([RELATIVE FILE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+            SELECT FILE1 ASSIGN DISK
+            ORGANIZATION RELATIVE ACCESS MODE RANDOM
+            RELATIVE KEY FILE1-KEY.
+            SELECT FILE2 ASSIGN DISK
+            ORGANIZATION RELATIVE ACCESS MODE RANDOM
+            RELATIVE KEY FILE2-KEY.
+            SELECT FILE3 ASSIGN DISK
+            ORGANIZATION RELATIVE ACCESS MODE RANDOM
+            RELATIVE KEY FILE3-KEY.
+            SELECT FILE4 ASSIGN DISK
+            ORGANIZATION RELATIVE ACCESS MODE RANDOM
+            RELATIVE KEY FILE4-KEY.
+            SELECT FILE5 ASSIGN DISK
+            ORGANIZATION RELATIVE ACCESS MODE RANDOM
+            RELATIVE KEY FILE5-KEY.
+       DATA DIVISION.
+       FILE SECTION.
+       FD FILE1.
+            01  FILE1-REC PIC X.
+       FD FILE2.
+            01  FILE2-REC PIC X.
+       FD FILE3.
+            01  FILE3-REC PIC X.
+       FD FILE4.
+            01  FILE4-REC.
+               05  FLD1      PIC X.
+               05  FILE4-KEY PIC 999.
+       FD FILE5.
+            01  FILE5-REC PIC X.
+       WORKING-STORAGE SECTION.
+            77  FILE1-KEY PIC XXXX.
+            01  FILE2-KEY.
+                05  F2-KEY PIC 9(5).
+            01  F3-KEY.
+                05  FILE3-KEY PIC 9(5) OCCURS 2 TIMES.
+            77  FILE5-KEY PIC 999V9.
+       PROCEDURE DIVISION.
+            STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: 9: error: file FILE1: RELATIVE KEY FILE1-KEY is not numeric
+prog.cob: 12: error: file FILE2: RELATIVE KEY FILE2-KEY is not numeric
+prog.cob: 15: error: file FILE3: RELATIVE KEY FILE3-KEY cannot have OCCURS
+prog.cob: 18: error: RELATIVE KEY FILE4-KEY cannot be in file record belonging to FILE4
+prog.cob: 21: error: file FILE5: RELATIVE KEY FILE5-KEY must be integer
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Mismatched KEY clause])
+AT_KEYWORDS([file RELATIVE INDEXED])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+            SELECT file-1 ASSIGN DISK,
+                INDEXED, RELATIVE KEY file-1-key.
+            SELECT file-2 ASSIGN DISK,
+                RELATIVE, RECORD KEY file-2-key.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: 8: error: Cannot use RELATIVE KEY clause on INDEXED files
+prog.cob: 10: error: Cannot use RECORD KEY clause on RELATIVE files
+prog.cob: 8: error: 'file-1-key' is not defined
+prog.cob: 10: error: 'file-2-key' is not defined
+])
+
+AT_CLEANUP

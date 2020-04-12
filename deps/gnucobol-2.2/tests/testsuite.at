@@ -1,0 +1,82 @@
+## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+AT_COPYRIGHT([Test cases Copyright (C) 2017 Free Software Foundation, Inc.
+Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart,
+Ron Norman, Brian Tiffin])
+
+### GnuCOBOL Test Suite
+
+AT_INIT([GnuCOBOL Tests])
+AT_COLOR_TESTS
+
+AT_TESTED([cobc cobcrun])
+
+## General tests of used binaries
+AT_BANNER([General tests of used binaries])
+m4_include([used_binaries.at])
+m4_include([configuration.at])
+
+## Syntax tests
+AT_BANNER([Syntax tests])
+
+m4_include([syn_copy.at])
+m4_include([syn_definition.at])
+m4_include([syn_subscripts.at])		# 8.4.1.2 Subscripts
+m4_include([syn_occurs.at])		# 13.16.36 OCCURS clause
+m4_include([syn_redefines.at])		# 13.16.42 REDEFINES clause
+m4_include([syn_value.at])		# 13.16.61 VALUE clause
+m4_include([syn_file.at])		# Files (SELECT, ASSIGN, ...) without RW
+m4_include([syn_reportwriter.at])		# REPORT WRITER
+m4_include([syn_refmod.at])		# 8.4.2.3 Reference-modification
+m4_include([syn_misc.at])		# Miscellaneous
+m4_include([syn_move.at])		# 14.8.24 MOVE statement
+m4_include([syn_multiply.at])		# 14.8.25 MULTIPLY statement
+m4_include([syn_screen.at])		# 13.9 SCREEN section
+m4_include([syn_set.at])		# 14.8.35 SET statement
+m4_include([syn_functions.at])		# 15 Intrinsic functions
+
+## Listings tests
+AT_BANNER([Listing tests])
+
+m4_include([listings.at])		# Listings
+
+## Run tests
+AT_BANNER([Run tests])
+
+m4_include([run_fundamental.at])
+m4_include([run_subscripts.at])		# 8.4.1.2 Subscripts
+m4_include([run_refmod.at])		# 8.4.2.3 Reference-modification
+m4_include([run_accept.at])		# 14.8.1  ACCEPT statement
+m4_include([run_initialize.at])		# 14.8.19 INITIALIZE statement
+m4_include([run_misc.at])		# Miscellaneous
+m4_include([run_file.at])		# Files (SELECT, ASSIGN, ...) without RW
+# RW tests taken out for upcoming 2.0, 
+# will be added back in 2.1 with more and better checks
+# m4_include([run_reportwriter.at])		# REPORT WRITER
+m4_include([run_returncode.at])
+m4_include([run_functions.at])	# 15 Intrinsic Functions / 9.4 User-Defined Functions
+m4_include([run_extensions.at])
+
+## Data Representation
+AT_BANNER([Data Representation])
+
+m4_include([data_binary.at])		# USAGE BINARY
+m4_include([data_display.at])		# USAGE DISPLAY
+m4_include([data_packed.at])		# USAGE PACKED-DECIMAL
+m4_include([data_pointer.at])		# USAGE POINTER

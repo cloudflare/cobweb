@@ -1,0 +1,88 @@
+/*
+   Copyright (C) 2006-2012, 2014, 2016-2017 Free Software Foundation, Inc.
+   Written by Roger While, Simon Sobisch, Ron Norman
+
+   This file is part of GnuCOBOL.
+
+   The GnuCOBOL runtime library is free software: you can redistribute it
+   and/or modify it under the terms of the GNU Lesser General Public License
+   as published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   GnuCOBOL is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public License
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/* COB_SYSTEM_GEN (external name, number of parameters min, max, internal name) */
+
+COB_SYSTEM_GEN ("SYSTEM",		1, 1, cob_sys_system)
+
+COB_SYSTEM_GEN ("CBL_AND",		3, 3, cob_sys_and)
+COB_SYSTEM_GEN ("CBL_CHANGE_DIR",	1, 1, cob_sys_change_dir)
+COB_SYSTEM_GEN ("CBL_CHECK_FILE_EXIST",	2, 2, cob_sys_check_file_exist)
+COB_SYSTEM_GEN ("CBL_CLOSE_FILE",	1, 1, cob_sys_close_file)
+COB_SYSTEM_GEN ("CBL_COPY_FILE",	2, 2, cob_sys_copy_file)
+COB_SYSTEM_GEN ("CBL_CREATE_DIR",	1, 1, cob_sys_create_dir)
+COB_SYSTEM_GEN ("CBL_CREATE_FILE",	5, 5, cob_sys_create_file)
+COB_SYSTEM_GEN ("CBL_DELETE_DIR",	1, 1, cob_sys_delete_dir)
+COB_SYSTEM_GEN ("CBL_DELETE_FILE",	1, 1, cob_sys_delete_file)
+COB_SYSTEM_GEN ("CBL_EQ",		3, 3, cob_sys_eq)
+COB_SYSTEM_GEN ("CBL_ERROR_PROC",	2, 2, cob_sys_error_proc)
+COB_SYSTEM_GEN ("CBL_EXIT_PROC",	2, 2, cob_sys_exit_proc)
+COB_SYSTEM_GEN ("CBL_FLUSH_FILE",	1, 1, cob_sys_flush_file)
+COB_SYSTEM_GEN ("CBL_GET_CSR_POS",	1, 1, cob_sys_get_csr_pos)
+COB_SYSTEM_GEN ("CBL_GET_CURRENT_DIR",	3, 3, cob_sys_get_current_dir)
+COB_SYSTEM_GEN ("CBL_GET_SCR_SIZE",	2, 2, cob_sys_get_scr_size)
+COB_SYSTEM_GEN ("CBL_IMP",		3, 3, cob_sys_imp)
+COB_SYSTEM_GEN ("CBL_NIMP",		3, 3, cob_sys_nimp)
+COB_SYSTEM_GEN ("CBL_NOR",		3, 3, cob_sys_nor)
+COB_SYSTEM_GEN ("CBL_NOT",		2, 2, cob_sys_not)
+COB_SYSTEM_GEN ("CBL_OPEN_FILE",	5, 5, cob_sys_open_file)
+COB_SYSTEM_GEN ("CBL_OR",		3, 3, cob_sys_or)
+COB_SYSTEM_GEN ("CBL_READ_FILE",	5, 5, cob_sys_read_file)
+COB_SYSTEM_GEN ("CBL_READ_KBD_CHAR",	1, 1, cob_sys_get_char)
+COB_SYSTEM_GEN ("CBL_RENAME_FILE",	2, 2, cob_sys_rename_file)
+COB_SYSTEM_GEN ("CBL_SET_CSR_POS",	1, 1, cob_sys_set_csr_pos)
+COB_SYSTEM_GEN ("CBL_TOLOWER",		2, 2, cob_sys_tolower)
+COB_SYSTEM_GEN ("CBL_TOUPPER",		2, 2, cob_sys_toupper)
+COB_SYSTEM_GEN ("CBL_WRITE_FILE",	5, 5, cob_sys_write_file)
+COB_SYSTEM_GEN ("CBL_XOR",		3, 3, cob_sys_xor)
+
+COB_SYSTEM_GEN ("CBL_GC_FORK",		0, 0, cob_sys_fork)
+COB_SYSTEM_GEN ("CBL_GC_GETOPT",	6, 6, cob_sys_getopt_long_long)
+COB_SYSTEM_GEN ("CBL_GC_HOSTED",	2, 2, cob_sys_hosted)
+COB_SYSTEM_GEN ("CBL_GC_NANOSLEEP",	1, 1, cob_sys_oc_nanosleep)
+COB_SYSTEM_GEN ("CBL_GC_PRINTABLE",		1, 2, cob_sys_printable)
+COB_SYSTEM_GEN ("CBL_GC_WAITPID",	1, 1, cob_sys_waitpid)
+COB_SYSTEM_GEN ("CBL_OC_GETOPT",	6, 6, cob_sys_getopt_long_long)
+COB_SYSTEM_GEN ("CBL_OC_HOSTED",	2, 2, cob_sys_hosted)
+COB_SYSTEM_GEN ("CBL_OC_NANOSLEEP",	1, 1, cob_sys_oc_nanosleep)
+
+COB_SYSTEM_GEN ("C$CALLEDBY",		1, 1, cob_sys_calledby)
+COB_SYSTEM_GEN ("C$CHDIR",		2, 2, cob_sys_chdir)
+COB_SYSTEM_GEN ("C$COPY",		3, 3, cob_sys_copyfile)
+COB_SYSTEM_GEN ("C$DELETE",		2, 2, cob_sys_file_delete)
+COB_SYSTEM_GEN ("C$FILEINFO",		2, 2, cob_sys_file_info)
+COB_SYSTEM_GEN ("C$GETPID",		0, 0, cob_sys_getpid)
+COB_SYSTEM_GEN ("C$JUSTIFY",		1, 2, cob_sys_justify)
+COB_SYSTEM_GEN ("C$MAKEDIR",		1, 1, cob_sys_mkdir)
+COB_SYSTEM_GEN ("C$NARG",		1, 1, cob_sys_return_args)
+COB_SYSTEM_GEN ("C$PARAMSIZE",		1, 1, cob_sys_parameter_size)
+COB_SYSTEM_GEN ("C$PRINTABLE",		1, 2, cob_sys_printable)	/* OC extension !!! */
+COB_SYSTEM_GEN ("C$SLEEP",		1, 1, cob_sys_sleep)
+COB_SYSTEM_GEN ("C$TOLOWER",		2, 2, cob_sys_tolower)
+COB_SYSTEM_GEN ("C$TOUPPER",		2, 2, cob_sys_toupper)
+
+
+COB_SYSTEM_GEN ("\x91",			2, 2, cob_sys_x91)
+COB_SYSTEM_GEN ("\xE4",			0, 0, cob_sys_clear_screen)
+COB_SYSTEM_GEN ("\xE5",			0, 0, cob_sys_sound_bell)
+COB_SYSTEM_GEN ("\xF4",			2, 2, cob_sys_xf4)
+COB_SYSTEM_GEN ("\xF5",			2, 2, cob_sys_xf5)
+

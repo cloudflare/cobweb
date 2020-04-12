@@ -1,0 +1,755 @@
+
+2017-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal_valgrind: changed default name for valgrind log files
+	  to show the actual compilation;
+	  changed for easier applying of suppression rules;
+	  don't use valgrind in atlocal itself for "cobcrun --runtime-conf"
+
+2017-08-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_valgrind, atlocal_win: set COBCRUN_DIRECT
+	  used for running executables through tools (especially valgrind)
+	* testsuite.src: COBCRUN_DIRECT as prefix for running generated executables
+
+2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_valgrind, atlocal_win: export COB_HAS_64_BIT_POINTER
+	* testsuite.src/data_pointer.at, testsuite.src/listings.at: check
+	  COB_HAS_64_BIT_POINTER instead of indirect test from COBOL
+
+2017-07-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_misc.at, testsuite.src/data_binary.at: changed
+	  subsequent compilations in same folder to use a different output name
+
+2017-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.at, Makefile.am: added testsuite.src/syn_refmod.at
+	* testsuite.src/run_refmod.at, testsuite.src/syn_refmod.at: moved
+	  compiler tests for reference modification to its own source and
+	  added check for [no-]constant-folding out of bounds
+
+2017-06-16  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Corrected Replacement w/o strings test.
+
+2017-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* ChangeLog: moved cobol85 entries to cobol85/ChangeLog
+
+2017-06-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added .PHONY to correctly declare logical targets that
+	  always have to be executed and don't result in a file
+
+2017-05-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_misc.at: set COB_EXIT_WAIT=0 in all testcases
+	  where we do extended screenio
+
+2017-05-10  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: added "Too many errors" message
+
+2017-05-08  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: corrected max error count test
+
+2017-05-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* listings-sed.sh: simplified (more likely to run in non GNU/Linux
+	  environments)
+
+2017-04-25  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_extensions.at: Drop daylight value test, zero means no
+	  rule exists, non-zero means rule exists, testing for bad value is
+	  pointless.
+
+2017-04-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_misc.at, testsuite.src/syn_definition.at: moved
+	  and renamed syntax tests for RETURNING to syn_defintion,
+	  added checks for RETURNING item
+
+2017-03-22  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added Error/Warning summary to listings.
+
+2017-03-21  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Changed variable indentation and redefines.
+
+2017-03-19  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added multiple files listing test.
+
+2017-02-21  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Fixed to pass internal cross reference.
+
+2017-02-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_file.at: fixed generation with old autoconf
+	  that trips on the string AT_DATA in AT_DATA definitions
+
+2017-01-20  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_misc.at: add PROCEDURE DIVISION EXTERN test
+
+2017-01-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.at: minimized the output of testsuite --version while adding
+	  core authors to it
+
+2016-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.at: added cobcrun to tested programs
+	* atlocal_win: changes for allowing test of Windows binaries with
+	  WSL / Bash on Windows
+	* listings-sed.sh: adjustment for optional package suffixes
+
+2016-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal_valgrind: sample configuration for running testsuites
+	  with valgrind
+
+2016-11-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_extensions.at: splitted tests for CBL_GC_FORK /
+	  CBL_GC_WAITPID, skip these tests if the functions return "not available"
+
+2016-11-17  Ron Norman <rjn@inglenet.com>
+
+	* testsuite.src/run_extensions.at: add CBL_GC_FORK & CBL_GC_WAITPID
+
+2016-11-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_win: added COB_IS_RUNNING_IN_TESTMODE
+
+2016-11-11  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: changed for new spacing
+
+2016-11-09  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: added cross reference tests
+
+2016-11-07  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added 88 values to printed symbol listing.
+
+2016-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* listings-sed.sh, testsuite.src/listing.at: adjustment for new maximum
+	  of 14 digits in version string
+	* testsuite.src/listing.at: capture original listing, instead of unified one
+
+2016-11-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* listings-sed.sh: moved from testsuite.src/listings-sed.sh
+	* listings-sed.sh: adjustment for exotic shells
+	* atlocal.in, atlocal_win: adjusted listings-sed.sh path in UNIFY_LISTING
+	* Makefile.am: added listings-sed.sh to EXTRA_DIST
+
+2016-11-01  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Changed preprocessed compile for new line
+	  number processing and added an error preprocessed test case.
+
+2016-10-31  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added header/trailer to file not found
+	  test case.
+
+2016-10-29  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings-sed.sh: Fixed for generic 9 character version.
+	* testsuite.src/listings.at: Fixed for generic 9 character version.
+
+2016-10-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in: pass COB_HAS_UTC_OFFSET, set PATHSEP and COB_HAS_CURSES
+	  for MinGW
+	* testsuite.src/listings-sed.sh: fix for patchlevel up to 999
+	* testsuite.src/configuration.at, testsuite.src/used_binaries.at:
+	  used `cobc -q` (instead of sed script) to simplify "unrecognized option"
+	* testsuite.src/run_misc.at: define NULL if needed
+	* testsuite.src/run_accept.at: evaluate COB_HAS_CURSES
+	* testsuite.src/run_functions.at: evaluate COB_HAS_UTC_OFFSET
+	* testsuite.src/configuration.at: evaluate PATHSEP
+
+2016-10-22  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added --no_symbols test.
+
+2016-10-18  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added some sequence numbers to a couple of
+	  examples. Would have caught the SOURCEFORMAT VARIABLE bug.
+
+2016-10-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_win: added UNIFY_LISTING
+	* testsuite.src/listings.at: moved simplified sed commands used to a single
+	  script listings-sed.sh and use this via UNIFY_LISTING
+	* testsuite.src/listings.at: split symbols test, added test for -tlines,
+	  use -tlines=0 to remove unforced page breaks
+	* atlocal_win: added missing COB_HAS_UTC_OFFSET
+
+2016-10-16  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: changed hardcoded listing version to a
+	  template
+
+2016-10-11  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: added Symbols test with OCCURS
+
+2016-09-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/syn_file.at: added tests for variable record size,
+	  depending on item and and key fields
+
+2016-09-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_win : fix unset of environment variables
+	  that are used in libcob for runtime configuration; bug #319
+
+2016-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: checking `diff` on start of target "check"
+
+2016-08-02  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Added tests for non-existent file and
+	  copybook messages in the listing file.
+
+2016-07-24  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Fixed test for 32/64 bit pointers and
+	  additional picture information.
+
+2016-07-18  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Added SCREEN and LINKAGE section tests.
+
+2016-07-17  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_misc.at: Added tests for C calling COBOL
+	  with and without setting cob_call_params.
+	  Added tests for ENTRY lookup within main module.
+
+2016-07-17  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_extensions.at: Moved stdout stderr fprintf test
+	  in CBL_OC_HOSTED to external C subprogram.
+	  And then a correction to account for linkage exports.
+
+2016-07-04  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_extensions.at: Removed a "feof" call in
+	  CBL_OC_HOSTED testing to help with Cygwin
+
+2016-06-28  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Added Files with FILLER.
+
+2016-06-26  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Added LISTING ON/OFF test.
+
+2016-06-20  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Added new tests for compiler listings.
+	* Makefile.in, Makefile.am - Added testsuite/listings.at.
+	* testsuite.at - Added testsuite/listings.at
+
+2016-06-15  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/used_binaries.at: added tests for -j"args"
+
+2016-05-31  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_fundamental.at: Added ADD/SUBTRACT CORRESPONDING test
+
+2016-05-22  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_extensions.at: changed CBL_OC_HOSTED errno test
+
+2016-05-15  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/used_binaries.at: added tests for cobcrun -M <module>
+
+2016-04-23  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/data_binary.at: added test for binary-double unsigned
+	  compare when high bit set.
+
+2016-02-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.at, tests/syn_reportwriter.at: RW checks earlier skipped are
+	  now only comments - will be added back in 2.1 with more and better checks
+
+2016-01-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added targets "test" (running ANSI testsuite) and
+	  "checkall" (running both GnuCOBOL and ANSI testsuite)
+
+2015-12-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: remove -std=cobol2002 for compiling (effectively using default),
+	  checked with cobol2014 where checking for standard behaviour,
+	  used -cb_conf when checking single compiler configurations instead
+	  of creating+using a test.conf or loading a completely different -std,
+	  check stdout+stderr where missing, removed the ifdef for __INTEL_COMPILER
+	  as this is included via libcob.h now
+	* configuration.at: check for all standard configurations -std to
+	  be usable
+
+2015-12-15  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_misc.at: command line option -a replaced with -R
+	  as short form for -debug
+
+2015-12-14  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/data_display.at: add unsigned numeric display tests
+
+2015-11-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: skip tests that need a curses build if not available
+	* general: use new internal shell function _return_path for resolving paths
+	  (necessary for use of paths in testsuite when testing non-cygwin builds
+	  with cygwin)
+	* atlocal_win: set tests to skip (via COB_HAS_ISAM / COB_HAS_CURSES)
+	  depending on available features (parsing cobc --info)
+
+2015-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/configuration.at: mayor update including runtime
+	  configuration
+
+2015-08-03  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_misc.at: compile from stdin, run after compile
+
+2015-05-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_functions.at : revised all tests from ACOS to LENGTH
+
+2015-04-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_file.at : (new) moved testsuite entries for
+	  file handling to their own test definition (origin: run_misc.at)
+
+2015-03-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/syn_functions.at : (new) moved testsuite entries for
+	  FUNCTIONs to their own test definition (origin: syn_misc.at)
+
+2015-03-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_win: Added setting of COB_RUNTIME_CONFIG
+	* moved tests for checking used binaries (cobc, cobcrun, extras) from
+	  testsuite.src/run_misc.at to testsuite.src/used_binaries.at
+	* moved tests for checking compiler configuration from
+	  testsuite.src/syn_misc.at to testsuite.src/configuration.at, updated
+	  tests and added new ones
+
+2014-12-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/syn_screen.at : (new) Added first testsuite entries for
+	  SCREEN section
+
+2014-09-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* support spaces in testsuite
+	* changed atlocal_win, removing the need for a configured source
+	  (works with build_windows out of the box)
+
+2014-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in : unset all environmental vars that are used by libcob
+
+2014-04-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/*.at: Added check for cobc's exit code and stderr
+		where missing
+
+2014-14-04  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* testsuite.src/run_extensions.at: Added tests for getopt.
+
+2014-01-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_reportwriter.at, testsuite.src/syn_reportwriter.at:
+	  Added first testsuite entries for REPORT WRITER
+
+2010-06-28  Roger While <simrw@sim-basis.de>
+
+	* MARK - Version 2.0
+	* Move to GPL/LGPL 3
+
+2009-06-09  Roger While <simrw@sim-basis.de>
+
+	* New OC tests for edited moves
+
+2009-05-11  Roger While <simrw@sim-basis.de>
+
+	* Allow tests to run without ISAM I/O
+
+2009-03-12  Roger While <simrw@sim-basis.de>
+
+	* Fix for newest development software
+	* Use minimum quadrigraphs in autotests for compatibility
+
+2009-01-20  Roger While <simrw@sim-basis.de>
+
+	* OC tests for DPC and 78 levels
+
+2008-10-17  Roger While <simrw@sim-basis.de>
+
+	* Add test for non-ALLOCATED BASED item
+
+2008-09-30  Roger While <simrw@sim-basis.de>
+
+	* Makefile.am : Fix out of source directory builds
+
+2008-08-09  Roger While <simrw@sim-basis.de>
+
+	* Change ENTRY test so as not to use obscure/obsoleted options
+
+2008-07-02  Roger While <simrw@sim-basis.de>
+
+	* General for all OC tests - Cater for activated END-xxx checking
+
+2008-05-23  Roger While <simrw@sim-basis.de>
+
+	* Due to display POINTER changes, ignore output from POINTER datarep test
+
+2008-03-25  Roger While <simrw@sim-basis.de>
+
+	* Add OC tests for reference modification of FUNCTIONS
+	* Add OC test for COB_LOAD_CASE
+
+2008-02-18  Roger While <simrw@sim-basis.de>
+
+	* Add OC test for ANY LENGTH
+
+2008-02-14  Roger While <simrw@sim-basis.de>
+
+	* atlocal.in : Fix up library search order
+
+2008-01-09  Roger While <simrw@sim-basis.de>
+
+	* BY CONTENT not allowed in PROCEDURE header
+
+2007-12-27  Roger While <simrw@sim-basis.de>
+
+	** Mark 1.0 RELEASE
+
+2007-12-27  Roger While <simrw@sim-basis.de>
+
+	* Add OC test for WHEN-COMPILED
+
+2007-10-27  Roger While <simrw@sim-basis.de>
+
+	* OC test for INSPECT with figurative constant
+
+2007-05-11  Roger While <simrw@sim-basis.de>
+
+	* Adjust OC test result to agree with tightened input
+	  file presence check
+
+2007-03-05  Roger While <simrw@sim-basis.de>
+
+	* OC tests for LOCALE-DATE, LOCALE-TIME
+
+2007-01-29  Roger While <simrw@sim-basis.de>
+
+	* OC test for ODO without TO clause
+
+2007-01-16  Roger While <simrw@sim-basis.de>
+
+	* OC test for ASSIGN [TO] KEYBOARD/DISPLAY
+
+2006-12-17  Roger While <simrw@sim-basis.de>
+
+	* OC test for NUMVAL-C
+
+2006-12-14  Roger While <simrw@sim-basis.de>
+
+	* OC tests for TRIM, UPPER-CASE
+
+2006-10-23  Roger While <simrw@sim-basis.de>
+
+	* Change C code in the tests to prototype functions
+
+2006-07-23  Roger While <simrw@sim-basis.de>
+
+	* run.src, atlocal.in: Remove SWITCH settings from
+	  atlocal and insert directly into the tests
+
+2006-07-19  Roger While <simrw@sim-basis.de>
+
+	* syntax.src, run.src : Change tests to accomodate revised
+	  messages
+
+2006-05-18  Roger While <simrw@sim-basis.de>
+
+	* OC tests for FUNCTION's EXCEPTION-FILE,
+	  EXCEPTION-LOCATION, EXCEPTION-STATEMENT, EXCEPTION-STATUS
+
+2006-05-08  Roger While <simrw@sim-basis.de>
+
+	* OC test for PROCEDURE DIVISION CHAINING
+	* OC test for INSPECT REPLACING TRAILING
+
+2006-03-22  Roger While <simrw@sim-basis.de>
+
+	* OC test for EBCDIC table SORT
+
+2006-03-04  Roger While <simrw@sim-basis.de>
+
+	* OC test for 88 level FALSE IS clause and
+	  SET TO FALSE.
+
+2006-01-29  Roger While <simrw@sim-basis.de>
+
+	* OC test for COB_PRE_LOAD
+
+2006-01-26  Roger While <simrw@sim-basis.de>
+
+	* OC test for UNSTRING DELIMITED LOW-VALUE
+
+2006-01-21  Roger While <simrw@sim-basis.de>
+
+	* tests/syntax.src/definition.at : Test mismatched levels
+
+2006-01-05  Roger While <simrw@sim-basis.de>
+
+	* General : Bootstrap up to new libtool / automake
+	  atlocal.in : More fixes for HP/IBM/Sun
+
+2005-12-30  Roger While <simrw@sim-basis.de>
+
+	* Relax LOG10 test
+	  Fix big endian shell test
+	  atlocal.in : Insert SHLIB_PATH/LIBPATH for AIX/HP-UX
+
+2005-12-28  Roger While <simrw@sim-basis.de>
+
+	* run.src/extensions.at : Remove A\$B (MingW)
+
+2005-12-09  Roger While <simrw@sim-basis.de>
+
+	* atlocal.in, run.src/*.at: Changes for '-x' option
+
+2005-12-05  Roger While <simrw@sim-basis.de>
+
+	* atlocal.in : Include libcob/.libs in PATH, needed for Win32
+
+2005-12-04  Roger While <simrw@sim-basis.de>
+
+	* Relax EXP test for MingW
+
+2005-11-25  Roger While <simrw@sim-basis.de>
+
+	* New OC test for sticky-linkage
+
+2005-11-07  Roger While <simrw@sim-basis.de>
+
+	* New test for PERFORM type OSVS.
+	* Get the FUNCTION tests in alphabetical order.
+
+2005-11-01  Roger While <simrw@sim-basis.de>
+
+	* Relax TAN test.
+
+2005-10-28  Roger While <simrw@sim-basis.de>
+
+	* Relax the range check for STANDARD-DEVIATION
+	  Don't do native binary tests when native = big-endian
+
+2005-10-27  Roger While <simrw@sim-basis.de>
+
+	* Fixes all over for MAC (Darwin)
+	  We had "-shared" hard-coded in several places.
+	  Pick up the real value from the configure.
+
+2005-10-14  Roger While <simrw@sim-basis.de>
+
+	* Fix a typo
+
+2005-10-13  Roger While <simrw@sim-basis.de>
+
+	* Fix various tests for GCC 4
+
+2005-07-31  Roger While <simrw@sim-basis.de>
+
+	* Tests for SIGN, FRACTION-PART.
+	* Tweak the tests a bit more to cater for the
+	  abysmal precision of MingW.
+
+2005-07-14  Roger While <simrw@sim-basis.de>
+
+	* New test for START of SEQ file.
+	* Tweak the IF tests a bit. This should cater
+	  for the precison vagueries of doubles.
+
+2005-07-02  Roger While <simrw@sim-basis.de>
+
+	* run.src/functions.at : New Intrinsic Function tests
+
+2005-06-13  Roger While <simrw@sim-basis.de>
+
+	* atlocal.in : Export COB_SWITCH_1/2 for OC
+	  and Cobol85 tests.
+	  run, run.src/misc.at : Test for SWITCH.
+
+2005-06-11  Roger While <simrw@sim-basis.de>
+
+	* Add in INSPECT BEFORE/AFTER tests
+
+2005-05-28  Roger While <simrw@sim-basis.de>
+
+	* Use absolute path for cobcrun; seems that some
+	  environments do not propogate the path correctly.
+
+2005-05-15  Roger While <simrw@sim-basis.de>
+
+	* Adjust tests for "Warning" and "Error".
+
+2005-05-12  Roger While <simrw@sim-basis.de>
+
+	* Adjust tests for larger redefines
+	  (not allowed for cobol2002)
+
+2005-05-03  Roger While <simrw@sim-basis.de>
+
+	* Makexx :	       Due to autoreconf.
+	* run-O, data-rep-O :  Use -O instead of -fruntime-inlining
+	* run.src,syntax.src : Add tests for duplicate paras and larger
+	  redefines.
+	  Adjust for endianness.
+
+2005-04-15  Keisuke Nishida  <knishida@opencobol.org>
+
+	* atlocal.in (BIGENDIAN): New variable.
+	* data-rep.src/binary.at: Don't test native binary on big-endian
+	  machines.
+	  (COMP-5): Moved from run.src/extensions.at.
+
+2005-04-13  Keisuke Nishida  <knishida@opencobol.org>
+
+	* atlocal.in (CC): Set -fPIC when necessary.
+
+2005-03-03  Roger While <simrw@sim-basis.de>
+
+	* run.src/extensions.at :
+	  Fix a dangling file in /tmp
+	* general: Small cleanups in other files
+
+2005-02-22  Roger While <simrw@sim-basis.de>
+
+	* run, run.src/misc.at : Fix REF/CONTENT/VALUE test
+
+2005-02-12  Roger While <simrw@sim-basis.de>
+
+	* run.src/misc.at : .. BY CONTENT LENGTH OF ..
+	  run.src/subscripts.at : Clean up a little
+	  run.src/return-code.at : Clean up a little
+
+2005-02-11  Roger While <simrw@sim-basis.de>
+
+	* Dummy entry
+
+2005-02-11  Roger While <simrw@sim-basis.de>
+
+	* run.src/extensions.at : Fix ARGUMENT check
+
+2005-02-08  Roger While <simrw@sim-basis.de>
+
+	* run.src/misc.at, run : Add EXTERNAL as Literal check
+
+2005-02-08  Roger While <simrw@sim-basis.de>
+
+	* run.src/misc.at, run : Add cobcrun check
+
+2005-02-04  Roger While <simrw@sim-basis.de>
+
+	* run.src/extensions.at : MF extensions
+
+2004-03-06  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
+
+	* data-rep.src/pointer.at: New file.
+
+2004-03-01  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
+
+	* Reorganized tests into run.src, syntax.src, and data-rep.src.
+
+2003-11-26  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* cobol2002-run.src, cobol2002-syntax.src, data-rep.src,
+	extension.src: New subdirectories.
+
+2003-08-21  Keisuke Nishida  <kxn30@yahoo.co.jp>
+
+	* display.at, packed.at: New files.
+
+2003-08-10  Keisuke Nishida  <knishida@netlab.jp>
+
+	* binary.at: New file.
+
+2003-05-30  Keisuke Nishida  <knishida@netlab.jp>
+
+	* occurs.at: New file.
+
+2003-05-21  Keisuke Nishida  <knishida@netlab.jp>
+
+	* multiply.at: New file.
+	* extension.at: New file.
+
+2003-04-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* fundamental.at, entry.at: New files.
+
+2003-04-26  Keisuke Nishida  <knishida@netlab.jp>
+
+	* subscripts.at, ref-mod.at: Divided from reference.at.
+	* value.at: Renamed from constant.at.
+	* usage.at: Renamed from packed.at.
+	* initialize.at: New file.
+
+2003-04-10  Keisuke Nishida  <knishida@netlab.jp>
+
+	* constant.at, move.at: New files.
+
+2003-04-04  Keisuke Nishida  <knishida@netlab.jp>
+
+	* packed.at: New file.
+
+2003-03-08  Keisuke Nishida  <knishida@netlab.jp>
+
+	* testsuite.at: Include all *.at files.
+	* Makefile.am: Build only a single testsuite script.
+
+2003-02-28  Keisuke Nishida  <knishida@netlab.jp>
+
+	* reference.at: Combine runtime.at and subref.at.
+
+2003-02-25  Keisuke Nishida  <knishida@netlab.jp>
+
+	* definition.at, misc.at: New files.
+	* redef.at: Removed.
+
+2002-12-12  Keisuke Nishida  <knishida@netlab.jp>
+
+	* redefines.at: New file.
+
+2002-12-10  Keisuke Nishida  <knishida@netlab.jp>
+
+	* Makefile.am, atlocal.in: New files.
+	* redef.at, subref.at, runtime.at: New files.

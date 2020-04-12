@@ -1,0 +1,24 @@
+@verbatim
+COBOL driver program for GnuCOBOL modules
+
+Usage: cobcrun [options] PROGRAM [parameter ...]
+  or:  cobcrun options
+
+Options:
+  -h, -help                      display this help and exit
+  -V, -version                   display cobcrun and runtime version and exit
+  -i, -info                      display runtime information (build/environment)
+  -c <file>, -config=<file>      set runtime configuration from <file>
+  -r, -runtime-conf              display current runtime configuration
+                                 (value and origin for all settings)
+  -M <module>, -module=<module>  set entry point module name and/or load path
+                                 where -M module prepends any directory to the
+                                 dynamic link loader library search path
+                                 and any basename to the module preload list
+                                 (COB_LIBRARY_PATH and/or COB_PRELOAD)
+
+Report bugs to: bug-gnucobol@gnu.org
+or (preferably) use the issue tracker via the home page.
+GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>
+General help using GNU software: <http://www.gnu.org/gethelp/>
+@end verbatim

@@ -1,0 +1,498 @@
+## Copyright (C) 2003-2012, 2015-2016 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+## 
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2002 14.8.24 MOVE statement
+
+## 14.8.24.2 Syntax rules
+
+
+# 1) TODO
+
+# 2) TODO
+
+# 3) DONE
+
+# 4) DONE
+
+
+# 5) DONE
+
+AT_SETUP([MOVE SPACE TO numeric or numeric-edited item])
+AT_KEYWORDS([move editing])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC 9.
+       01 Y             PIC 09.
+       PROCEDURE        DIVISION.
+           MOVE SPACE TO X.
+           MOVE SPACE TO Y.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 9: error: invalid MOVE statement
+prog.cob: 10: error: invalid MOVE statement
+])
+
+AT_CLEANUP
+
+
+# 6) DONE
+
+AT_SETUP([MOVE ZERO TO alphabetic item])
+AT_KEYWORDS([move])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 A             PIC A.
+       PROCEDURE        DIVISION.
+           MOVE ZERO TO A.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: invalid MOVE statement
+])
+
+AT_CLEANUP
+
+
+# 7) TODO
+
+
+# 8) TODO
+
+AT_SETUP([MOVE alphabetic TO x])
+AT_KEYWORDS([move])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC A.
+       01 Y-A           PIC A.
+       01 Y-X           PIC X.
+       01 Y-BX          PIC BX.
+       01 Y-9           PIC 9.
+       01 Y-09          PIC 09.
+       PROCEDURE        DIVISION.
+           MOVE X TO Y-A.
+           MOVE X TO Y-X.
+           MOVE X TO Y-BX.
+           MOVE X TO Y-9.
+           MOVE X TO Y-09.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 16: error: invalid MOVE statement
+prog.cob: 17: error: invalid MOVE statement
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE alphanumeric TO x])
+AT_KEYWORDS([move])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+       01 Y-A           PIC A.
+       01 Y-X           PIC X.
+       01 Y-BX          PIC BX.
+       01 Y-9           PIC 9.
+       01 Y-09          PIC 09.
+       PROCEDURE        DIVISION.
+           MOVE X TO Y-A.
+           MOVE X TO Y-X.
+           MOVE X TO Y-BX.
+           MOVE X TO Y-9.
+           MOVE X TO Y-09.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE alphanumeric-edited TO x])
+AT_KEYWORDS([move editing])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC BX.
+       01 Y-A           PIC A.
+       01 Y-X           PIC X.
+       01 Y-BX          PIC BX.
+       01 Y-9           PIC 9.
+       01 Y-09          PIC 09.
+       PROCEDURE        DIVISION.
+           MOVE X TO Y-A.
+           MOVE X TO Y-X.
+           MOVE X TO Y-BX.
+           MOVE X TO Y-9.
+           MOVE X TO Y-09.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 16: error: invalid MOVE statement
+prog.cob: 17: error: invalid MOVE statement
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE numeric (integer) TO x])
+AT_KEYWORDS([move])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC 9.
+       01 Y-A           PIC A.
+       01 Y-X           PIC X.
+       01 Y-BX          PIC BX.
+       01 Y-9           PIC 9.
+       01 Y-09          PIC 09.
+       PROCEDURE        DIVISION.
+           MOVE X TO Y-A.
+           MOVE X TO Y-X.
+           MOVE X TO Y-BX.
+           MOVE X TO Y-9.
+           MOVE X TO Y-09.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 13: error: invalid MOVE statement
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE numeric (non-integer) TO x])
+AT_KEYWORDS([move])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC 9V9.
+       01 Y-A           PIC A.
+       01 Y-X           PIC X.
+       01 Y-BX          PIC BX.
+       01 Y-9           PIC 9.
+       01 Y-09          PIC 09.
+       PROCEDURE        DIVISION.
+           MOVE X TO Y-A.
+           MOVE X TO Y-X.
+           MOVE X TO Y-BX.
+           MOVE X TO Y-9.
+           MOVE X TO Y-09.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 13: error: invalid MOVE statement
+prog.cob: 14: error: invalid MOVE statement
+prog.cob: 15: error: invalid MOVE statement
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([MOVE numeric-edited TO x])
+AT_KEYWORDS([move editing])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC 09.
+       01 Y-A           PIC A.
+       01 Y-X           PIC X.
+       01 Y-BX          PIC BX.
+       01 Y-9           PIC 9.
+       01 Y-09          PIC 09.
+       PROCEDURE        DIVISION.
+           MOVE X TO Y-A.
+           MOVE X TO Y-X.
+           MOVE X TO Y-BX.
+           MOVE X TO Y-9.
+           MOVE X TO Y-09.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 13: error: invalid MOVE statement
+])
+
+AT_CLEANUP
+
+
+# 9) DONE
+
+
+# 10) DONE
+
+AT_SETUP([CORRESPONDING - Operands must be groups])
+AT_KEYWORDS([move])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G-1.
+         02 X           PIC X.
+       01 G-2.
+         02 Y           PIC X.
+       PROCEDURE        DIVISION.
+           MOVE CORR X TO G-1.
+           MOVE CORR G-1 TO X.
+           MOVE CORR G-1(1:1) TO G-2.
+           MOVE CORR G-1 TO G-2(1:1).
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 11: error: 'X' is not a group name
+prog.cob: 12: error: 'X' is not a group name
+prog.cob: 13: error: 'G-1 (1:1)' is not a group name
+prog.cob: 14: error: 'G-2 (1:1)' is not a group name
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([CORRESPONDING - Target has no matching items])
+AT_KEYWORDS([move])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G-1.
+         02 X           PIC X.
+       01 G-2.
+         02 Y           PIC X.
+       PROCEDURE        DIVISION.
+           MOVE CORR G-1 TO G-2.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 11: warning: no CORRESPONDING items found
+])
+
+AT_CLEANUP
+
+
+# 11) DONE
+
+AT_SETUP([MOVE to erroneous field])
+AT_KEYWORDS([move])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 INVALID-ITEM.
+       01 I             PIC 9(3).
+       PROCEDURE        DIVISION.
+           MOVE 1 TO INVALID-ITEM.
+           MOVE SPACE TO I(1:2).
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 6: error: PICTURE clause required for 'INVALID-ITEM'
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Overlapping MOVE])
+AT_KEYWORDS([move])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01  STRUCTURE1.
+            05 FIELD1-1  PIC X(5).
+            05 FIELD1-2  PIC X(10).
+        01  STRUCTURE2   REDEFINES STRUCTURE1.
+            05 FIELD2-1  PIC X(10).
+            05 FIELD2-2  PIC X(5).
+        01  FILLER       REDEFINES STRUCTURE1.
+            05 FILLER    PIC X(01).
+            05 FIELD     PIC X(02) OCCURS 7.
+        01  FILLER.
+            05 FIELDO    PIC X(02) OCCURS 7.
+        77  NUMVAR       PIC 9(02) VALUE 1.
+        78  CONST4       VALUE 4.
+        PROCEDURE DIVISION.
+           MOVE FIELD1-2 TO STRUCTURE1
+           MOVE FIELD1-2 TO FIELD1-1
+           MOVE FIELD1-1 TO FIELD1-2, FIELD2-2
+           MOVE FIELD1-2 TO FIELD2-1
+           MOVE FIELD2-1 TO FIELD2-2
+           MOVE FIELD2-1   (2:5) TO FIELD1-2
+           MOVE STRUCTURE1 (2:4) TO STRUCTURE1 (5:4)
+           MOVE STRUCTURE1 (2:4) TO STRUCTURE1 (6:4)
+           MOVE STRUCTURE1 (1:NUMVAR)  TO STRUCTURE1 (3:13)
+           MOVE STRUCTURE1 (NUMVAR:1)  TO STRUCTURE1 (3:13)
+           MOVE STRUCTURE1 (3:13)      TO STRUCTURE1 (1:NUMVAR) 
+           MOVE STRUCTURE1 (3:13)      TO STRUCTURE1 (NUMVAR:1) 
+           MOVE STRUCTURE1 (CONST4:2)  TO STRUCTURE1 (3:2)
+           MOVE STRUCTURE1 (6:4)       TO STRUCTURE1 (2:4)
+           MOVE STRUCTURE1 (6:4)       TO STRUCTURE1 (2: )
+           MOVE FIELD (6)         TO STRUCTURE1 (13:2)
+           MOVE FIELD (5)         TO STRUCTURE1 (13:2)
+           MOVE FIELD (NUMVAR)    TO STRUCTURE1 (13:2)
+           MOVE FIELD (CONST4)    TO STRUCTURE1 (13:2)
+           MOVE FIELDO (1)        TO FIELDO (1)
+           MOVE FIELDO (CONST4)   TO FIELDO (CONST4)
+           MOVE FIELDO (1)        TO FIELDO (2)
+           MOVE FIELDO (4)        TO FIELDO (CONST4)
+           MOVE FIELDO (CONST4)   TO FIELDO (4)
+           MOVE FIELDO (4)        TO FIELDO (NUMVAR)
+           MOVE FIELDO (NUMVAR)   TO FIELDO (4)
+           MOVE FIELDO (NUMVAR)   TO FIELDO (NUMVAR)
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -w prog.cob], [0], [], [])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], 
+[prog.cob: 20: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 23: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 25: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 26: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 32: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 34: warning: overlapping MOVE may produce unpredictable results
+])
+
+AT_CHECK([$COMPILE -Wpossible-overlap prog.cob], [0], [], 
+[prog.cob: 20: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 23: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 25: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 26: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 28: warning: overlapping MOVE may occur and produce unpredictable results
+prog.cob: 29: warning: overlapping MOVE may occur and produce unpredictable results
+prog.cob: 30: warning: overlapping MOVE may occur and produce unpredictable results
+prog.cob: 31: warning: overlapping MOVE may occur and produce unpredictable results
+prog.cob: 32: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 34: warning: overlapping MOVE may produce unpredictable results
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([invalid source for MOVE])
+AT_KEYWORDS([move label program-prototype])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           PROGRAM repo-prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77 MAIN-VAR      PIC X(3).
+       PROCEDURE        DIVISION.
+       MAIN.
+           MOVE MAIN TO MAIN-VAR.
+           MOVE repo-prog TO MAIN.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: warning: no definition/prototype seen for program 'repo-prog'
+prog.cob: in paragraph 'MAIN':
+prog.cob: 13: error: 'MAIN' is not a field
+prog.cob: 14: error: 'repo-prog' is not a field
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([invalid target for MOVE])
+AT_KEYWORDS([move constant label program-prototype])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           PROGRAM repo-prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       78 DEFINED-CONST VALUE 'A'.
+       77 MAIN-VAR      PIC X(3).
+       PROCEDURE        DIVISION.
+       MAIN.
+           MOVE 'A' TO MAIN-VAR.
+           MOVE 'B' TO MAIN.
+           MOVE 'C' TO repo-prog.
+           MOVE 'D' TO QUOTE.
+           MOVE 'E' TO DEFINED-CONST.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: warning: no definition/prototype seen for program 'repo-prog'
+prog.cob: in paragraph 'MAIN':
+prog.cob: 15: error: invalid MOVE target: MAIN
+prog.cob: 16: error: invalid MOVE target: repo-prog
+prog.cob: 17: error: invalid MOVE target: QUOTE
+prog.cob: 18: error: invalid MOVE target: "A"
+])
+
+AT_CLEANUP

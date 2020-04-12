@@ -1,0 +1,137 @@
+## Copyright (C) 2003-2012 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While
+## 
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2002 14.8.25 MULTIPLY statement
+
+## 14.8.25.2 Syntax rules
+
+
+# 1) DONE
+
+AT_SETUP([Category check of Format 1])
+AT_KEYWORDS([multiply])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-X           PIC X.
+       01 X-9           PIC 9.
+       01 X-09          PIC 09.
+       PROCEDURE        DIVISION.
+           MULTIPLY 123  BY 456
+           END-MULTIPLY.
+           MULTIPLY "a"  BY "b"
+           END-MULTIPLY.
+           MULTIPLY X-X  BY X-9
+           END-MULTIPLY.
+           MULTIPLY X-9  BY X-09
+           END-MULTIPLY.
+           MULTIPLY X-09 BY X-X
+           END-MULTIPLY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+[prog.cob: 10: error: '456' is not a numeric name
+prog.cob: 12: error: '"a"' is not a numeric value
+prog.cob: 12: error: '"b"' is not a numeric name
+prog.cob: 14: error: 'X-X' is not a numeric value
+prog.cob: 16: error: 'X-09' is not a numeric name
+prog.cob: 18: error: 'X-09' is not a numeric value
+prog.cob: 18: error: 'X-X' is not a numeric name
+])
+
+AT_CLEANUP
+
+# 2) DONE
+
+AT_SETUP([Category check of Format 2])
+AT_KEYWORDS([multiply])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-X           PIC X.
+       01 X-9           PIC 9.
+       01 X-09          PIC 09.
+       PROCEDURE        DIVISION.
+           MULTIPLY 123  BY 456  GIVING 789
+           END-MULTIPLY.
+           MULTIPLY "a"  BY "b"  GIVING "c"
+           END-MULTIPLY.
+           MULTIPLY X-X  BY X-9  GIVING X-09
+           END-MULTIPLY.
+           MULTIPLY X-9  BY X-09 GIVING X-X
+           END-MULTIPLY.
+           MULTIPLY X-09 BY X-X  GIVING X-9
+           END-MULTIPLY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+[prog.cob: 10: error: '789' is not a numeric or numeric-edited name
+prog.cob: 12: error: '"a"' is not a numeric value
+prog.cob: 12: error: '"b"' is not a numeric value
+prog.cob: 12: error: '"c"' is not a numeric or numeric-edited name
+prog.cob: 14: error: 'X-X' is not a numeric value
+prog.cob: 16: error: 'X-09' is not a numeric value
+prog.cob: 16: error: 'X-X' is not a numeric or numeric-edited name
+prog.cob: 18: error: 'X-09' is not a numeric value
+prog.cob: 18: error: 'X-X' is not a numeric value
+])
+
+AT_CLEANUP
+
+# 3) DONE
+
+AT_SETUP([Category check of literals])
+AT_KEYWORDS([multiply])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC 9.
+       PROCEDURE        DIVISION.
+           MULTIPLY 123  BY X
+           END-MULTIPLY.
+           MULTIPLY "a"  BY X
+           END-MULTIPLY.
+           MULTIPLY 123  BY 456 GIVING X
+           END-MULTIPLY.
+           MULTIPLY "a"  BY "b" GIVING X
+           END-MULTIPLY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+[prog.cob: 10: error: '"a"' is not a numeric value
+prog.cob: 14: error: '"a"' is not a numeric value
+prog.cob: 14: error: '"b"' is not a numeric value
+])
+
+AT_CLEANUP
+
+# 4) TODO

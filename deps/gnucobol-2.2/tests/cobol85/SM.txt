@@ -1,0 +1,26 @@
+Filename    total pass fail deleted inspect
+--------    ----- ---- ---- ------- -------
+SM101A.CBL      8    8    0       0       0 OK
+SM102A.SUB      4    4    0       0       0 OK
+SM103A.CBL      6    6    0       0       0 OK
+SM104A.SUB      7    7    0       0       0 OK
+SM105A.CBL      9    9    0       0       0 OK
+SM106A.CBL      1    0    0       0       1 OK
+SM107A.CBL    200  200    0       0       0 OK
+SM201A.CBL     11   11    0       0       0 OK
+SM202A.SUB      7    7    0       0       0 OK
+SM203A.CBL      1    1    0       0       0 OK
+SM204A.SUB      4    4    0       0       0 OK
+SM205A.CBL      9    9    0       0       0 OK
+SM206A.CBL     16   14    0       2       0 OK
+SM207A.CBL      2    2    0       0       0 OK
+SM208A.CBL      9    9    0       0       0 OK
+SM301M.CBL      0    0    0       0       0 OK
+SM401M.CBL      0    0    0       0       0 OK
+--------    ----- ---- ---- ------- -------
+Total         294  291    0       2       1
+
+Number of programs:    17
+Successfully executed: 17
+Compile error:          0
+Execute error:          0

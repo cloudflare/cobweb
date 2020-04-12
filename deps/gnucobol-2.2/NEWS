@@ -1,0 +1,625 @@
+NEWS - user visible changes				-*- outline -*-
+
+
+GnuCOBOL 2.2 released (20170906)
+
+* Move to GPL/LGPL 3
+
+* New GnuCOBOL features (too much to list)
+
+** User Defined Functions, FUNCTION-ID.
+
+** New intrinsic functions
+
+  ABSOLUTE-VALUE                   alias for ABS
+  CURRENCY-SYMBOL                  CURRENCY-SYMBOL of the current program
+  FORMATTED-CURRENT-DATE           ISO 8601 datetime function
+  FORMATTED-DATE                   ISO 8601 datetime function
+  FORMATTED-DATETIME               ISO 8601 datetime function
+  FORMATTED-TIME                   ISO 8601 datetime function
+  TEST-FORMATTED-DATETIME          ISO 8601 datetime function
+  INTEGER-OF-FORMATTED-DATE        date to integer
+  HIGHEST-ALGEBRAIC                now implemented
+  LOWEST-ALGEBRAIC                 now implemented
+  LOCALE-COMPARE                   now implemented
+  NUMVAL-F                         now implemented
+  TEST-NUMVAL                      now implemented
+  TEST-NUMVAL-C                    now implemented
+  TEST-NUMVAL-F                    now implemented
+  LENGTH-AN                        alias for BYTE-LENGTH
+  MODULE-CALLER-ID                 return the name of the caller
+  MODULE-DATE                      current module: compilation date
+  MODULE-TIME                      current module: compilation time
+  MODULE-FORMATTED-DATE            current module: formatted datetime
+  MODULE-ID                        current module: PROGRAM-ID
+  MODULE-PATH                      current module: path on compile time
+  MODULE-SOURCE                    current module: name on compile time
+  MONETARY-DECIMAL-POINT           LOCALE based fiscal decimal point
+  MONETARY-THOUSANDS-SEPARATOR     LOCALE based fiscal visual grouping separator
+
+  Note:
+  The functions that are actually available as intrinsic functions depend
+  on the -std used. Function names that aren't marked as intrinsic functions
+  by the current -std can be used freely as user defined words or
+  even as user defined functions.
+
+** New system functions
+
+  C$CALLEDBY                       return the name of the caller
+  CBL_GC_FORK                      fork current process (not on Windows)
+  CBL_GC_WAITPID                   wait for process to end
+  CBL_GC_GETOPT  (CBL_OC_GETOPT)   comand lineoption parser for COBOL
+  CBL_GC_PRINTABLE (C$PRINTABLE)   check if character is printable
+  CBL_GC_HOSTED (CBL_OC_HOSTED)    provides access to C extern variables,
+                                   like stdin, errno
+  CBL_GC_NANOSLEEP                 CBL_OC_NANOSLEEP
+  CBL_GET_SCR_SIZE                 get current terminal size - if any
+  CBL_READ_KBD_CHAR                get character from terminal
+  CBL_SET_CSR_POS                  set current position on terminal
+  x'E4'                            clear terminal screen
+  x'E5'                            ring the bell
+
+** many new / extended COBOL statements from COBOL2002/2014 and extensions
+   from different COBOL dialects
+
+** more SWITCHes: from SWITCH-01 to SWITCH-36 and its variants from many
+   COBOL dialects
+
+** more IEEE numeric types added, FLOAT-DECIMAL-16, FLOAT-DECIMAL-34, etc
+
+** more literal types added, numeric boolean etc.
+
+** most of the COBOL 2014 spec Compiler Directive Facility is in
+
+** optional: stricter syntax checks
+
+** refactored and extended compiler and runtime messages with available
+   translations (currently to Spanish, Portuguese and Dutch, partial to German)
+
+** screen IO: many extended ACCEPT DISPLAY and SCREEN SECTION changes
+
+** Direct call interface for C:
+  CALL-CONVENTIONS for CALLs and PROCEDURE DIVISION
+  SIZE of parameters specified for CALL ... BY VALUE
+  RETURN NOTHING for calling void functions
+  RETURN ADDRESS OF VAR for calling functions returning a pointer
+  PROCEDURE DIVISION RETURNING OMITTED -> callable as void function
+
+** Much, much more!
+
+
+* New cobc options:
+
+** New -std options:
+
+  cobol2014       COBOL 2014 Standard
+  xopen           X/Open COBOL Standard
+  mf-strict       Micro Focus COBOL compatibility   - strict
+  ibm-strict      IBM COBOL compatibility           - strict
+  ibm-strict      MVS/VM COBOL compatibility        - strict
+  acu             ACUCOBOL-GT compatibility
+  acu-strict      ACUCOBOL-GT compatibility         - strict
+  bs2000          BS2000 COBOL compatibility (back again)
+  bs2000-strict   BS2000 COBOL compatibility        - strict
+  rm              RM-COBOL compatibility
+  rm-strict       RM-COBOL compatibility            - strict
+
+  Note:
+  The GnuCOBOL compiler tries to limit both the feature-set and reserved words
+  to the specified compiler when the "strict" dialects are used.
+  COBOL sources compiled with these dialects are therefore likely to compile
+  with the specified compiler and vice versa: sources that were compiled on
+  the specified compiler should compile without any issues with GnuCOBOL.
+
+  With the "non-strict" dialects GnuCOBOL will activate the complete
+  feature-set where it doesn't directly conflict with the specified dialect,
+  including reserved words and GnuCOBOL specific extensions.
+  COBOL sources compiled with these dialects therefore may work only
+  with GnuCOBOL. COBOL sources may need a change because of rich feature-set
+  and reserved words in GnuCOBOL, otherwise offending words may be removed
+  by `-fno-reserved=word`.
+  COBOL-85, X/Open COBOL, COBOL 2002 and COBOL 2014 are always "strict".
+
+** New listing options:
+
+  -t listing, -T wide listing, --tlines=lines, lines per page of listing
+  -Xref
+
+  Note: -P, generate preprocessor listing, is still available (and improved)
+
+** All compiler configuration flags may be set on command line
+   to override a specific setting of the current -std, see cobc --help
+
+** All Warnings can be explicit enabled/disabled or even marked as error,
+   see cobc --help
+  -Wunreachable report on possible unreachable statements
+
+** Options for the C compiler/linker:
+  -K <entry>, compile entry point as static (resolve at link time)
+  -A, add options to C compile phase
+  -Q, add options to C link phase
+
+** Miscellaneous
+  -i -info, display build/environment
+  -D define symbol for Compiler Directive Facility
+  -j -job=args, run job after compile
+  input filename of '-' reads source from standard in
+  For more: see cobc --help
+
+
+* New cobcrun options:
+
+  -i -info, display build/environment
+  -r -runtime-env, display runtime configuration
+  -c -config, set runtime config from file
+  -M -module, set path/module name when looking for entry
+
+
+* New build features
+
+  make test      downloads NIST testsuite if necessary
+                 now usable with parallel builds (make -j4 test)
+  make checkall  runs both the internal an NIST testsuite
+  
+** testsuite defaults to coloured output
+
+** Windows(tm) Visual Studio build support files added,
+   options to validate the software generated with VS against both test suites
+
+** removed maintainer mode - if files need a rebuild because of a change
+   they are always rebuild
+
+** help2man, bison and flex are checked during configure,
+   if they need to be invoked and are missing a useful error message is given
+
+** All files created by GnuCOBOL runtime use the same file permission settings
+   now: COB_FILE_MODE which was changed to 0666
+
+** changed unix package name from "gnu-cobol" to "gnucobol"
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+GnuCOBOL 1.1 released (20140118)
+
+* Change unix package name to gnu-cobol, and project to GnuCOBOL
+* list of changes see
+  https://open-cobol.sourceforge.io/faq/
+  #what-are-the-differences-between-opencobol-1-1-and-gnucobol-1-1
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+OpenCOBOL 1.1 released (20090206)
+
+* Note: was tagged as pre-release and later on as full version
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ OpenCOBOL 1.0 released
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ Changes in OpenCOBOL 0.33
+
+* New compile option '-x'. This causes the compiler to produce an
+  executable program. '-fmain' is deprecated.
+
+* Remove long option --verbose. Use '-v' for verbosity. Problem is
+  with getopt_long_only which does not like eg. -mv
+
+* New conformity option -std=bs2000.
+
+* FUNCTION is implemented. See cobc/reserved.c for a list of what is
+  implemented.
+
+* Nested programs are partially supported.
+
+* LINAGE is implemented.
+
+* EXTERNAL on FD is implemented.
+
+* SAME RECORD AREA is implemented.
+
+* New config variables -
+  "perform-osvs", "sticky-linkage". These are
+  activated for -std=ibm and -std=mvs.
+  "relax-level-hierarchy". Allows mismatched data
+  description level numbers. Activated for
+  -std=mf, ibm, mvs and bs2000.
+
+* Support for non-gcc compilers.
+
+* Large file support, system dynamic loading and Berkeley DB inclusion
+  are default for the configure.
+  ie. ./configure assumes --with-db --with-lfs64 --with-dl
+
+* New configure option --with-patch-level=<n>
+  Default is 0.
+
+* At run time, version checking is done. ie. When executing/loading
+  Cobol programs, the version (eg. 0.33) and the patch level (eg. 0)
+  are checked against the OC library version/patch level.
+
+* Libtool is not required for systems that support native dynamic
+  loading. This includes GNU/Linux, Cygwin and MingW amongst others.
+
+* Note to developers : See README for required software versions.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ Changes in OpenCOBOL 0.32
+
+* Stability update - See individual ChangeLogs
+
+* New internal register - NUMBER-OF-CALL-PARAMETERS
+
+* New config variables - larger-redefines-ok, relaxed-syntax-check
+
+* Powerpc changes - We now pass all OC and Cobol85 tests
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ Changes in OpenCOBOL 0.31
+
+* Stability update - See individual ChangeLogs
+
+* New driver program - "cobcrun"
+  This allows all application programs to be compiled as
+  modules and driven by "cobcrun" similar to MF's "cobrun".
+  Syntax - cobcrun <MAINPROG> [Arguments to program "MAINPROG"]
+  As "cobcrun" is linked with the static version of OpenCOBOL
+  libraries, it is easier to maintain concurrent versions on the
+  same system.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ Changes in OpenCOBOL 0.30
+
+* Installation changes
+
+** No longer use readline.
+
+** No longer use run-time configuration file (libcob.conf)
+
+** libdb is now optional.
+Use the new configure option --with-db1 to link with libdb1.
+Use the new configure option --with-db to link with libdb.
+Otherwise, libdb will not be linked, and indexed files and
+SORT/MERGE statements will not work.
+
+*** New subdirectory `config' will be installed under
+$prefix/share/gnucobol.
+
+** Compatibility changes
+
+*** New -std options:
+
+  default       used when you omit -std
+  cobol85       COBOL 85 Standard
+  cobol2002     COBOL 2002 Standard
+  ibm           IBM COBOL compatibility
+  mf            Micro Focus COBOL compatibility
+  v023          OpenCOBOL 0.23 compatibility
+
+*** Compile-time options can be stored in a "config" file.
+See config/default.conf for details.
+
+*** Binary data items are now big endian.
+The config option `binary-byteorder' controls this.
+
+*** Numeric sign of USAGE DISPLAY items has been changed as follows:
+
+  Positive: 0123456789  Negative: pqrstuvwxy
+
+The config option `display-sign' controls this.
+
+*** Data items defined in the working-storage section are
+initialized at the beginning of program by default.
+The config option `auto-initialize' controls this.
+
+*** SORT statement now creates a temporary file in /tmp for sorting
+and removes it after sorting.
+
+** Feature changes
+
+*** COPY statements try to complement the following file extensions:
+.CBL, .COB, .cbl, or .cob.
+
+*** COPY / REPLACE statements are reimplemented for better replacement.
+
+*** SPECIAL-NAMES. FORMFEED IS ...
+
+*** ALPHABET ... IS EBCDIC.
+
+*** EXTERNAL clause.
+
+*** SHARING clause.
+
+*** USAGE COMP-5 and COMP-X.
+
+*** USAGE POINTER and ADDRESS OF operator.
+
+*** LENGTH OF operator.
+
+*** PROCEDURE DIVISION USING BY REFERENCE/CONTENT/VALUE.
+
+*** DISPLAY ... ENVIRONMENT-NAME.  ACCEPT ... ENVIRONMENT-VALUE.
+
+*** COLLATING SEQUENCE in the SORT and MERGE statements.
+
+*** EXIT PERFORM [CYCLE] statement.
+
+*** SORT table.
+
+*** OPEN ... WITH NO REWIND / WITH LOCK recognized, though not working.
+
+*** Literal concatenation (the `&' operator).
+
+** Compiler changes
+
+*** New compiler environment variable TMPDIR.
+
+*** New compiler environment variable COB_LDFLAGS.
+
+*** The runtime environment variable COB_CONFIG_FILE has been removed.
+
+*** New runtime environment variable COB_DYNAMIC_RELOADING.
+
+*** New compiler option `--list-reserved', which list all reserved words.
+
+*** New compiler option `-conf', which specifies the config file.
+
+*** New compiler option `-ext', which specifies the copy file extension.
+
+*** The compiler option `-O' now does C level optimization.
+
+*** New compiler option `-O2', which does further C level optimization.
+
+*** New compiler option `-L' and `-l', which are passed to the C compiler.
+
+*** New compiler option `-ftrace', which display section names at run time.
+
+*** New compiler option `-fsyntax-only', which does syntax error check
+only without any output.
+
+*** New compiler option `-fstatic-call', which is equivalent to `-static'.
+
+*** New compiler option `-fdebugging-line', which enables debugging lines.
+
+*** New compiler option `-fsource-location', which includes source location
+in the output.
+
+*** New compiler option `-fline-directive', which includes line directive
+in the output.
+
+*** New compiler option `-fruntime-inlining', which is the replacement
+of obsolete options `-finline-move' and `-finline-get-int'.
+
+*** New compiler option `-w', which inhibits warnings.
+
+*** New compiler option `-Wredefinition', which warns redefined names.
+
+*** The compiler options `-static' and `-dynamic' are obsolete.
+
+*** The compiler option `-column' removed.
+
+** Many improvement for compatibility.
+
+** Many many bug fixes.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.23
+
+** Installation changes
+
+*** We use the GNU MP library again.
+
+** Run-time library changes
+
+*** `cob_resolve' now search the main program for the module name.
+
+** Bug fixes
+
+*** Duplicate use of intermediate field variables.
+
+*** fseek issues on the MinGW environment.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.22
+
+** Installation changes
+
+*** We no longer depend on the GNU MP library.
+
+Decimal arithmetic is done by using `long long'.
+
+** Compiler changes
+
+*** Alphabet-name has been implemented.
+
+*** Variable-length table has been implemented.
+
+*** De-editing (move numeric-edited to numeric) has been implemented.
+
+** Bug fixes
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.21
+
+** Installation changes
+
+*** New configure argument --with-lfs64.
+
+** Compiler changes
+
+*** New option -std, which specifies which COBOL standard to use.
+
+Currently the following standards are available:
+
+  gnu           GnuCOBOL (default)
+  cobol85       COBOL 85
+  cobol2002     COBOL 2002
+  mvs           IBM COBOL for MVS & VM
+
+*** New option -O, which enables some optimization.
+
+*** New option -debug, which enables run-time error checking.
+
+*** New option -Wobsolete, which reports obsolete features.
+
+*** New option -Warchaic, which reports archaic features.
+
+*** -Wnext-sentence has been removed.  Use -Warchaic instead.
+
+*** -fdebugging-line has been removed.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.20
+
+** cobpp has been integrated into cobc.
+
+Now cobc is the only binary program.
+
+** cobc now generates an executable without `-main' flag.
+
+`-main' has been renamed to `-fmain', which is turned on
+by default if none of -E, -C, -S, -c, or -m is given.
+
+** The default source format is now the fixed form.
+
+The format will not be detected automatically.  You need
+to use SOURCE FORMAT compiler directive as described below.
+This conforms to the COBOL 2002 standard.
+
+** Compiler directive "SOURCE FORMAT" is now supported.
+
+Put the following line at the beginning of file if you
+want to use the free-form:
+
+  >>SOURCE FORMAT IS FREE
+
+** Option `-semi-fixed' has been removed.
+
+If you want to expand the program text area over 72 columns,
+use the option `-column' instead.
+
+** New option `-column', which specifies the end of program text area.
+
+** New option `-T', which specifies the tab width.
+
+** New warning options:
+
+  -Wall                 Enable all warnings
+  -Wcolumn-overflow     Warn any text after column 72
+  -Wconstant            Warn inconsistent constant
+  -Wparentheses         Warn lacks of parentheses around AND within OR
+  -Wnext-sentence       Warn uses of NEXT SENTENCE
+  -Wimplicit-terminator Warn lacks of scope terminator (END-XXX)
+  -Wstrict-typing       Warn type mismatch strictly
+
+** Option `debug' has been renamed to `-fdebugging-line'.
+
+** USAGE PACKED-DECIMAL is now supported.
+
+** Improved error checking.
+
+** Additional testsuite entries.
+
+** Bug fixes.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.12
+
+** Improved compile-time error check.
+
+** Additional testsuite entries.
+
+** Bug fixes.
+
+* Changes in OpenCOBOL 0.11
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+** Part of run-time library interface has been redesigned.
+
+** Bug fixes.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.10
+
+** Autoconf 2.57, Automake 1.7.2, Libtool 1.4.3, and Gettext 0.11.5
+are used for packaging.
+
+** New file cob.pc, which is used by pkg-config script.
+
+** libcob.conf is now installed under sysconfdir (i.e., $(PREFIX)/etc).
+The default value of COB_CONFIG_FILE has been changed appropriately.
+
+** The directory `tests' includes new testsuites.
+"make check" will run the tests.
+
+** We use db1 again instead of db2 or db3.
+
+** New option -semi-fixed.
+
+** New option -Wtrailing-line.
+
+** CALL statements now accept CONTENT LENGTH OF clause.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.9.7
+
+** The default value of COB_CONFIG_FILE has been changed to
+"$PREFIX/etc/gnucobol/libcob.conf".
+
+** SORT and MERGE statements have been impelemented.
+
+** Preliminary implementation of SCREEN SECTION.
+
+** Many bug fixes and improvements.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.9.6
+
+** cobc now requires `-main' flag to build an executable from a COBOL file.
+
+Without -main, cobc does not generate a main function.
+See manual for details.
+
+** Run-time configuration file: libcob.conf
+
+The environment variable `COB_CONFIG_FILE' specifies the file name
+(default: "${prefix}/share/gnucobol/libcob.conf").
+
+** Use gettext for international messages.
+
+** Include the test suite in subdir `testsuite'.
+
+** Many bug fixes and improvements.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.9.5
+
+** Support Berkeley DB 2.0.
+
+** Many bug fixes.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Changes in OpenCOBOL 0.9.4
+
+** OpenCOBOL now requires Berkeley DB 3.0 or later.
+
+** File I/O routine (libcob/fileio.c) has been reimplemented.
+
+** New NIST Test Suite modules: SM, IC, SQ, RL, IX.
+
+** Many bug fixes.

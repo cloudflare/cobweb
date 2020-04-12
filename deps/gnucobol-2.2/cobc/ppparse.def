@@ -1,0 +1,39 @@
+/*
+   Copyright (C) 2010-2012 Free Software Foundation, Inc.
+   Written by Roger While
+
+   This file is part of GnuCOBOL.
+
+   The GnuCOBOL compiler is free software: you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   GnuCOBOL is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/* CB_PARSE_DEF (name, return value if true) */
+
+CB_PARSE_DEF ("OPENCOBOL",		1U)
+CB_PARSE_DEF ("GNUCOBOL",		1U)
+CB_PARSE_DEF ("P64",			sizeof (void *) > 4U)
+CB_PARSE_DEF ("EXECUTABLE",		cb_flag_main != 0)
+CB_PARSE_DEF ("MODULE",			cb_flag_main == 0)
+CB_PARSE_DEF ("TRUNC",			cb_binary_truncate != 0)
+CB_PARSE_DEF ("NOTRUNC",		cb_binary_truncate == 0)
+CB_PARSE_DEF ("DEBUG",			cobc_wants_debug != 0)
+CB_PARSE_DEF ("STICKY-LINKAGE",		cb_sticky_linkage != 0)
+CB_PARSE_DEF ("NOSTICKY-LINKAGE",	cb_sticky_linkage == 0)
+CB_PARSE_DEF ("HOSTSIGNS",		cb_host_sign != 0)
+CB_PARSE_DEF ("NOHOSTSIGNS",		cb_host_sign == 0)
+CB_PARSE_DEF ("IBMCOMP",		cb_binary_size == CB_BINARY_SIZE_2_4_8)
+CB_PARSE_DEF ("OCCOMP",			cb_binary_size == CB_BINARY_SIZE_1_2_4_8)
+CB_PARSE_DEF ("GCCOMP",			cb_binary_size == CB_BINARY_SIZE_1_2_4_8)
+CB_PARSE_DEF ("NOIBMCOMP",		cb_binary_size != CB_BINARY_SIZE_2_4_8)

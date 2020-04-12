@@ -1,0 +1,49 @@
+GnuCOBOL TODO						-*- outline -*-
+
+1 Pending requests
+
+1.1 Handling of EBCDIC files
+
+2 Other features to be implemented
+
+2.1 Embedded SQL
+
+Frank Polscheit posted his implementation of SQL preprocessor.
+(2004-02-17: SQL pre-processor for OPEN-COBOL)
+
+Firebird (firebird.sourceforge.net) has a SQL preprocessor
+for their database.
+
+2.2 New backends for INDEXED files
+
+ - Look at C-ISAM replacements
+
+3 Improvement of compiler internals
+
+3.1 Error checking
+
+3.1.1 Strict error checking depending on the standard
+Partially implemented
+
+3.1.2 Use `error' token in the parser for better error recovery
+
+4 Optimization
+
+4.1 More inlining of run-time functions
+
+Done with various binary operands
+
+5 Debugging support
+
+5.1 Data access method
+
+We should generate all data hierarchy defined in a COBOL program
+with all relevant information, including data names, picture clauses,
+and source locations.  We should also define a debugging function
+that receives a data name and displays its value using the generated
+data hierarchy.  By calling the function from gdb, we can easily
+access the COBOL data at debugging time.
+
+6 Better user manual
+
+Yes, we should

@@ -1,0 +1,2002 @@
+\input texinfo
+@setfilename gnucobol.info
+@settitle GnuCOBOL Manual
+@setchapternewpage on
+@footnotestyle end
+
+@afourpaper
+
+@include version.texi
+
+@copying
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+@sp 1
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries a copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+@end ignore
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+@sp 1
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation
+approved by the Free Software Foundation.
+@end copying
+
+@ifinfo
+@dircategory Software development
+@direntry
+* cobc: (gnucobol)Compile.      The GnuCOBOL compiler.
+@end direntry
+@dircategory COBOL
+@direntry
+* GnuCOBOL: (gnucobol).         A COBOL compiler
+@end direntry
+@dircategory GnuCOBOL
+@direntry
+* Overview: (gnucobol).         COBOL compiler overview.
+@end direntry
+
+@end ifinfo
+
+@titlepage
+@title GnuCOBOL Manual
+@subtitle for GnuCOBOL @value{VERSION}
+@author Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch
+
+Edition @value{EDITION} @*
+Updated for GnuCOBOL @value{VERSION} @*
+@value{UPDATED} @*
+
+GnuCOBOL is a free and open-source COBOL compiler, which translates
+COBOL programs to C code and compiles it using GCC or other native
+operating system C compiler.
+@sp 2
+This manual corresponds to GnuCOBOL @value{VERSION}.
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 2002-2012, 2014-2017 Free Software Foundation, Inc.@*
+Written by Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch.
+
+@insertcopying
+@sp 2
+@end titlepage
+
+@contents
+
+@node Top
+
+@ifinfo
+Welcome to the GnuCOBOL @value{VERSION} manual.
+@end ifinfo
+
+@menu
+* Getting started::             Introduction to GnuCOBOL
+* Compile::                     Compiling COBOL programs
+* Customize::                   Customizing the compiler
+* Optimize::                    Optimizing your program
+* Debug::                       Debugging your program
+* Extensions::                  Non-standard extensions
+* System routines::             Additional routines
+* Appendix A::                  @code{cobc --help}
+* Appendix B::                  @code{cobc --list-reserved}
+* Appendix C::                  @code{cobc --list-intrinsics}
+* Appendix D::                  @code{cobc --list-system}
+* Appendix E::                  @code{cobc --list-mnemonics}
+* Appendix F::                  Compiler Configuration
+* Appendix G::                  @code{cobcrun --help}
+* Appendix H::                  Runtime configuration
+* Appendix I::                  GNU Free Documentation License
+* Index::                       Index
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Getting started
+
+* Hello world!::                Hello, world!
+
+Compile
+
+* Compiler options::            Compiler options
+* Multiple sources::            Compiling multiple source files
+* C interface::                 Dealing with C files
+
+Compiler options
+
+* Help options::                Help options
+* Build target::                Build target
+* Source format::               Source format
+* Warning options::             Warning options
+* Configuration options::       Configuration options
+* Listing options::             Listing options
+* Debug switches::              Debug switches
+* Miscellaneous::               Miscellaneous
+
+Multiple sources
+
+* Static linking::              Compiling into a single executable
+* Dynamic linking::             A main program and separate modules
+* Building library::            Building a shared library
+* Using library::               Using external libraries
+
+C interface
+
+* Main C program::              Writing main program in C
+* Static C to COBOL::
+* Dynamic C to COBOL::
+* Static COBOL to C::
+* Dynamic COBOL to C::
+
+Customize
+
+* Customizing compiler::        Customizing compiler
+* Customizing library::         Customizing library
+
+Optimize
+
+* Optimize options::            How to enable optimization
+* Optimize call::               Call subroutines efficiently
+* Optimize binary::             Use efficient binary representation
+
+Debug
+
+* Debug options::               Debug options
+
+Extensions
+
+* SELECT::                      SELECT ASSIGN TO.
+* Indexed::                     Indexed file packages.
+* Extended ACCEPT::             Extended ACCEPT statement.
+* ACCEPT special::              ACCEPT special keys.
+* Extended DISPLAY::            Extended DISPLAY statement.
+
+System routines
+
+* CBL_GC_GETOPT                 GETOPT for Cobol
+* CBL_GC_HOSTED                 Access to C hosted variables
+* CBL_GC_NANOSLEEP              Sleep for nanoseconds
+* CBL_GC_FORK                   Fork the current COBOL process to a new one
+* CBL_GC_WAITPID                Wait for a system process to end
+
+Appendix A
+
+Appendix B
+
+Appendix C
+
+Appendix D
+
+Appendix E
+
+Appendix F
+
+Appendix G
+
+Appendix H
+
+@end detailmenu
+@end menu
+
+@node Getting started, Compile, Top, Top
+@chapter Getting started
+
+@menu
+* Hello world!::                Hello, world!
+@end menu
+
+@node Hello world!,  , Getting started, Getting started
+@section Hello, world!
+
+This is a sample program that displays ``Hello, world!'':
+
+@example
+---- hello.cob -------------------------
+      * Sample COBOL program
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. hello.
+       PROCEDURE DIVISION.
+       DISPLAY "Hello, world!".
+       STOP RUN.
+----------------------------------------
+@end example
+
+@*The compiler, @code{cobc}, is executed as follows:
+
+@example
+$ cobc -x hello.cob
+$ ./hello
+Hello, world!
+@end example
+
+@*The executable file name (@file{hello} in this case) is
+determined by removing the extension from the source file name.
+
+@*You can specify the executable file name by specifying the compiler
+option @code{-o} as follows:
+
+@example
+$ cobc -x -o hello-world hello.cob
+$ ./hello-world
+Hello, world!
+@end example
+
+@*The program can be written in a more modern style, with free format code,
+inline comments, the @code{GOBACK} verb and an optional @code{END-DISPLAY} terminator:
+
+@example
+---- hellonew.cob ----------------
+*> Sample GnuCOBOL program
+identification division.
+program-id. hellonew.
+procedure division.
+display
+   "Hello, new world!"
+end-display
+goback.
+----------------------------------
+@end example
+
+To compile free-format code, you must use the @code{-free} compiler option.
+
+@example
+$ cobc -x -free hellonew.cob
+$ ./hellonew
+Hello, new world!
+@end example
+
+@node Compile, Customize, Getting started, Top
+@chapter Compile
+@cindex Invoking
+
+This chapter describes how to compile COBOL programs using GnuCOBOL.
+
+@menu
+* Compiler options::            Compiler options
+* Multiple sources::            Compiling multiple source files
+* C interface::                 Dealing with C files
+@end menu
+
+@node Compiler options, Multiple sources, Compile, Compile
+@section Compiler options
+
+The compiler @code{cobc} accepts the options described in this section.
+The compiler arguments follow the general syntax @code{cobc} [options]
+file [file @dots{}].
+A complete list of options can be displayed by using the help option.
+
+@menu
+* Help options::                Help options
+* Build target::                Build target
+* Source format::               Source format
+* Warning options::             Warning options
+* Configuration options::       Configuration options
+* Listing options::             Listing options
+* Debug switches::              Debug switches
+* Miscellaneous::               Miscellaneous
+@end menu
+
+@node Help options, Build target, Compiler options, Compiler options
+@subsection Help options
+
+The following switches display information about the compiler:
+
+@table @code
+@item --help, -h
+Display help screen (@pxref{Appendix A, ,cobc --help}).
+No further actions will be taken.
+
+@item --version
+Display compiler version, author package date and executable build
+date.  @code{-V} will also display version. No further actions will be taken.
+
+@item --info
+Display build information along with the default and current compiler
+configurations. No further actions will be taken except for further display options.
+
+@item -v
+Verbosely display the programs invoked during compilation.
+
+@item --list-reserved
+Display reserved words (@pxref{Appendix B, ,cobc --list-reserved}).
+A Y/N field shows if the word is supported.
+@footnote{Support may be partial or complete.}
+The given options for reserved words specified for example by @code{-std}
+will be taken into account.
+No further actions will be taken except for further display options.
+
+@item --list-intrinsics
+Display intrinsic functions (@pxref{Appendix C, ,cobc --list-intrinsics}).
+A Y/N field shows if the function is implemented.
+No further actions will be taken except for further display options.
+
+@item --list-system
+Display system routines (@pxref{Appendix D, ,cobc --list-system}).
+No further actions will be taken except for further display options.
+
+@item --list-mnemonics
+Display mnemonic names (@pxref{Appendix E, ,cobc --list-mnemonics}).
+No further actions will be taken except for further display options.
+
+@end table
+
+@node Build target, Source format, Help options, Compiler options
+@subsection Build target
+
+The @code{cobc} compiler treats files like @file{*.cob}, @file{*.cbl} as
+COBOL source code, @file{*.c} as C source code, @file{*.o} as
+object code, @file{*.i} as preprocessed code and @file{*.so}
+as dynamic modules and knows how to handle such files in the generation,
+compilation, and linking steps.
+
+The special input name @file{-} takes input from @file{stdin} which is
+assumed to be COBOL source, and uses a default output name of
+@file{a.out} (or @file{a.so/c/o/i}, selected as appropriate) for the build type.
+
+By default, the compiler builds a dynamically loadable module.
+
+The following options specify the target type produced by the compiler:
+
+@table @code
+@item -E
+Preprocess only: compiler directives are executed, comment lines are
+removed and @code{COPY} statements are expanded.
+The output is saved in file @file{*.i}.
+
+@item -C
+Translation only.  COBOL source files are translated into C files.
+The output is saved in file @file{*.c}.
+
+@item -S
+Compile only.  Translated C files are compiled by the C compiler
+to assembler code. The output is saved in file @file{*.s}.
+
+@item -c
+Compile and assemble.  This is equivalent to @code{cc -c}.
+The output is saved in file @file{*.o}.
+
+@item -m
+Compile, assemble, and build a dynamically loadable module (i.e.,
+a shared library). The output is saved in file @file{*.so}.
+@footnote{The extension varies depending on your host.}
+This is the default behaviour.
+
+@item -b
+Compile, assemble, and combine all input files into a single
+dynamically loadable module.  Unless @code{-o} is also used,
+the output is saved using the first filename as @file{*.so}.
+
+@item -x
+Include the main function in the output, creating an executable
+image.  The main entry point being the first program in the file.
+
+This option takes effect at the translation stage.
+If you give this option with @code{-C}, you will see the main
+function at the end of the generated C file.
+
+@item -j(=<args>), -job(=<args>)
+Run job after compilation.  Either from executable with @code{-x}, or with
+@code{cobcrun} when compiling a module.  Optional arguments, if given, are
+passed to the program or module command line.
+
+@item -I <directory>
+Add <directory> to copy/include search path.
+
+@item -L <directory>
+Add <directory> to library search path.
+
+@item -l <lib>
+Link the library <lib>.
+
+@item -D <define>
+Pass <define> to the COBOL compiler.
+
+@item -o <file>
+Place the output into <file>.
+
+@end table
+
+@node Source format, Warning options, Build target, Compiler options
+@subsection Source format
+
+GnuCOBOL supports both fixed and free source format.
+The default format is the fixed format.
+This can be overriden either by the
+@code{>>SOURCE [FORMAT] [IS] @{FIXED|FREE@}} directive,
+or by one of the following options:
+
+@table @code
+@item -free, -F
+Free format.  The program-text area starts in column 1 and
+continues till the end of line (effectively 255 characters
+in GnuCOBOL).
+
+@item -fixed
+Fixed format.  Source code is divided into: columns 1-6, the sequence
+number area; column 7, the indicator area; columns 8-72, the program-text
+area; and columns 72-80 as the reference area.@footnote{Historically, fixed
+format was based on 80-character punch cards.}
+
+@end table
+
+@node Warning options, Configuration options, Source format, Compiler options
+@subsection Warning options
+
+@table @code
+@item -W
+Enable every possible warning.  This includes more information
+than @code{-Wall} would normally provide.
+
+@item -Wall
+Enable all common warnings.
+
+@item -Warchaic
+Warn if archaic features are used, such as continuation lines or the @code{NEXT SENTENCE} statement.
+
+@item -Wcall-params
+Warn if non-01/77-level items are used as arguments in a @code{CALL} statement. This is @emph{not} set with @code{-Wall}.
+
+@item -Wcolumn-overflow
+Warn if text after column 72 in FIXED format. This is @emph{not} set with @code{-Wall}.
+
+@item -Wconstant
+@comment{TODO: Clarify!}
+Warn inconsistent constant
+
+@item -Wimplicit-define
+Warn if implicitly defined data items are used.
+
+@item -Wlinkage
+@comment{TODO: Define "dangling".}
+Warn dangling @code{LINKAGE} items. This is @emph{not} set with @code{-Wall}.
+
+@item -Wobsolete
+Warn if obsolete features are used.
+
+@item -Wparentheses
+Warn about any lack of parentheses around @code{AND} within @code{OR}.
+
+@item -Wredefinition
+Warn about incompatible redefinitions of data items.
+
+@item -Wstrict-typing
+Warn about type mismatch strictly.
+
+@item -Wterminator
+Warn about the lack of scope terminator END-XXX. This is @emph{not} set with @code{-Wall}.
+
+@item -Wtruncate
+Warn on possible field truncation. This is @emph{not} set with @code{-Wall}.
+
+@item -Wunreachable
+Warn if statements are unreachable. This is @emph{not} set with @code{-Wall}.
+@end table
+
+@node Configuration options, Listing options, Warning options, Compiler options
+@subsection Configuration options
+
+@table @code
+@item -std=<dialect>
+Compiler uses the given dialect to determine certain compiler features
+and warnings.@*
+@xref{Appendix F, Compiler Configuration}, and @file{config/*.conf}.@*
+Note: The GnuCOBOL compiler tries to limit both the feature-set and reserved words
+to the specified compiler when the "strict" dialects are used.
+COBOL sources compiled with these dialects are therefore likely to compile with
+the specified compiler and vice versa: sources that were compiled on the
+specified compiler should compile without any issues with GnuCOBOL.@*
+With the "non-strict" dialects GnuCOBOL will activate the complete feature-set
+where it doesn't directly conflict with the specified dialect, including reserved words.
+COBOL sources compiled with these dialects therefore may work only with GnuCOBOL.
+COBOL sources may need a change because of reserved words in GnuCOBOL, otherwise
+offending words may be removed by @code{-fno-reserved=word}.@*
+COBOL-85, X/Open COBOL, @w{COBOL 2002} and @w{COBOL 2014} are always "strict".
+
+@item -std=default
+GnuCOBOL dialect, supporting many of the @w{COBOL 2002} and @w{COBOL 2014} features,
+many extensions found in other dialects and its own feature-set
+
+@item -std=cobol85
+COBOL-85 without any extensions other than the amendment Intrinsic Function Module (1989), source compiled with this dialect is likely to compile with most COBOL compilers
+
+@item -std=xopen
+X/Open COBOL (based on COBOL-85) without any vendor extensions, source compiled with this dialect is likely to compile with most COBOL compilers, will warn items that "should not be used in a conforming X/Open COBOL source program"
+
+@item -std=cobol2002, -std=cobol2014
+COBOL 2002 / COBOL 2014 without any vendor extensions, use @code{-Warchaic} and @code{-Wobsolete} if
+archaic/obsolete features should be flagged
+
+@item -std=ibm-strict, -std=ibm
+IBM compatible
+
+@item -std=mvs-strict, -std=mvs
+MVS compatible
+
+@item -std=mf-strict, -std=mf
+Micro Focus compatible
+
+@item -std=bs2000-strict, -std=bs2000
+BS2000 compatible
+
+@item -std=acu-strict, -std=acu
+ACUCOBOL-GT compatible
+
+@item -std=rm-strict, -std=rm
+RM/COBOL compatible
+
+@item -conf=<file>
+User-defined dialect configuration. See @code{-std=} above.@*
+@xref{Appendix F, Compiler Configuration}, and @file{config/*.conf}.
+
+@end table
+
+You can override each single configuration entry by using compiler configuration
+options on the command line.
+
+Examples:
+
+@table @code
+@item -frelax-syntax-checks
+@item -frenames-uncommon-levels=warning
+@item -fnot-reserved=CHAIN,SCREEN
+@item -ftab-width=4
+@end table
+@xref{Appendix A, @code{cobc --help}}.
+
+@node Listing options, Debug switches, Configuration options, Compiler options
+@subsection Listing options
+
+@table @code
+
+@item -t=<file>
+Generate and place the standard print listing into @file{*.lst}.
+
+@item -T=<file>
+Generate and place a wide print listing into @file{*.lst}.
+
+@item --tlines=<lines>
+Specify lines per page in print listing, default = 55.
+Set to zero for no aditional page breaks.
+
+@item --tsymbols
+Generate symbol table in listing.
+
+@item -P(=<dir or file>)
+Generate and place a preprocessed listing (old format) into @file{*.lst}.
+
+@item -Xref
+@item -X
+Generate cross reference in the listing.
+
+@end table
+
+Here is an example program listing with the -t -tsymbols option:
+
+@example
+GnuCOBOL 2.0.0   test.cbl                   Mon Oct 17 10:23:45 2016  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001         IDENTIFICATION   DIVISION.
+000002         PROGRAM-ID.      prog.
+000003         ENVIRONMENT DIVISION.
+000004         CONFIGURATION SECTION.
+000005         DATA             DIVISION.
+000006         WORKING-STORAGE  SECTION.
+000007         COPY 'values.cpy'.
+000001C        78  I   VALUE 20.
+000002C        78  J   VALUE 5000.
+000003C        78  M   VALUE 5.
+000008         01  SETUP-REC.
+000009             05  FL1       PIC X(04).
+000010             05  FL2       PIC ZZZZZ.
+000011             05  FL3       PIC 9(04).
+000012             05  FL4       PIC 9(08) COMP.
+000013             05  FL5       PIC 9(04) COMP-4.
+000014             05  FL6       PIC Z,ZZZ.99.
+000015             05  FL7       PIC S9(05) SIGN LEADING SEPARATE.
+000016             05  FL8       PIC X(04).
+000017             05  FL9 REDEFINES FL8 PIC 9(04).
+000018             05  FLA.
+000019                 10  FLB OCCURS I TIMES.
+000020                     15  FLC PIC X(02).
+000021                 10  FLD   PIC X(20).
+000022             05  FLD1      PIC X(100).
+000023             05  FLD2 OCCURS M TO J TIMES DEPENDING ON FL5.
+000024                 10  FILLER PIC X(01).
+000025             05  FLD3      PIC X(3).
+000026             05  FLD4      PIC X(4).
+000027         PROCEDURE        DIVISION.
+000028             STOP RUN.
+@end example
+
+The first part of the listing lists the program text.  If the program text is
+a COPY the line number reflects the COPY line number and is appended with
+a 'C'. 
+
+When the wide list option is specified (-T), the SEQUENCE columns are included
+in the listing.
+
+
+The second part of the listing file is the listing of the Symbol Table:
+
+@example
+GnuCOBOL 2.0.0   test.cbl                   Mon Oct 17 10:23:45 2016  Page 0002
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+5204 GROUP          01   SETUP-REC
+0004 ALPHANUMERIC   05     FL1                          X(04)
+0005 ALPHANUMERIC   05     FL2                          ZZZZZ
+0004 ALPHANUMERIC   05     FL3                          9(04)
+0004 NUMERIC        05     FL4                          9(08) COMP
+0002 NUMERIC        05     FL5                          9(04) COMP
+0008 ALPHANUMERIC   05     FL6                          Z,ZZZ.99
+0006 ALPHANUMERIC   05     FL7                          S9(05)
+0004 ALPHANUMERIC   05     FL8                          X(04)
+0004 ALPHANUMERIC-R 05     FL9                          9(04)
+0060 ALPHANUMERIC   05     FLA
+0040 ALPHANUMERIC   10       FLB                        OCCURS 20
+0002 ALPHANUMERIC   15         FLC                      X(02)
+0020 ALPHANUMERIC   10       FLD                        X(20)
+0100 ALPHANUMERIC   05     FLD1                         X(100)
+5000 ALPHANUMERIC   05     FLD2                         OCCURS 5 TO 5000
+0001 ALPHANUMERIC   10       FILLER                     X(01)
+0003 ALPHANUMERIC   05     FLD3                         X(3)
+0004 ALPHANUMERIC   05     FLD4                         X(4)
+@end example
+
+If the symbol redefines another variable the TYPE is marked with 'R'. If the 
+symbol is an array the OCCURS phrase is in the PICTURE field.
+
+
+The last part of the listing file is the summary of warnings an error in the compilation group:
+
+@example
+0 warnings in compilation group
+2 errors in compilation group
+@end example
+
+@node Debug switches, Miscellaneous, Listing options, Compiler options
+@subsection Debug switches
+
+@table @code
+
+@item -debug, -d
+Enable all run-time error checks.
+
+@item -g
+Produce debugging information in the output.
+
+@item -O
+Enable optimization of code size and execution speed.
+See @code{man gcc} for details.
+
+@item -O2
+Optimize even more.
+
+@item -Os
+Optimize for size. Optimizer will favour code size over execution speed.
+
+@item -ftrace
+Generate trace code (log executed procedures).
+
+@item -ftraceall
+Generate trace code (log executed procedures and statements).
+
+@item -fsyntax-only
+Check syntax only; don't emit any output.
+
+@item -fdebugging-line
+Enable debugging lines (@code{D} in indicator column).
+
+@item -fsource-location
+Generate source location code (implied by @code{-debug} or @code{-g}).
+
+@item -fimplicit-init
+Do automatic initialization of the COBOL runtime system.
+
+@item -fstack-check
+Enable @code{PERFORM} stack checking (implied by @code{-debug} or @code{-g}).
+
+@item -fnotrunc
+Do not truncate binary fields according to PICTURE.
+
+@end table
+
+@node Miscellaneous,  , Debug switches, Compiler options
+@subsection Miscellaneous
+@table @code
+
+@item -ext <extension>
+@comment{TODO: Clarify}
+Add default file extension.
+
+@item -fmfcomment
+Treat lines with @code{*} or @code{/} in column 1 as comment (fixed-format only).
+
+@item -acucomment
+Treat @code{|} as an inline comment marker.
+
+@item -fsign=ASCII
+@comment{TODO: Clarify}
+Numeric display sign ASCII (default on ASCII machines).
+
+@item -fsign=EBCDIC
+Numeric display sign EBCDIC (default on EBCDIC machines).
+
+@item -ffunctions-all
+Allow use of intrinsic functions without @code{FUNCTION} keyword.
+
+@item -ffold-copy=LOWER
+Fold @code{COPY} subject to lower case (default no transformation).
+
+@item -ffold-copy=UPPER
+Fold @code{COPY} subject to upper case (default no transformation).
+
+@item -save-temps(=<dir>)
+Save intermediate files (by default, in current directory).
+
+@end table
+
+@node Multiple sources, C interface, Compiler options, Compile
+@section Multiple sources
+
+This section describes how to compile a program from multiple source files.
+
+This section also describes how to build a shared library that can
+be used by any COBOL program and how to use external libraries in
+COBOL programs.
+
+@menu
+* Static linking::              Compiling into a single executable
+* Dynamic linking::             A main program and separate modules
+* Building library::            Building a shared library
+* Using library::               Using external libraries
+@end menu
+
+@node Static linking, Dynamic linking, Multiple sources, Multiple sources
+@subsection Static linking
+
+The easiest way of combining multiple files is to compile them into a
+single executable.
+
+One way is to compile all the files in one command:
+
+@example
+$ cobc -x -o prog main.cob subr1.cob subr2.cob
+@end example
+
+Another way is to compile each file with the option @code{-c},
+and link them at the end.
+The top-level program must be compiled with the option @code{-x}.
+
+@example
+$ cobc -c subr1.cob
+$ cobc -c subr2.cob
+$ cobc -c -x main.cob
+$ cobc -x -o prog main.o subr1.o subr2.o
+@end example
+
+You can link C routines as well using either method:
+
+@example
+$ cobc -o prog main.cob subrs.c
+@end example
+
+or
+@example
+$ cobc -c subrs.c
+$ cobc -c -x main.cob
+$ cobc -x -o prog main.o subrs.o
+@end example
+
+Any number of functions can be contained in a single C file.
+
+The linked programs will be called dynamically; that is, the symbol
+will be resolved at run time.  For example, the following COBOL
+statement
+
+@example
+CALL "subr" USING X.
+@end example
+
+will be converted into equivalent C code like this:
+
+@example
+int (*func)() = cob_resolve("subr");
+if (func != NULL)
+  func (X);
+@end example
+
+With the compiler option @code{-fstatic-call}, more efficient code
+will be generated:
+
+@example
+subr(X);
+@end example
+
+Note that this option only takes effect when the called program name
+is in a literal (like @code{CALL "subr"}).  With a data name (like
+@code{CALL SUBR}), the program is still called dynamically.
+
+@node Dynamic linking, Building library, Static linking, Multiple sources
+@subsection Dynamic linking
+
+There are two methods to achieve this: a driver program, or compiling the main program and subprograms separately.
+
+@subsubsection Driver program
+
+Compile all programs with the option @code{-m}:
+@example
+$ cobc -m main.cob subr.cob
+@end example
+This creates the shared object files @file{main.so subr.so}.@footnote{The extension used depends on your operating system.}
+
+Before running the main program, install the module files in your
+library directory:
+@example
+$ cp subr.so /your/cobol/lib
+@end example
+Set the runtime variable @code{COB_LIBRARY_PATH}
+to your library directory, and run the main program:
+@example
+$ export COB_LIBRARY_PATH=/your/cobol/lib
+@end example
+(Note: You may set the variable via a runtime configuration file, @pxref{Appendix H, Runtime Configuration}. You may also set the variable to directly point to the directory where you compiled the sources.)
+
+Now execute your program:
+@example
+$ cobcrun main
+@end example
+
+@subsubsection Compiling programs separately
+
+The main program is compiled as usual:
+@example
+$ cobc -x -o main main.cob
+@end example
+
+Subprograms are compiled with the option @code{-m}:
+@example
+$ cobc -m subr.cob
+@end example
+This creates a module file @file{subr.so}@footnote{The extension used depends on your operating system.}.
+
+Before running the main program, install the module files in your
+library directory:
+@example
+$ cp subr.so /your/cobol/lib
+@end example
+
+Now, set the environment variable @code{COB_LIBRARY_PATH}
+to your library directory, and run the main program:
+@example
+$ export COB_LIBRARY_PATH=/your/cobol/lib
+$ ./main
+@end example
+
+@node Building library, Using library, Dynamic linking, Multiple sources
+@subsection Building library
+
+You can build a shared library by combining multiple COBOL programs
+and even C routines:
+
+@example
+$ cobc -c subr1.cob
+$ cobc -c subr2.cob
+$ cc -c subr3.c
+$ cc -shared -o libsubrs.so subr1.o subr2.o subr3.o
+@end example
+
+@node Using library,  , Building library, Multiple sources
+@subsection Using library
+
+You can use a shared library by linking it with your main program.
+
+Before linking the library, install it in your system library directory:
+@example
+$ cp libsubrs.so /usr/lib
+@end example
+or install it somewhere else and set @code{LD_LIBRARY_PATH}:
+@example
+$ cp libsubrs.so /your/cobol/lib
+$ export LD_LIBRARY_PATH=/your/cobol/lib
+@end example
+
+Then, compile the main program, linking the library as follows:
+@example
+$ cobc -x main.cob -L/your/cobol/lib -lsubrs
+@end example
+
+@node C interface,  , Multiple sources, Compile
+@section C interface
+
+This chapter describes how to combine C programs with COBOL programs.
+
+@menu
+* Main C program::              Writing main program in C
+* Static C to COBOL::
+* Dynamic C to COBOL::
+* Static COBOL to C::
+* Dynamic COBOL to C::
+@end menu
+
+@node Main C program, Static C to COBOL, C interface, C interface
+@subsection Writing Main Program in C
+
+Include @file{libcob.h} in your C program and call @code{cob_init} before using any COBOL module.
+Do a cleanup afterwards, either by calling @code{cob_stop_run} (if your program should terminate)
+or by calling @code{cob_tidy} (if your program should go on without any further COBOL calls).
+
+@example
+#include <libcob.h>
+
+int
+main (int argc, char **argv)
+@{
+  /* initialize your program */
+  ...
+
+  /* initialize the COBOL run-time library */
+  cob_init (argc, argv);
+
+  /* rest of your program */
+  ...
+
+  /* Clean up and terminate - This does not return */
+  cob_stop_run (return_status);
+@}
+@end example
+
+You can write @code{cobc_init(0, NULL);} if you do not want to pass
+command line arguments to COBOL.
+
+You can compile your C program as follows:
+
+@example
+cc -c @`{}cob-config --cflags@`{} main.c
+@end example
+
+The compiled object must be linked with libcob as follows:
+
+@example
+cc -o main main.o @`{}cob-config --libs@`{}
+@end example
+
+@node Static C to COBOL, Dynamic C to COBOL, Main C program, C interface
+@subsection Static linking with COBOL programs
+
+Let's call the following COBOL module from a C program:
+
+@example
+---- say.cob ---------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. say.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01 hello PIC X(7).
+       01 world PIC X(6).
+       PROCEDURE DIVISION USING hello world.
+           DISPLAY hello world.
+           EXIT PROGRAM.
+----------------------------------------
+@end example
+
+This program accepts two arguments, displays them, and exits.
+
+From the viewpoint of C, this is equivalent to a function having the
+following prototype:
+
+@example
+extern int say(char *hello, char *world);
+@end example
+
+So, your main program will look like as follows:
+
+@example
+---- hello.c ---------------------------
+#include <libcob.h>
+
+extern int say(char *hello, char *world);
+
+int
+main()
+@{
+  int ret;
+  char hello[8] = "Hello, ";
+  char world[7] = "world!";
+
+  /* initialize the COBOL run-time library */
+  cob_init(0, NULL);
+
+  /* call the static module and store its return code */
+  ret = say(hello, world);
+
+  /* shutdown the COBOL run-time library, keep program running */
+  (void)cob_tidy();
+
+  return ret;
+@}
+----------------------------------------
+@end example
+
+Compile these programs as follows:
+
+@example
+$ cc -c `cob-config --cflags` hello.c
+$ cobc -c -static say.cob
+$ cobc -x -o hello hello.o say.o
+$ ./hello
+Hello, world!
+@end example
+
+@node Dynamic C to COBOL, Static COBOL to C, Static C to COBOL, C interface
+@subsection Dynamic linking with COBOL programs
+
+You can find a COBOL module having a specific name by using the C
+function @code{cob_resolve}, which takes the module name as a string
+and returns a pointer to the module function.
+
+@code{cob_resolve} returns @code{NULL} if there is no module.  In this case,
+the function @code{cob_resolve_error} returns the error message.
+
+Let's see an example:
+
+@example
+---- hello-dynamic.c -------------------
+#include <libcob.h>
+
+static int (*say)(char *hello, char *world);
+
+int main()
+@{
+  int ret;
+  char hello[8] = "Hello, ";
+  char world[7] = "world!";
+
+  /* initialize the COBOL run-time library */
+  cob_init(0, NULL);
+
+  /* Find the module with PROGRAM-ID "say". */
+  say = cob_resolve("say");
+
+  /* If there is no such module, show error and exit. */
+  if(say == NULL) @{
+    fprintf(stderr, "%s\n", cob_resolve_error());
+    exit(1);
+  @}
+
+  /* Call the module found ... */
+  ret = say(hello, world);
+
+  /* ...and exit with the return code. */
+  cob_stop_run(ret);
+@}
+----------------------------------------
+@end example
+
+Compile these programs as follows:
+
+@example
+$ cc -c `cob-config --cflags` hello-dynamic.c
+$ cobc -x -o hello hello-dynamic.o
+$ cobc -m say.cob
+$ export COB_LIBRARY_PATH=.
+$ ./hello
+Hello, world!
+@end example
+
+@node Static COBOL to C, Dynamic COBOL to C, Dynamic C to COBOL, C interface
+@subsection Static linking with C programs
+
+Let's call the following C function from COBOL:
+
+@example
+---- say.c -----------------------------
+int say(char *hello, char *world)
+@{
+  int i;
+  for(i = 0; i < 7; i++)
+    putchar(hello[i]);
+  for(i = 0; i < 6; i++)
+    putchar(world[i]);
+  putchar('\n');
+  return 0;
+@}
+----------------------------------------
+@end example
+
+This program is equivalent to the program in @file{say.cob} above.
+
+Note that, unlike C, the arguments passed from COBOL programs are not
+terminated by the null character (i.e., @code{'\0'}).
+
+You can call this function in the same way you call COBOL programs:
+
+@example
+---- hello.cob -------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. hello.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 hello PIC X(7) VALUE "Hello, ".
+       01 world PIC X(6) VALUE "world!".
+       PROCEDURE DIVISION.
+       CALL "say" USING hello world.
+       STOP RUN.
+----------------------------------------
+@end example
+
+Compile these programs as follows:
+
+@example
+$ cc -c say.c
+$ cobc -c -static -x hello.cob
+$ cobc -x -o hello hello.o say.o
+$ ./hello
+Hello, world!
+@end example
+
+@node Dynamic COBOL to C,  , Static COBOL to C, C interface
+@subsection Dynamic linking with C programs
+
+You can create a dynamically-linked module from a C program by passing an
+option @code{-shared} to the C compiler:
+
+@example
+$ cc -shared -o say.so say.c
+$ cobc -x hello.cob
+$ export COB_LIBRARY_PATH=.
+$ ./hello
+Hello, world!
+@end example
+
+@node Customize, Optimize, Compile, Top
+@chapter Customize
+
+@menu
+* Customizing compiler::        Customizing compiler
+* Customizing library::         Customizing library
+@end menu
+
+@node Customizing compiler, Customizing library, Customize, Customize
+@section Customizing compiler
+
+These settings are effective at compile-time.
+
+Environment variables (default value in brackets):
+
+@table @code
+@item COB_CC
+C compiler ("gcc")
+@item COB_CFLAGS
+Flags passed to the C compiler ("-I$(PREFIX)/include")
+@item COB_LDFLAGS
+Flags passed to the C compiler ("")
+@item COB_LIBS
+Standard libraries linked with the program ("-L$(PREFIX)/lib -lcob")
+@item COB_LDADD
+Additional libraries linked with the program ("")
+@end table
+
+@node Customizing library,  , Customizing compiler, Customize
+@section Customizing library
+
+These settings are effective at run-time. You can set them either via the
+environment or by a runtime configuration file.
+
+To set the global runtime configuration file export @code{COB_RUNTIME_CONFIG}
+to point to your configuration file.
+To set an explicit runtime configuration file for a single run via
+@code{cobcrun} you can use its option @code{-c <file>, -config=<file>}.
+
+For displaying the current runtime settings you can use the option
+@code{-r, -runtime-env} of @code{cobcrun}.
+
+For a complete list of runtime variables, aliases, their default values and options
+to set them @pxref{Appendix H, Runtime Configuration}.
+
+@node Optimize, Debug, Customize, Top
+@chapter Optimize
+
+@menu
+* Optimize options::            How to enable optimization
+* Optimize call::               Call subroutines efficiently
+* Optimize binary::             Use efficient binary representation
+@end menu
+
+@node Optimize options, Optimize call, Optimize, Optimize
+@section Optimize options
+
+There are three compiler options for optimization: @code{-O}, @code{-Os}
+and @code{-O2}.  These options enable optimization at both translation
+(from COBOL to C) and compilation (C to assembly) levels.
+
+Currently, there is no difference between these optimization options at
+the translation level.
+
+The option @code{-O}, @code{-Os} or @code{-O2} is passed to the
+C compiler as is and used for C level optimization.
+
+@node Optimize call, Optimize binary, Optimize options, Optimize
+@section Optimize call
+
+When a @code{CALL} statement is executed, the called program is linked at run
+time.  By specifying the compiler option @code{-fstatic-call}, you can
+statically link the program at compile time and call it efficiently.
+(@pxref{Static linking})
+
+@node Optimize binary,  , Optimize call, Optimize
+@section Optimize binary
+
+By default, data items of usage binary or comp are stored in
+big-endian form.  On those machines whose native byte order is
+little-endian, this is not quite efficient.
+
+If you prefer, you can store binary items in the native form of your
+machine.  Set the config option @code{binary-byteorder} to
+@code{native} in your config file (@pxref{Customize}).
+
+In addition, setting the option @code{binary-size} to @code{2-4-8} or
+@code{1-2-4-8} is more efficient than others.
+
+@node Debug, Debug options, Optimize, Top
+@chapter Debug
+
+@menu
+* Debug options::               Debug options
+@end menu
+
+@node Debug options, Extensions, Debug, Debug
+@section Debug options
+
+The compiler option @code{-debug} can be used during the development
+of your programs.  It enables all run-time error checking, such as
+subscript boundary checks and numeric data checks, and displays
+run-time errors with source locations.
+
+@exampleindent 0
+
+@node Extensions, SELECT, Debug options, Top
+@chapter Non-standard extensions
+@cindex Extensions
+@cindex Non-standard extensions
+
+@menu
+* SELECT::                      @code{SELECT ASSIGN TO}.
+* Indexed::                     Indexed file packages.
+* Extended ACCEPT::             Extended @code{ACCEPT} statement.
+* ACCEPT special::              @code{ACCEPT} special keys.
+* Extended DISPLAY::            Extended @code{DISPLAY} statement.
+@end menu
+
+
+@node SELECT, Indexed , Extensions, Extensions
+@section SELECT ASSIGN TO
+@cindex @code{SELECT}
+@cindex @code{SELECT ASSIGN TO}
+
+<This section is in progress.>
+
+
+@node Indexed, Extended ACCEPT, SELECT, Extensions
+@section Indexed file packages
+@cindex Indexed
+@cindex Indexed file packages
+
+<This section is in progress.>
+
+
+@node Extended ACCEPT, ACCEPT special, Indexed, Extensions
+@section Extended ACCEPT statement
+@cindex Extended @code{ACCEPT} statement
+
+Extended @code{ACCEPT} statements allow for full control of items
+accepted from the screen.
+Items accept by line and column positioning.
+
+@example
+
+ACCEPT variable-1
+   LINE <line> COLUMN <column>
+   WITH
+      AUTO-SKIP | AUTO
+      [PROTECTED] SIZE [IS] variable-2 | literal-2
+END-ACCEPT.
+
+@end example
+
+
+@subsection AUTO-SKIP
+@cindex @code{AUTO-SKIP}
+@cindex @code{AUTO}
+
+With this option the @code{ACCEPT} statement returns after the last
+character is typed at the end of the field.
+This is the same as if the Enter key were pressed.
+
+Without this option the cursor remains at the end of the field
+and waits for the user to press Enter.
+
+The word @code{AUTO} may be used for @code{AUTO-SKIP}.
+
+The Right-Arrow key returns from the end of the field.
+The Left-Arrow key returns from the beginning.
+@xref{ACCEPT special, Arrow keys,,,}.
+
+The Alt-Right-Arrow and Alt-Left-Arrow keys never @code{AUTO-SKIP}.
+
+
+@subsection PROTECTED
+@cindex @code{PROTECTED}
+
+@code{PROTECTED} is ignored.
+It is optional.
+
+
+@subsection SIZE
+@cindex @code{SIZE}
+
+The size of variable-1 to accept from the screen.
+It is optional.
+
+@vtable @option
+
+@item @code{SIZE} <greater than zero>
+
+If @code{SIZE} is less than the length of variable-1 then only the @code{SIZE}
+number of characters accept into the field.
+Variable-1 pads with spaces after @code{SIZE} to the end of the field.
+
+If SIZE is greater than variable-1, then the screen pads with spaces
+after variable-1 to the @code{SIZE} length.
+
+@item @code{SIZE ZERO}
+@itemx <@code{SIZE} option not specified>
+
+The variable-1 field accepts with its length.
+
+@end vtable
+
+
+@node ACCEPT special, Extended DISPLAY, Extended ACCEPT, Extensions
+@section ACCEPT special keys
+@cindex @code{ACCEPT} special keys
+
+Special keys are available for extended @code{ACCEPT} statements.
+
+The @code{COB-CRT-STATUS} values are in the screenio.cpy copy file.
+
+
+@subsection Arrow keys
+@cindex Arrow keys
+
+The Left-Arrow key moves the cursor to the left.
+Without @code{AUTO-SKIP} the cursor stops at the beginning of the field.
+With @code{AUTO-SKIP} it returns with the @code{COB-SCR-KEY-LEFT} value of 2009.
+@xref{Extended ACCEPT, AUTO-SKIP,,,}.
+
+The Alt-Left-Arrow key is the same as Left-Arrow except that
+it never returns, even for @code{AUTO-SKIP}.
+
+The Right-Arrow key moves the cursor to the right.
+Without @code{AUTO-SKIP} the cursor stops at the end of the field.
+With @code{AUTO-SKIP} it returns with the @code{COB-SCR-KEY-RIGHT} value of 2010.
+@xref{Extended ACCEPT, AUTO-SKIP,,,}.
+
+The Alt-Right-Arrow key is the same as Right-Arrow except that
+it never returns, even for @code{AUTO-SKIP}.
+
+
+@subsection Backspace key
+@cindex Backspace key
+
+The Backspace key moves the cursor, and the remainder of the text,
+to the left.
+
+
+@subsection Delete keys
+@cindex Delete keys
+
+The Delete key deletes the cursor's character and moves the
+remainder of the text to the left.
+The cursor does not move.
+
+The Alt-Delete key deletes all text from the cursor to the
+end of the field.
+
+
+@subsection End keys
+@cindex End keys
+
+The End key moves the cursor after the last non-space character.
+
+The Alt-End key moves the cursor to the end of the field.
+
+
+@subsection Home keys
+@cindex Home keys
+
+The Home key moves the cursor to the first non-space character.
+
+The Alt-Home key moves the cursor to the beginning of the field.
+
+
+@subsection Insert key
+@cindex Insert key
+
+The Insert key changes the insert mode.
+
+When the insert mode is on, typed characters move the existing characters
+to the right.
+When it is off, typed characters type over existing characters.
+
+The default insert mode is set by the @code{COB_INSERT_MODE} variable,
+@xref{Appendix H, Runtime Configuration}.
+This must be set before the first extended @code{ACCEPT}, @code{DISPLAY},
+or any routine that gets information from the screen.
+
+The last press of the Insert key is used in all following @code{ACCEPT}
+statements while the program is running.
+
+
+@subsection Tab keys
+@cindex Tab keys
+
+The Tab key returns from the @code{ACCEPT} with the @code{COB-SCR-TAB} value of 2007.
+
+The Shift-Tab key returns with the @code{COB-SCR-BACK-TAB} value of 2008.
+
+
+@node Extended DISPLAY, System routines, ACCEPT special, Extensions
+@section Extended DISPLAY statement
+@cindex Extended @code{DISPLAY} statement
+
+Extended @code{DISPLAY} statements allow for full control of items that display
+on the screen.
+Items display by line and column positioning.
+
+@example
+
+DISPLAY variable-1 | literal-1 | figurative constant
+   LINE <line> COLUMN <column>
+   WITH BELL
+        BLANK LINE | SCREEN
+        ERASE EOL | EOS
+        SIZE [IS] variable-2 | literal-2
+END-DISPLAY.
+
+@end example
+
+
+@subsection BELL
+@cindex @code{BELL}
+
+Ring the bell.
+It is optional.
+
+
+@subsection BLANK
+@cindex @code{BLANK LINE}
+@cindex @code{BLANK SCREEN}
+
+Clear the whole line or screen.
+It is optional.
+
+@vtable @option
+
+@item @code{BLANK LINE}
+
+Clear the line from the beginning of the line to the end of the line.
+
+@item @code{BLANK SCREEN}
+
+Clear the whole screen.
+
+@end vtable
+
+
+@subsection ERASE
+@cindex @code{ERASE EOL}
+@cindex @code{ERASE EOS}
+
+Clear the line or screen from LINE and COLUMN.
+It is optional.
+
+@vtable @option
+
+@item @code{ERASE EOL}
+
+Clear the line from LINE and COLUMN to the end of the line.
+
+@item @code{ERASE EOS}
+
+Clear the screen from LINE and COLUMN to the end of the screen.
+
+@end vtable
+
+
+@subsection SIZE
+@cindex @code{SIZE}
+
+The size of variable-1, literal-1, or figurative constant
+to display onto the screen.
+It is optional.
+
+@vtable @option
+
+@item @code{SIZE} <greater than zero>
+
+If @code{SIZE} is less than the length of variable-1 or literal-1
+then only the @code{SIZE} number of characters display.
+
+If @code{SIZE} is greater than the length of variable-1 or literal-1,
+then the screen pads with spaces after the field to the @code{SIZE} length.
+
+Figurative constants display repeatedly the number of times in @code{SIZE}.
+Except that @code{LOW-VALUES} always positions the cursor (see @code{SIZE} ZERO below).
+
+@item @code{SIZE ZERO}
+@itemx <@code{SIZE} option not specified>
+
+Variable-1 or literal-1 displays with the field length.
+
+Certain figurative constants have special functions.
+
+@code{SPACE}:  Display spaces from LINE and COLUMN to the end of the screen.
+This is the same as WITH ERASE EOS.
+
+@code{LOW-VALUE}:  Position the cursor to LINE and COLUMN.
+The next @code{DISPLAY} statement does not need a LINE or COLUMN
+to display at that position.
+
+ALL "1"  Display spaces from LINE and COLUMN to the end of the line.
+This is the same as @code{WITH ERASE EOL}.
+
+ALL "2"  Clear the whole screen.
+This is the same as @code{WITH BLANK SCREEN}.
+
+ALL "7"  Ring the bell.
+This is the same as @code{WITH BELL}.
+
+All other figurative constants display as a single character.
+
+@end vtable
+
+
+@node System routines, Appendix A, Extended DISPLAY, Top
+
+
+@chapter System routines
+
+For a complete list of supported system routines
+@xref{Appendix D, ,cobc --list-system}.
+
+@menu
+* CBL_GC_GETOPT::				CBL_GC_GETOPT
+* CBL_GC_HOSTED::				CBL_GC_HOSTED
+* CBL_GC_NANOSLEEP::				CBL_GC_NANOSLEEP
+* CBL_GC_FORK::					CBL_GC_FORK
+* CBL_GC_WAITPID::				CBL_GC_WAITPID
+@end menu
+
+@node CBL_GC_GETOPT, , System routines, System routines
+@section CBL_GC_GETOPT
+
+@code{CBL_GC_GETOPT} realises the quite well-known option parser, getopt, for
+GnuCOBOL. The usage of this system routine is described by the
+following example.
+
+@example
+        identification division.
+        program-id. prog.
+
+        data division.
+        working-storage section.
+            78 shortoptions value "jkl".
+
+            01 longoptions.
+                05 optionrecord occurs 2 times.
+                    10 optionname   pic x(25).
+                    10 has-value    pic 9.
+                    10 valpoint     pointer value NULL.
+                    10 return-value pic x(4).
+
+            01 longind     pic 99.
+            01 long-only   pic 9 value 1.
+
+            01 return-char pic x(4).
+            01 opt-val     pic x(10).
+
+            01 counter     pic 9 value 0.
+@end example
+
+We first need to define the necessary fields for getopt's shortoptions (so),
+longoptions (lo), longoption index (longind), long-only-option (long-only)
+and also the fields for return values return-char and opt-val (arbitrary size with trimming, see return codes).
+
+The shortoptions are written down as an alphanumeric field (i.e., a string with arbitrary size) as follows:
+
+@example
+"ab:c::d"
+@end example
+
+This means we want getopt to look for shortoptions named a, b, c or d and we demand an option
+value for b and we are accepting an optional one for c.
+
+The longoptions are defined as a table of records with oname, has-value, valpoint and val.
+@itemize @bullet
+@item oname defines the name of a longoption.
+@item has-value defines if an option value is demanded (has-val = 1), optional (has-val = 2) or not required (has-val = 0).
+@item valpoint is a pointer used to specify an address to save getopt's return value to. The pointer
+is optional. If it is @code{NULL}, getopt returns a value as usual. If you use the pointer it has to
+point to a @code{PIC X(4)} field.
+@item The field val is a @code{PIC X(4)} character which is returned if the longoption was recognized.
+@end itemize
+The longoption structure is immutable! You can only vary the number of records.
+
+Now we have the tools to run @code{CBL_GC_GETOPT} within the procedure division.
+
+@example
+        procedure division.
+            move "version" to optionname   (1).
+            move 0         to has-value    (1).
+            move "v"       to return-value (1).
+
+            move "verbose" to optionname   (2).
+            move 0         to has-value    (2).
+            move "V"       to return-value (2).
+
+            perform with test after until return-code = -1
+                call 'CBL_GC_GETOPT' using
+                   by reference shortoptions longoptions longind
+                   by value long-only
+                   by reference return-char opt-val
+                end-call
+
+                display return-char end-display
+                display opt-val     end-display
+            end-perform
+            stop run.
+
+@end example
+
+The example shows how we initialize all parameters and call the routine until
+@code{CBL_GC_GETOPT} runs out of options and returns -1.
+
+The return-char might contain the following:
+@itemize @bullet
+@item regular character if an option was recognized
+@item '?' @ @ if we have an undefined or ambiguous option
+@item '1' @ @ if we have a non-option (only if first byte of so is '-')
+@item '0' @ @ if valpoint != NULL and we are writing the return value to the specified address
+@item '-1' @ if we don't have any more options (or reach the first non-option  if first byte of so is '+')
+@end itemize
+
+The return-codes of @code{CBL_GC_GETOPT} are:
+@itemize @bullet
+@item 1 @ @ if we've got a non-option (only if first byte of so is '-')
+@item 0 @ @ if valpoint != @code{NULL} and we are writing the return value to the specified address
+@item -1 @ if we don't have any more options (or reach the first non-option  if first byte of so is '+')
+@item 2 @ @ if we have got an truncated option value in opt-val (because opt-val was too small)
+@item 3 @ @ if we got a regular answer from getopt
+@end itemize
+
+
+@node CBL_GC_HOSTED, , System routines, System routines
+@section CBL_GC_HOSTED
+
+@code{CBL_GC_HOSTED} provides access to the following C hosted variables:
+@itemize @bullet
+@item @code{argc} @ to binary-long by value
+@item @code{argv} @ to pointer to char **
+@item @code{stdin}, @code{stdout}, @code{stderr} @ to pointer
+@item @code{errno} @ giving address of errno in pointer to binary-long, use based for more direct access
+@end itemize
+
+and conditional access to the following variables:
+@itemize @bullet
+@item @code{tzname} @ pointer to pointer to array of two char pointers
+@item @code{timezone} @ C long, will be seconds west of UTC
+@item @code{daylight} @ C int, will be 1 during daylight savings
+@end itemize
+
+System will need to HAVE_TIMEZONE defined for these to return anything meaningful.
+Attempts made when they are not available return 1 from CBL_GC_HOSTED.
+
+It returns 0 when match, 1 on failure, case matters as does length, "arg" won't match.
+
+The usage of this system routine is described by the following example.
+
+@example
+HOSTED identification division.
+       program-id. hosted.
+       data division.
+       working-storage section.
+       01 argc  usage binary-long.
+       01 argv  usage pointer.
+
+       01 stdin usage pointer.
+       01 stdout usage pointer.
+       01 stderr usage pointer.
+
+       01 errno usage pointer.
+       01 err   usage binary-long based.
+
+       01 domain usage float-long value 3.0.
+
+       01 tzname usage pointer.
+       01 tznames usage pointer based.
+          05 tzs usage pointer occurs 2 times.
+
+       01 timezone   usage binary-long.
+       01 daylight   usage binary-short.
+
+
+      *> Testing CBL_GC_HOSTED
+       procedure division.
+       call "CBL_GC_HOSTED" using stdin "stdin"
+       display "stdin                : " stdin
+       call "feof" using by value stdin
+       display "feof stdin           : " return-code
+
+       call "CBL_GC_HOSTED" using stdout "stdout"
+       display "stdout               : " stdout
+       call "fprintf" using by value stdout by content "Hello" & x"0a"
+
+       call "CBL_GC_HOSTED" using stderr "stderr"
+       display "stderr               : " stderr
+       call "fprintf" using by value stderr by content "on err" & x"0a"
+
+       call "CBL_GC_HOSTED" using argc "argc"
+       display "argc                 : " argc
+
+       call "CBL_GC_HOSTED" using argv "argv"
+       display "argv                 : " argv
+
+       call "args" using by value argc argv
+
+       call "CBL_GC_HOSTED" using errno "errno"
+       display "&errno               : " errno
+       set address of err to errno
+       display "errno                : " err
+       call "acos" using by value domain
+       display "errno after acos(3.0): " err ", EDOM is 33"
+
+       call "CBL_GC_HOSTED" using argc "arg"
+       display "'arg' lookup         : " return-code
+       call "CBL_GC_HOSTED" using null "argc"
+       display "null with argc       : " return-code
+       display "argc is still        : " argc
+
+
+       *> the following only returns zero if the system has HAVE_TIMEZONE set
+       
+       call "CBL_GC_HOSTED" using daylight "daylight "
+       display "'timezone' lookup    : " return-code
+
+       if return-code not = 0
+          display "system doesn't has timezone"
+       else
+          
+          display "timezone is          : " timezone
+          
+          call "CBL_GC_HOSTED" using daylight "daylight "
+          display "'daylight' lookup    : " return-code
+          display "daylight is          : " daylight
+       
+          set environment "TZ" to "PST8PDT"
+          call static "tzset" returning omitted on exception continue end-call
+          
+          call "CBL_GC_HOSTED" using tzname "tzname"
+          display "'tzname' lookup      : " return-code
+       
+          *> tzs(1) will point to z"PST" and tzs(2) to z"PDT"
+          if return-code equal 0 and tzname not equal null then
+              set address of tznames to tzname
+              if tzs(1) not equal null then
+                 display "tzs #1               : " tzs(1)
+              end-if
+              if tzs(2) not equal null then
+                 display "tzs #2               : " tzs(2)
+              end-if
+          end-if
+
+       end-if
+
+       goback.
+       end program hosted.
+@end example
+
+
+@node CBL_GC_NANOSLEEP, , System routines, System routines
+@section CBL_GC_NANOSLEEP
+
+@code{CBL_GC_NANOSLEEP} allows you to pause the program for nanoseconds.
+The actual precision depends on the system.
+
+@example
+      *> Waiting a half second
+       call "CBL_GC_NANOSLEEP" using "500000000" end-call
+
+      *> Waiting five seconds using compiler string catenation for readability
+       call "CBL_GC_NANOSLEEP" using "500" & "0000000"  end-call
+@end example
+
+
+@node CBL_GC_FORK, , System routines, System routines
+@section CBL_GC_FORK
+
+@code{CBL_GC_FORK} allows you to fork the current COBOL process to a new one.
+The current content of the process' storage (including @code{LOCAL-STORAGE})
+will be identical, any file handles get invalid in the new process, positions
+and file / record locks are only available to the original process.
+
+This system routine is not available on Windows (exception: GCC on Cygwin).
+
+Parameters:	none
+Returns:	PID (the child process gets '0' returned, the calling process gets
+the PID of the created children).
+Negative values are returned for system dependand error codes and -1 if the function
+is not available on the current system.
+
+@example
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 CHILD-PID   PIC S9(9) BINARY.
+       01 WAIT-STS    PIC S9(9) BINARY.
+       PROCEDURE DIVISION.
+
+           CALL "CBL_GC_FORK" RETURNING CHILD-PID END-CALL
+           EVALUATE TRUE
+              WHEN CHILD-PID = ZERO
+                 PERFORM CHILD-CODE
+              WHEN CHILD-PID > ZERO 
+                 PERFORM PARENT-CODE
+              WHEN CHILD-PID = -1
+                 DISPLAY 'CBL_GC_FORK is not available '
+                         'on the current system!'
+                 END-DISPLAY
+                 PERFORM CHILD-CODE
+                 MOVE 0 TO CHILD-PID
+                 PERFORM PARENT-CODE
+              WHEN OTHER
+                 MULTIPLY CHILD-PID BY -1 END-MULTIPLY
+                 DISPLAY 'CBL_GC_FORK returned system error: '
+                         CHILD-PID
+                 END-DISPLAY
+           END-EVALUATE
+
+           STOP RUN.
+
+       CHILD-CODE.
+           CALL "C$SLEEP" USING 1 END-CALL
+           DISPLAY "Hello, I am the child"
+           END-DISPLAY
+           MOVE 2 TO RETURN-CODE
+
+           CONTINUE.
+
+       PARENT-CODE.
+           DISPLAY "Hello, I am the parent"
+           END-DISPLAY
+           CALL "CBL_GC_WAITPID" USING CHILD-PID RETURNING WAIT-STS
+           END-CALL
+           MOVE 0 TO RETURN-CODE
+           EVALUATE TRUE
+              WHEN WAIT-STS >= 0
+                 DISPLAY 'Child ended with status: '
+                         WAIT-STS
+                 END-DISPLAY
+              WHEN WAIT-STS = -1
+                 DISPLAY 'CBL_GC_WAITPID is not available '
+                         'on the current system!'
+                 END-DISPLAY
+              WHEN WAIT-STS < -1
+                 MULTIPLY -1 BY WAIT-STS END-MULTIPLY
+                 DISPLAY 'CBL_GC_WAITPID returned system error: ' WAIT-STS
+                 END-DISPLAY
+           END-EVALUATE
+
+           CONTINUE.
+@end example
+
+
+@node CBL_GC_WAITPID, , System routines, System routines
+@section CBL_GC_WAITPID
+
+@code{CBL_GC_WAITPID} allows you to wait until another system process ended.
+Additional you can check the process' return code.
+
+Parameters:	none
+Returns:	function-status / child-status
+Negative values are returned for system dependand error codes and -1 if the function
+is not available on the current system.
+
+@example
+        CALL "CBL_GC_WAITPID" USING CHILD-PID RETURNING WAIT-STS
+        END-CALL
+        MOVE 0 TO RETURN-CODE
+        DISPLAY 'CBL_GC_WAITPID ended with status: ' WAIT-STS
+        END-DISPLAY
+@end example
+
+
+@node Appendix A, Appendix B, System routines, Top
+@appendix @code{cobc --help}
+
+@include cbhelp.tex
+
+@node Appendix B, Appendix C, Appendix A, Top
+@appendix @code{cobc --list-reserved}
+
+@include cbrese.tex
+
+@node Appendix C, Appendix D, Appendix B, Top
+@appendix @code{cobc --list-intrinsics}
+
+@include cbintr.tex
+
+@node Appendix D, Appendix E, Appendix C, Top
+@appendix @code{cobc --list-system}
+
+@include cbsyst.tex
+
+@node Appendix E, Appendix F, Appendix D, Top
+@appendix @code{cobc --list-mnemonics}
+
+@include cbmnem.tex
+
+@node Appendix F, Appendix G, Appendix E, Top
+@appendix Compiler Configuration
+
+The following list was extracted from @file{config/default.conf}.
+
+@include cbconf.tex
+
+@node Appendix G, Appendix H, Appendix F, Top
+@appendix @code{cobcrun --help}
+
+@include cbchelp.tex
+
+@node Appendix H, Appendix I, Appendix G, Top
+@appendix Runtime configuration
+
+The following list was extracted from @file{config/runtime.cfg}.
+
+@include cbrunt.tex
+
+@comment The full FDL 1.3 text
+@node Appendix I, Index, Appendix H, Top
+@appendix GNU Free Documentation License
+@cindex Copying
+
+@include fdl.texi
+
+@comment Create index.
+@node Index, , Appendix I, Top
+@unnumbered Index
+@printindex cp
+
+@comment End info file.
+@bye
+
+@c Local Variables:
+@c mode:outline-minor
+@c outline-regexp:"@\\(ch\\|sec\\|subs\\)"
+@c compile-command:"texi2any --pdf -o gnucobol.pdf gnucobol.texi"
+@c End:

@@ -1,0 +1,16 @@
+Filename    total pass fail deleted inspect
+--------    ----- ---- ---- ------- -------
+OBIC1A.CBL      1    1    0       0       0 OK
+OBNC1M.CBL      6    6    0       0       0 OK
+OBNC2M.CBL     16   16    0       0       0 OK
+OBSQ1A.CBL      6    6    0       0       0 OK
+OBSQ3A.CBL      1    1    0       0       0 OK
+OBSQ4A.SUB      4    4    0       0       0 OK
+OBSQ5A.SUB      5    5    0       0       0 OK
+--------    ----- ---- ---- ------- -------
+Total          39   39    0       0       0
+
+Number of programs:     7
+Successfully executed:  7
+Compile error:          0
+Execute error:          0

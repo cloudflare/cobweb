@@ -1,0 +1,37 @@
+Alain Lucari <eurlix@libertysurf.fr>
+Brian Tiffin <btiffin@users.sourceforge.net>
+David Korn <dgk@research.att.com>
+Dave Pitts <dpitts@cozx.com>
+Edward Hart <edward.dan.hart@gmail.com>
+Keiichi Takahashi <bitwalk@jcom.home.ne.jp>
+Keisuke Nishida <knishida@netlab.jp>
+Peg <peg@coboler.com>
+Richard Smith <rich@theforest.plus.com>
+Roger While <RogerWhile@sim-basis.de>
+Simon Sobisch <sf-mensch@users.sourceforge.net>
+Thomas Biehler <tobiglob@users.sourceforge.net>
+William M. Klein <wmklein@ix.netcom.com>
+Yoshiki Kusumoto <webmaster@coboler.com>
+
+Also to the many people that have helped out in testing this product.
+We hope that everybody will continue to provide feedback. This is invaluable
+to the continuing development process.
+
+A special mention here of people who have provided exceptional support in terms
+of time and resources on hardware that was not available to the developers :
+Oleg Philon - For his work on the Powerpc
+David Wilson - For his work on the MAC (Darwin)
+Sergey Kashyrin - For his work on :
+		SUN Solaris
+		IBM AIX
+		HP-UX
+
+And continuing this amazing support :
+Hans-Martin Rasch - Work on compiler syntax
+Michel Gouget - Work on syntax - IS
+Bill Klein - The mainstay for COBOL questions
+Frank Swarbrick - Work on compiler syntax
+Warren Gay - For testing systems that we didn't known that we even support!
+	(eg. Old DEC Alpha sytems)
+Ron Norman - Work on C/D/VB-ISAM handler
+Fabrizio Calabretta - Work on the EXTFH interface

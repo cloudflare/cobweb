@@ -1,0 +1,50 @@
+## Copyright (C) 2003-2012, 2014, 2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2002 14.8.35 SET statement
+
+
+AT_SETUP([SET: misc])
+AT_KEYWORDS([set])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+
+       LINKAGE          SECTION.
+       01 Y             BASED.
+          03  Z         PIC X.
+
+       PROCEDURE        DIVISION.
+           SET ADDRESS OF X TO NULL.
+           SET ADDRESS OF Z TO NULL.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+[prog.cob: 14: error: cannot change address of 'X', which is not BASED or a linkage item
+prog.cob: 15: error: cannot change address of 'Z', which is not level 1 or 77
+])
+
+AT_CLEANUP

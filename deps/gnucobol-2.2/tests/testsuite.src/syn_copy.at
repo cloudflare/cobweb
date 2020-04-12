@@ -1,0 +1,264 @@
+## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+## 
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+AT_SETUP([COPY: within comment])
+AT_KEYWORDS([copy])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+      *COPY "copy.inc".
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+  IDENTIFICATION   DIVISION.
+  PROGRAM-ID.      prog2.
+  DATA             DIVISION.
+  WORKING-STORAGE  SECTION.
+  *> COPY "copy.inc".
+  PROCEDURE        DIVISION.
+  STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -free prog2.cob], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([COPY: file not found])
+AT_KEYWORDS([copy])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       COPY "copy.inc".
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+[prog.cob: 6: error: copy.inc: No such file or directory
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([COPY: replacement order])
+AT_KEYWORDS([copy])
+
+AT_DATA([copy.inc], [
+       01 TEST-VAR PIC X(2) VALUE "OK".
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       COPY "copy.inc"
+          REPLACING ==TEST-VAR== BY ==FIRST-MATCH==
+                    ==TEST-VAR== BY ==SECOND-MATCH==.
+       PROCEDURE        DIVISION.
+           DISPLAY FIRST-MATCH NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([COPY: separators])
+AT_KEYWORDS([copy])
+
+AT_DATA([copy.inc], [
+       01 TEST-VAR PIC X(2) VALUE "OK".
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       COPY "copy.inc"
+          REPLACING ==TEST-VAR==, BY ==FIRST-MATCH==,
+                 ,  ==TEST-VAR==; BY ==SECOND-MATCH==;
+                 ;  ==TEST-VAR== , BY ==THIRD-MATCH==
+                    ==TEST-VAR== ; BY ==FOURTH-MATCH==.
+       PROCEDURE        DIVISION.
+           DISPLAY FIRST-MATCH NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([COPY: partial replacement])
+AT_KEYWORDS([copy])
+
+AT_DATA([copy.inc], [
+       01 :TEST:-VAR PIC X(2) VALUE "OK".
+       01 (TEST)-VAR PIC X(2) VALUE "OK".
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       COPY "copy.inc"
+          REPLACING ==:TEST:== BY ==COLON==
+                    ==(TEST)== BY ==PAREN==.
+       PROCEDURE        DIVISION.
+           DISPLAY COLON-VAR NO ADVANCING
+           END-DISPLAY.
+           DISPLAY PAREN-VAR NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OKOK])
+
+AT_CLEANUP
+
+AT_SETUP([COPY: LEADING replacement])
+AT_KEYWORDS([copy])
+
+AT_DATA([copy.inc], [
+       01  TEST-VAR PIC X(2) VALUE "OK".
+       01  NORM-VAR PIC X(2) VALUE "OK".
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       COPY "copy.inc"
+            REPLACING LEADING ==TEST== BY ==FIRST==
+                      LEADING ==NORM== BY ==SECOND==.
+       PROCEDURE        DIVISION.
+           DISPLAY FIRST-VAR NO ADVANCING
+           END-DISPLAY.
+           DISPLAY SECOND-VAR NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OKOK])
+
+AT_CLEANUP
+
+AT_SETUP([COPY: TRAILING replacement])
+AT_KEYWORDS([copy])
+
+AT_DATA([copy.inc], [
+       01  TEST-FIRST  PIC X(2) VALUE "OK".
+       01  TEST-SECOND PIC X(2) VALUE "OK".
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       COPY "copy.inc"
+            REPLACING TRAILING ==FIRST== BY ==VAR1==
+                      TRAILING ==SECOND== BY ==VAR2==.
+       PROCEDURE        DIVISION.
+           DISPLAY TEST-VAR1 NO ADVANCING
+           END-DISPLAY.
+           DISPLAY TEST-VAR2 NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OKOK])
+
+AT_CLEANUP
+
+AT_SETUP([COPY: recursive replacement])
+AT_KEYWORDS([copy])
+
+AT_DATA([copy-2.inc], [
+       01 TEST-VAR PIC X(2) VALUE "OK".
+])
+
+AT_DATA([copy-1.inc], [
+       COPY "copy-2.inc".
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       COPY "copy-1.inc"
+           REPLACING ==TEST-VAR== BY ==COPY-VAR==.
+       PROCEDURE        DIVISION.
+           DISPLAY COPY-VAR NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+AT_SETUP([COPY: fixed/free format])
+AT_KEYWORDS([copy])
+
+AT_DATA([copy.inc], [
+       >>SOURCE FIXED
+       01 TEST-VAR PIC X(2) VALUE "OK".
+])
+
+AT_DATA([prog.cob], [
+  IDENTIFICATION   DIVISION.
+  PROGRAM-ID.      prog.
+  DATA             DIVISION.
+  WORKING-STORAGE  SECTION.
+  COPY "copy.inc".
+  PROCEDURE        DIVISION.
+   DISPLAY TEST-VAR NO ADVANCING
+   END-DISPLAY.
+   STOP RUN.
+])
+
+AT_CHECK([$COMPILE -free prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
+
+AT_CLEANUP

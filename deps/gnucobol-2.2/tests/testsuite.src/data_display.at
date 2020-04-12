@@ -1,0 +1,222 @@
+## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch, Brian Tiffin
+## 
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+AT_SETUP([DISPLAY: Sign ASCII])
+AT_KEYWORDS([display])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X(5).
+         02 X-9         REDEFINES X PIC 9(4).
+         02 X-S9        REDEFINES X PIC S9(4).
+         02 X-S9-L      REDEFINES X PIC S9(4) LEADING.
+         02 X-S9-LS     REDEFINES X PIC S9(4) LEADING SEPARATE.
+         02 X-S9-T      REDEFINES X PIC S9(4) TRAILING.
+         02 X-S9-TS     REDEFINES X PIC S9(4) TRAILING SEPARATE.
+       PROCEDURE        DIVISION.
+           MOVE ZERO TO X. MOVE  1234 TO X-9.     DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE  1234 TO X-S9.    DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE -1234 TO X-S9.    DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE  1234 TO X-S9-L.  DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE -1234 TO X-S9-L.  DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE  1234 TO X-S9-LS. DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE -1234 TO X-S9-LS. DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE  1234 TO X-S9-T.  DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE -1234 TO X-S9-T.  DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE  1234 TO X-S9-TS. DISPLAY X
+           END-DISPLAY.
+           MOVE ZERO TO X. MOVE -1234 TO X-S9-TS. DISPLAY X
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fsign=ascii prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[12340
+12340
+123t0
+12340
+q2340
++1234
+-1234
+12340
+123t0
+1234+
+1234-
+])
+
+AT_CLEANUP
+
+AT_SETUP([DISPLAY: Sign ASCII (2)])
+AT_KEYWORDS([display])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X(10).
+         02 X-S99       REDEFINES X PIC S99.
+         02 X-S9        REDEFINES X PIC S9 OCCURS 10.
+       PROCEDURE        DIVISION.
+           MOVE 0 TO X-S9(1).
+           MOVE 1 TO X-S9(2).
+           MOVE 2 TO X-S9(3).
+           MOVE 3 TO X-S9(4).
+           MOVE 4 TO X-S9(5).
+           MOVE 5 TO X-S9(6).
+           MOVE 6 TO X-S9(7).
+           MOVE 7 TO X-S9(8).
+           MOVE 8 TO X-S9(9).
+           MOVE 9 TO X-S9(10).
+           DISPLAY X NO ADVANCING
+           END-DISPLAY.
+           MOVE -10 TO X-S99. MOVE X(2:1) TO X(1:1).
+           MOVE -1 TO X-S9(2).
+           MOVE -2 TO X-S9(3).
+           MOVE -3 TO X-S9(4).
+           MOVE -4 TO X-S9(5).
+           MOVE -5 TO X-S9(6).
+           MOVE -6 TO X-S9(7).
+           MOVE -7 TO X-S9(8).
+           MOVE -8 TO X-S9(9).
+           MOVE -9 TO X-S9(10).
+           DISPLAY X NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fsign=ascii prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0123456789pqrstuvwxy])
+
+AT_CLEANUP
+
+
+AT_SETUP([DISPLAY: Sign EBCDIC])
+AT_KEYWORDS([display])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X(10).
+         02 X-S99       REDEFINES X PIC S99.
+         02 X-S9        REDEFINES X PIC S9 OCCURS 10.
+       PROCEDURE        DIVISION.
+           MOVE 0 TO X-S9(1).
+           MOVE 1 TO X-S9(2).
+           MOVE 2 TO X-S9(3).
+           MOVE 3 TO X-S9(4).
+           MOVE 4 TO X-S9(5).
+           MOVE 5 TO X-S9(6).
+           MOVE 6 TO X-S9(7).
+           MOVE 7 TO X-S9(8).
+           MOVE 8 TO X-S9(9).
+           MOVE 9 TO X-S9(10).
+           DISPLAY X NO ADVANCING
+           END-DISPLAY.
+           MOVE -10 TO X-S99. MOVE X(2:1) TO X(1:1).
+           MOVE -1 TO X-S9(2).
+           MOVE -2 TO X-S9(3).
+           MOVE -3 TO X-S9(4).
+           MOVE -4 TO X-S9(5).
+           MOVE -5 TO X-S9(6).
+           MOVE -6 TO X-S9(7).
+           MOVE -7 TO X-S9(8).
+           MOVE -8 TO X-S9(9).
+           MOVE -9 TO X-S9(10).
+           DISPLAY X NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fsign=ebcdic prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [{ABCDEFGHI}JKLMNOPQR])
+
+AT_CLEANUP
+
+AT_SETUP([DISPLAY: unsigned])
+AT_KEYWORDS([display])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-BCU         BINARY-CHAR   UNSIGNED.
+       01 X-BSU         BINARY-SHORT  UNSIGNED.
+       01 X-BIU         BINARY-INT    UNSIGNED.
+       01 X-BLU         BINARY-LONG   UNSIGNED.
+       01 X-BDU         BINARY-DOUBLE UNSIGNED.
+       01 X-US          UNSIGNED-SHORT.
+       01 X-UI          UNSIGNED-INT.
+       PROCEDURE        DIVISION.
+           MOVE 127 TO X-BCU.               DISPLAY X-BCU END-DISPLAY.  
+           ADD 1 TO X-BCU END-ADD.          DISPLAY X-BCU END-DISPLAY.  
+           MOVE 32767 TO X-BSU.             DISPLAY X-BSU END-DISPLAY.  
+           ADD 1 TO X-BSU END-ADD.          DISPLAY X-BSU END-DISPLAY.  
+           MOVE 2147483647 TO X-BIU.        DISPLAY X-BIU END-DISPLAY.  
+           ADD 1 TO X-BIU END-ADD.          DISPLAY X-BIU END-DISPLAY.  
+           MOVE 2147483647 TO X-BLU.        DISPLAY X-BLU END-DISPLAY.  
+           ADD 1 TO X-BLU END-ADD.          DISPLAY X-BLU END-DISPLAY.  
+           MOVE 9223372036854775807 TO X-BDU. DISPLAY X-BDU END-DISPLAY.
+           ADD 1 TO X-BDU END-ADD.          DISPLAY X-BDU END-DISPLAY.  
+           MOVE 32767 TO X-US.              DISPLAY X-US  END-DISPLAY.  
+           ADD 1 TO X-US END-ADD.           DISPLAY X-US  END-DISPLAY.  
+           MOVE 2147483647 TO X-UI.         DISPLAY X-UI  END-DISPLAY.  
+           ADD 1 TO X-UI END-ADD.           DISPLAY X-UI  END-DISPLAY.  
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[127
+128
+32767
+32768
+2147483647
+2147483648
+2147483647
+2147483648
+09223372036854775807
+09223372036854775808
+32767
+32768
+2147483647
+2147483648
+])
+
+AT_CLEANUP

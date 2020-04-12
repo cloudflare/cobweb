@@ -1,0 +1,3832 @@
+## Copyright (C) 2014-2015 Free Software Foundation, Inc.
+## Written by Ron Norman
+##
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2002 REPORT WRITER module
+
+
+AT_SETUP([REPORT BUG1])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      *>****************************************************************
+      *> 11NOV2013 BUG 001 - RWCS Presents RF before it presents the  **
+      *>                     last PF                                  **
+      *>****************************************************************
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT REPORT-FILE     ASSIGN TO EXTERNAL PRINTOUT
+                                       LINE SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  REPORT-FILE
+           REPORT IS RWCS-Report.
+       WORKING-STORAGE SECTION.
+       REPORT SECTION.
+       RD  RWCS-Report
+           PAGE LIMIT 12
+               HEADING 1
+               FIRST DETAIL 4
+               LAST DETAIL 7.
+               
+       01  TYPE REPORT HEADING LINE 1.
+           05 COL 1 VALUE 'RH'.
+           
+       01  TYPE PAGE HEADING LINE PLUS 1.
+           05 COL 1 VALUE 'PH'.
+              
+       01  Detail-Line TYPE DETAIL LINE PLUS 1.
+           05 COL 1 VALUE 'DE'.
+
+       01  TYPE PAGE FOOTING LINE NUMBER 10.
+           05 COL 1 VALUE 'PF'.
+              
+       01  TYPE REPORT FOOTING LINE NUMBER PLUS 1.
+           05 COL 1 VALUE 'RF'.
+
+       PROCEDURE DIVISION.
+       010-Main SECTION.
+       1.  OPEN OUTPUT REPORT-FILE
+           INITIATE RWCS-Report
+           GENERATE Detail-Line
+           GENERATE Detail-Line
+           GENERATE Detail-Line
+           GENERATE Detail-Line
+           GENERATE Detail-Line
+           GENERATE Detail-Line
+           GENERATE Detail-Line
+           GENERATE Detail-Line
+           TERMINATE RWCS-Report
+           CLOSE REPORT-FILE
+           .
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+
+AT_CHECK([DD_PRINTOUT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [RH
+PH
+
+DE
+DE
+DE
+DE
+
+
+PF
+
+
+PH
+
+
+DE
+DE
+DE
+DE
+
+
+
+PF
+
+
+RF
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([REPORT COL PLUS])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      *>****************************************************************
+      *> 11NOV2013 BUG 002 - RWCS Treats "COL PLUS n" the same as     **
+      *>                     "COL n".                                 **
+      *>****************************************************************
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT REPORT-FILE          ASSIGN TO EXTERNAL PRINTOUT
+                                       LINE SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  REPORT-FILE
+           REPORT IS RWCS-Report.
+       WORKING-STORAGE SECTION.
+       REPORT SECTION.
+       RD  RWCS-Report
+           PAGE LIMIT 12
+               HEADING 1
+               FIRST DETAIL 4
+               LAST DETAIL 7.
+               
+       01  Detail-Line TYPE DETAIL.
+           05 LINE NUMBER PLUS 1.
+              10 COL 1      PIC X(20)  VALUE '12345678901234567890'.
+              10 COL PLUS 2 PIC X(4)   VALUE 'ABCD'.
+              10 COL 30     PIC X(1)   VALUE '!'.
+
+       PROCEDURE DIVISION.
+       010-Main SECTION.
+       1.  OPEN OUTPUT REPORT-FILE
+           INITIATE RWCS-Report
+           GENERATE Detail-Line
+           TERMINATE RWCS-Report
+           CLOSE REPORT-FILE
+           .
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+
+AT_CHECK([DD_PRINTOUT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [
+
+
+12345678901234567890  ABCD   !
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([REPORT BUG3])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      *>****************************************************************
+      *> 11NOV2013 BUG 003 - RWCS causes "Abort trap 6" if an attempt **
+      *>                     is made to overwrite previous field on   **
+      *>                     a line                                   **
+      *>****************************************************************
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT REPORT-FILE          ASSIGN TO EXTERNAL PRINTOUT
+                                       LINE SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  REPORT-FILE
+           REPORT IS RWCS-Report.
+       WORKING-STORAGE SECTION.
+       REPORT SECTION.
+       RD  RWCS-Report
+           PAGE LIMIT 12
+               HEADING 1
+               FIRST DETAIL 4
+               LAST DETAIL 7.
+
+       01  Detail-Line TYPE DETAIL.
+           05 LINE NUMBER PLUS 1.
+              10 COL 1      PIC X(20)  VALUE '12345678901234567890'.
+              10 COL 10     PIC X(4)   VALUE 'ABCD'.
+
+       PROCEDURE DIVISION.
+       010-Main SECTION.
+       1.  OPEN OUTPUT REPORT-FILE
+           INITIATE RWCS-Report
+           GENERATE Detail-Line
+           TERMINATE RWCS-Report
+           CLOSE REPORT-FILE
+           .
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+
+AT_CHECK([DD_PRINTOUT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [
+
+
+123456789ABCD
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([EMPTY REPORT])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      *>****************************************************************
+      *> 11NOV2013 BUG 004 - RWCS INITIATE TERMINATE W/O GENERATE     **
+      *>                     IS NOT SUPPOSED TO PRODUCE ANY OUTPUT    **
+      *>****************************************************************
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT REPORT-FILE          ASSIGN TO EXTERNAL PRINTOUT
+                                       LINE SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  REPORT-FILE
+           REPORT IS RWCS-Report.
+       WORKING-STORAGE SECTION.
+       REPORT SECTION.
+       RD  RWCS-Report
+           PAGE LIMIT 12
+               HEADING 1
+               FIRST DETAIL 4
+               LAST DETAIL 7
+           CONTROL IS FINAL.
+
+       01  TYPE REPORT HEADING LINE 1.
+           05 COL 1 VALUE 'RH'.
+
+       01  TYPE PAGE HEADING LINE PLUS 1.
+           05 COL 1 VALUE 'PH'.
+
+       01  Detail-Line TYPE DETAIL LINE PLUS 1.
+           05 COL 1 VALUE 'DE'.
+
+       01  TYPE CONTROL FOOTING FINAL.
+           05 COL 1 VALUE 'CFF'.
+
+       01  TYPE PAGE FOOTING LINE NUMBER 10.
+           05 COL 1 VALUE 'PF'.
+
+       01  TYPE REPORT FOOTING LINE NUMBER 1.
+           05 COL 1 VALUE 'RF'.
+
+       PROCEDURE DIVISION.
+       010-Main SECTION.
+       1.  OPEN OUTPUT REPORT-FILE
+           INITIATE RWCS-Report
+           TERMINATE RWCS-Report
+           CLOSE REPORT-FILE
+           .
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+
+AT_CHECK([DD_PRINTOUT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([Customer Report])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
+0152 J. LANGDON       64025 00945
+0152 J. LANGDON       41915 01370
+0152 J. LANGDON       17410 00251
+2468 L. MORRISEY      18520 00375
+2468 L. MORRISEY      20012 00420
+2468 L. MORRISEY      31572 01015
+2468 L. MORRISEY      48792 03750
+2468 L. MORRISEY      50407 01515
+2468 L. MORRISEY      61575 02010
+2468 L. MORRISEY      79204 05170
+2468 L. MORRISEY      85075 03784
+2468 L. MORRISEY      98476 08794
+3451 M. JACKSON       37847 02790
+3451 M. JACKSON       58492 06850
+3451 M. JACKSON       60010 02040
+3451 M. JACKSON       85260 07852
+3451 M. JACKSON       90520 02752
+4512 S. LEVITT        24680 03050
+4512 S. LEVITT        56784 05253
+4512 S. LEVITT        60410 01215
+4512 S. LEVITT        78952 08925
+4512 S. LEVITT        85278 04975
+4512 S. LEVITT        87492 06425
+4512 S. LEVITT        97204 08475
+5417 K. CONKLIN       13579 03572
+5417 K. CONKLIN       24615 01875
+5417 K. CONKLIN       34928 03745
+5417 K. CONKLIN       48527 08750
+5417 K. CONKLIN       50150 01895
+5417 K. CONKLIN       54652 03892
+5417 K. CONKLIN       59765 09895
+5417 K. CONKLIN       71572 01895
+5417 K. CONKLIN       85175 08010
+5417 K. CONKLIN       90275 00460
+5417 K. CONKLIN       91572 01857
+5417 K. CONKLIN       97576 08495
+6213 Z. HAMPTON       15792 06425
+6213 Z. HAMPTON       19975 09875
+6213 Z. HAMPTON       34576 05115
+6213 Z. HAMPTON       49512 08520
+7545 M. LARSON        14676 03845
+7545 M. LARSON        18592 08251
+7545 M. LARSON        19994 09898
+7545 M. LARSON        21214 01515
+7545 M. LARSON        37515 08212
+7545 M. LARSON        38592 09615
+7545 M. LARSON        48485 08714
+7545 M. LARSON        52762 03792
+7545 M. LARSON        57684 08015
+7545 M. LARSON        79015 09625
+7545 M. LARSON        80123 00560
+7545 M. LARSON        82462 02015
+7545 M. LARSON        91520 01815
+7545 M. LARSON        93715 04015
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      
+      * ************************************************************* *
+      * REPORT WRITER EXAMPLE #1.                                     *
+      * ************************************************************* *
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      
+           SELECT TRANSACTION-DATA
+               ASSIGN TO EXTERNAL DATAIN
+                         ORGANIZATION IS LINE SEQUENTIAL.
+      
+           SELECT REPORT-FILE
+               ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+      
+       DATA DIVISION.
+       FILE SECTION.
+      
+       FD  TRANSACTION-DATA
+           LABEL RECORDS ARE OMITTED
+           BLOCK CONTAINS 0 RECORDS
+           RECORD CONTAINS 80 CHARACTERS
+           DATA RECORD IS TRANSACTION-RECORD.
+      
+       01  TRANSACTION-RECORD.
+           03  TR-CUSTOMER-NUMBER      PIC 9(04).
+           03  FILLER                  PIC X(01).
+           03  TR-CUSTOMER-NAME        PIC X(16).
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-NUMBER          PIC 9(05).
+           03  FILLER                  REDEFINES TR-ITEM-NUMBER.
+               05  TR-ITEM-DEPARTMENT  PIC 9(01).
+               05  FILLER              PIC 9(04).
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-COST            PIC 9(03)V99.
+           03  FILLER                  PIC X(47).
+      
+       FD  REPORT-FILE
+           LABEL RECORDS ARE OMITTED
+           REPORT IS CUSTOMER-REPORT.
+      
+       WORKING-STORAGE SECTION.
+       77  END-OF-FILE-SWITCH          PIC X(1)    VALUE 'N'.
+           88  END-OF-FILE                         VALUE 'Y'.
+      
+       REPORT SECTION.
+       RD  CUSTOMER-REPORT
+           PAGE LIMIT IS 66 LINES
+           HEADING 1
+           FIRST DETAIL 5
+           LAST DETAIL 58.
+      
+       01  PAGE-HEAD-GROUP TYPE PAGE HEADING.
+           02  LINE 1.
+               03  COLUMN 27   PIC X(41) VALUE
+                   'C U S T O M E R  C H A R G E  R E P O R T'.
+           02  LINE PLUS 2.
+               03  COLUMN 01   PIC X(09) VALUE 'CUST. NO.'.
+               03  COLUMN 15   PIC X(10) VALUE 'CUST. NAME'.
+               03  COLUMN 30   PIC X(05) VALUE 'DEPT.'.
+               03  COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
+               03  COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
+      
+       01  CHARGE-DETAIL TYPE DETAIL.
+           02  LINE PLUS 1.
+               03  COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
+               03  COLUMN 10   PIC X(16) SOURCE TR-CUSTOMER-NAME.
+               03  COLUMN 32   PIC 9(01) SOURCE TR-ITEM-DEPARTMENT.
+               03  COLUMN 40   PIC 9(05) SOURCE TR-ITEM-NUMBER.
+               03  COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
+      
+       PROCEDURE DIVISION.
+      
+       000-INITIATE.
+      
+           OPEN INPUT TRANSACTION-DATA,
+                OUTPUT REPORT-FILE.
+      
+           INITIATE CUSTOMER-REPORT.
+      
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      *    END-READ.
+      
+           PERFORM 100-PROCESS-TRANSACTION-DATA THRU 199-EXIT
+               UNTIL END-OF-FILE.
+      
+       000-TERMINATE.
+           TERMINATE CUSTOMER-REPORT.
+      
+           CLOSE TRANSACTION-DATA,
+                 REPORT-FILE.
+      
+           STOP RUN.
+      
+       100-PROCESS-TRANSACTION-DATA.
+           GENERATE CHARGE-DETAIL.
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      *    END-READ.
+      
+       199-EXIT.
+           EXIT.
+      
+      
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob],  [0], [],
+[prog.cob: 26: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 28: warning: RECORD clause ignored for LINE SEQUENTIAL
+prog.cob: 29: warning: DATA RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 45: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+])
+
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [                          C U S T O M E R  C H A R G E  R E P O R T
+
+CUST. NO.     CUST. NAME     DEPT.    ITEM NO.    ITEM COST
+
+   152   J. LANGDON            8       87653       $24.75
+   152   J. LANGDON            6       64025        $9.45
+   152   J. LANGDON            4       41915       $13.70
+   152   J. LANGDON            1       17410        $2.51
+  2468   L. MORRISEY           1       18520        $3.75
+  2468   L. MORRISEY           2       20012        $4.20
+  2468   L. MORRISEY           3       31572       $10.15
+  2468   L. MORRISEY           4       48792       $37.50
+  2468   L. MORRISEY           5       50407       $15.15
+  2468   L. MORRISEY           6       61575       $20.10
+  2468   L. MORRISEY           7       79204       $51.70
+  2468   L. MORRISEY           8       85075       $37.84
+  2468   L. MORRISEY           9       98476       $87.94
+  3451   M. JACKSON            3       37847       $27.90
+  3451   M. JACKSON            5       58492       $68.50
+  3451   M. JACKSON            6       60010       $20.40
+  3451   M. JACKSON            8       85260       $78.52
+  3451   M. JACKSON            9       90520       $27.52
+  4512   S. LEVITT             2       24680       $30.50
+  4512   S. LEVITT             5       56784       $52.53
+  4512   S. LEVITT             6       60410       $12.15
+  4512   S. LEVITT             7       78952       $89.25
+  4512   S. LEVITT             8       85278       $49.75
+  4512   S. LEVITT             8       87492       $64.25
+  4512   S. LEVITT             9       97204       $84.75
+  5417   K. CONKLIN            1       13579       $35.72
+  5417   K. CONKLIN            2       24615       $18.75
+  5417   K. CONKLIN            3       34928       $37.45
+  5417   K. CONKLIN            4       48527       $87.50
+  5417   K. CONKLIN            5       50150       $18.95
+  5417   K. CONKLIN            5       54652       $38.92
+  5417   K. CONKLIN            5       59765       $98.95
+  5417   K. CONKLIN            7       71572       $18.95
+  5417   K. CONKLIN            8       85175       $80.10
+  5417   K. CONKLIN            9       90275        $4.60
+  5417   K. CONKLIN            9       91572       $18.57
+  5417   K. CONKLIN            9       97576       $84.95
+  6213   Z. HAMPTON            1       15792       $64.25
+  6213   Z. HAMPTON            1       19975       $98.75
+  6213   Z. HAMPTON            3       34576       $51.15
+  6213   Z. HAMPTON            4       49512       $85.20
+  7545   M. LARSON             1       14676       $38.45
+  7545   M. LARSON             1       18592       $82.51
+  7545   M. LARSON             1       19994       $98.98
+  7545   M. LARSON             2       21214       $15.15
+  7545   M. LARSON             3       37515       $82.12
+  7545   M. LARSON             3       38592       $96.15
+  7545   M. LARSON             4       48485       $87.14
+  7545   M. LARSON             5       52762       $37.92
+  7545   M. LARSON             5       57684       $80.15
+  7545   M. LARSON             7       79015       $96.25
+  7545   M. LARSON             8       80123        $5.60
+  7545   M. LARSON             8       82462       $20.15
+  7545   M. LARSON             9       91520       $18.15
+
+
+
+
+
+
+
+
+                          C U S T O M E R  C H A R G E  R E P O R T
+
+CUST. NO.     CUST. NAME     DEPT.    ITEM NO.    ITEM COST
+
+  7545   M. LARSON             9       93715       $40.15
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([Charge Report])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
+0152 J. LANGDON       64025 00945
+0152 J. LANGDON       41915 01370
+0152 J. LANGDON       17410 00251
+2468 L. MORRISEY      18520 00375
+2468 L. MORRISEY      20012 00420
+2468 L. MORRISEY      31572 01015
+2468 L. MORRISEY      48792 03750
+2468 L. MORRISEY      50407 01515
+2468 L. MORRISEY      61575 02010
+2468 L. MORRISEY      79204 05170
+2468 L. MORRISEY      85075 03784
+2468 L. MORRISEY      98476 08794
+3451 M. JACKSON       37847 02790
+3451 M. JACKSON       58492 06850
+3451 M. JACKSON       60010 02040
+3451 M. JACKSON       85260 07852
+3451 M. JACKSON       90520 02752
+4512 S. LEVITT        24680 03050
+4512 S. LEVITT        56784 05253
+4512 S. LEVITT        60410 01215
+4512 S. LEVITT        78952 08925
+4512 S. LEVITT        85278 04975
+4512 S. LEVITT        87492 06425
+4512 S. LEVITT        97204 08475
+5417 K. CONKLIN       13579 03572
+5417 K. CONKLIN       24615 01875
+5417 K. CONKLIN       34928 03745
+5417 K. CONKLIN       48527 08750
+5417 K. CONKLIN       50150 01895
+5417 K. CONKLIN       54652 03892
+5417 K. CONKLIN       59765 09895
+5417 K. CONKLIN       71572 01895
+5417 K. CONKLIN       85175 08010
+5417 K. CONKLIN       90275 00460
+5417 K. CONKLIN       91572 01857
+5417 K. CONKLIN       97576 08495
+6213 Z. HAMPTON       15792 06425
+6213 Z. HAMPTON       19975 09875
+6213 Z. HAMPTON       34576 05115
+6213 Z. HAMPTON       49512 08520
+7545 M. LARSON        14676 03845
+7545 M. LARSON        18592 08251
+7545 M. LARSON        19994 09898
+7545 M. LARSON        21214 01515
+7545 M. LARSON        37515 08212
+7545 M. LARSON        38592 09615
+7545 M. LARSON        48485 08714
+7545 M. LARSON        52762 03792
+7545 M. LARSON        57684 08015
+7545 M. LARSON        79015 09625
+7545 M. LARSON        80123 00560
+7545 M. LARSON        82462 02015
+7545 M. LARSON        91520 01815
+7545 M. LARSON        93715 04015
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      * ************************************************************* *
+      * REPORT WRITER EXAMPLE #2.                                     *
+      * ************************************************************* *
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      
+           SELECT TRANSACTION-DATA
+               ASSIGN TO EXTERNAL DATAIN
+                         ORGANIZATION IS LINE SEQUENTIAL.
+      
+           SELECT REPORT-FILE
+               ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+      
+       DATA DIVISION.
+       FILE SECTION.
+      
+       FD  TRANSACTION-DATA
+           LABEL RECORDS ARE OMITTED
+           BLOCK CONTAINS 0 RECORDS
+           RECORD CONTAINS 80 CHARACTERS
+           DATA RECORD IS TRANSACTION-RECORD.
+      
+       01  TRANSACTION-RECORD.
+           03  TR-CUSTOMER-NUMBER      PIC 9(04).
+           03  FILLER                  PIC X(01).
+           03  TR-CUSTOMER-NAME        PIC X(16).
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-NUMBER          PIC 9(05).
+           03  FILLER                  REDEFINES TR-ITEM-NUMBER.
+               05  TR-ITEM-DEPARTMENT  PIC 9(01).
+               05  FILLER              PIC 9(04).
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-COST            PIC 9(03)V99.
+           03  FILLER                  PIC X(47).
+      
+       FD  REPORT-FILE
+           LABEL RECORDS ARE OMITTED
+           REPORT IS CUSTOMER-REPORT.
+      
+       WORKING-STORAGE SECTION.
+       77  END-OF-FILE-SWITCH          PIC X(1)    VALUE 'N'.
+           88  END-OF-FILE                         VALUE 'Y'.
+      
+       01  DISCOUNT-TABLE.
+           02  FILLER                  PIC 99      VALUE 05.
+           02  FILLER                  PIC 99      VALUE 07.
+           02  FILLER                  PIC 99      VALUE 10.
+           02  FILLER                  PIC 99      VALUE 15.
+           02  FILLER                  PIC 99      VALUE 06.
+           02  FILLER                  PIC 99      VALUE 22.
+           02  FILLER                  PIC 99      VALUE 12.
+           02  FILLER                  PIC 99      VALUE 09.
+           02  FILLER                  PIC 99      VALUE 20.
+       01  FILLER                      REDEFINES DISCOUNT-TABLE.
+           02  DISCOUNT                OCCURS 9 TIMES
+                                       INDEXED BY DISCOUNT-IX
+                                       PIC V99.
+      
+       01  CALCULATED-FIELDS.
+           03  WS-DISCOUNT-AMT         PIC 9(3)V99.
+           03  WS-CHARGE-AMT           PIC 9(3)V99.
+      
+       REPORT SECTION.
+       RD  CUSTOMER-REPORT
+           CONTROL IS TR-CUSTOMER-NUMBER
+           PAGE LIMIT IS 66 LINES
+           HEADING 1
+           FIRST DETAIL 5
+           LAST DETAIL 58.
+      
+       01  PAGE-HEAD-GROUP TYPE PAGE HEADING.
+           02  LINE 1.
+               03  COLUMN 27   PIC X(41) VALUE
+                   'C U S T O M E R  C H A R G E  R E P O R T'.
+               03  COLUMN 90   PIC X(04) VALUE 'PAGE'.
+               03  COLUMN 95   PIC ZZZZ9 SOURCE PAGE-COUNTER.
+           02  LINE PLUS 2.
+               03  COLUMN 01   PIC X(09) VALUE 'CUST. NO.'.
+               03  COLUMN 15   PIC X(10) VALUE 'CUST. NAME'.
+               03  COLUMN 30   PIC X(05) VALUE 'DEPT.'.
+               03  COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
+               03  COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
+               03  COLUMN 64   PIC X(08) VALUE 'DISCT. %'.
+               03  COLUMN 76   PIC X(11) VALUE 'DISCT. AMT.'.
+               03  COLUMN 91   PIC X(06) VALUE 'CHARGE'.
+      
+       01  CHARGE-DETAIL TYPE DETAIL.
+           02  LINE PLUS 1.
+               03  COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
+               03  COLUMN 10   PIC X(16) SOURCE TR-CUSTOMER-NAME.
+               03  COLUMN 32   PIC 9(01) SOURCE TR-ITEM-DEPARTMENT.
+               03  COLUMN 40   PIC 9(05) SOURCE TR-ITEM-NUMBER.
+               03  COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
+               03  COLUMN 67   PIC V99 SOURCE DISCOUNT (DISCOUNT-IX).
+               03  COLUMN 69   PIC X(01) VALUE '%'.
+               03  COLUMN 78   PIC $$$$.99 SOURCE WS-DISCOUNT-AMT.
+               03  COLUMN 93   PIC $$$$.99 SOURCE WS-CHARGE-AMT.
+      
+       01  CUSTOMER-TOTAL TYPE CONTROL FOOTING TR-CUSTOMER-NUMBER
+           NEXT GROUP IS PLUS 2.
+           02  LINE PLUS 1.
+               03  COLUMN 92   PIC $$$$$.99 SUM WS-CHARGE-AMT.
+               03  COLUMN 101  PIC X VALUE '*'.
+      
+       PROCEDURE DIVISION.
+      
+       000-INITIATE.
+      
+           OPEN INPUT TRANSACTION-DATA,
+                OUTPUT REPORT-FILE.
+      
+           INITIATE CUSTOMER-REPORT.
+      
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH
+           END-READ.
+      
+           PERFORM 100-PROCESS-TRANSACTION-DATA THRU 199-EXIT
+               UNTIL END-OF-FILE.
+      
+       000-TERMINATE.
+           TERMINATE CUSTOMER-REPORT.
+      
+           CLOSE TRANSACTION-DATA,
+                 REPORT-FILE.
+      
+           STOP RUN.
+      
+       100-PROCESS-TRANSACTION-DATA.
+           SET DISCOUNT-IX TO TR-ITEM-DEPARTMENT.
+           COMPUTE WS-DISCOUNT-AMT ROUNDED =
+               TR-ITEM-COST * DISCOUNT (DISCOUNT-IX).
+           COMPUTE WS-CHARGE-AMT =
+               TR-ITEM-COST - WS-DISCOUNT-AMT.
+           GENERATE CHARGE-DETAIL.
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH
+           END-READ.
+      
+       199-EXIT.
+           EXIT.
+      
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob],  [0], [],
+[prog.cob: 25: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 27: warning: RECORD clause ignored for LINE SEQUENTIAL
+prog.cob: 28: warning: DATA RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 44: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+])
+
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [                          C U S T O M E R  C H A R G E  R E P O R T                      PAGE     1
+
+CUST. NO.     CUST. NAME     DEPT.    ITEM NO.    ITEM COST    DISCT. %    DISCT. AMT.    CHARGE
+
+   152   J. LANGDON            8       87653       $24.75         09%          $2.23         $22.52
+   152   J. LANGDON            6       64025        $9.45         22%          $2.08          $7.37
+   152   J. LANGDON            4       41915       $13.70         15%          $2.06         $11.64
+   152   J. LANGDON            1       17410        $2.51         05%           $.13          $2.38
+                                                                                             $43.91 *
+
+
+  2468   L. MORRISEY           1       18520        $3.75         05%           $.19          $3.56
+  2468   L. MORRISEY           2       20012        $4.20         07%           $.29          $3.91
+  2468   L. MORRISEY           3       31572       $10.15         10%          $1.02          $9.13
+  2468   L. MORRISEY           4       48792       $37.50         15%          $5.63         $31.87
+  2468   L. MORRISEY           5       50407       $15.15         06%           $.91         $14.24
+  2468   L. MORRISEY           6       61575       $20.10         22%          $4.42         $15.68
+  2468   L. MORRISEY           7       79204       $51.70         12%          $6.20         $45.50
+  2468   L. MORRISEY           8       85075       $37.84         09%          $3.41         $34.43
+  2468   L. MORRISEY           9       98476       $87.94         20%         $17.59         $70.35
+                                                                                            $228.67 *
+
+
+  3451   M. JACKSON            3       37847       $27.90         10%          $2.79         $25.11
+  3451   M. JACKSON            5       58492       $68.50         06%          $4.11         $64.39
+  3451   M. JACKSON            6       60010       $20.40         22%          $4.49         $15.91
+  3451   M. JACKSON            8       85260       $78.52         09%          $7.07         $71.45
+  3451   M. JACKSON            9       90520       $27.52         20%          $5.50         $22.02
+                                                                                            $198.88 *
+
+
+  4512   S. LEVITT             2       24680       $30.50         07%          $2.14         $28.36
+  4512   S. LEVITT             5       56784       $52.53         06%          $3.15         $49.38
+  4512   S. LEVITT             6       60410       $12.15         22%          $2.67          $9.48
+  4512   S. LEVITT             7       78952       $89.25         12%         $10.71         $78.54
+  4512   S. LEVITT             8       85278       $49.75         09%          $4.48         $45.27
+  4512   S. LEVITT             8       87492       $64.25         09%          $5.78         $58.47
+  4512   S. LEVITT             9       97204       $84.75         20%         $16.95         $67.80
+                                                                                            $337.30 *
+
+
+  5417   K. CONKLIN            1       13579       $35.72         05%          $1.79         $33.93
+  5417   K. CONKLIN            2       24615       $18.75         07%          $1.31         $17.44
+  5417   K. CONKLIN            3       34928       $37.45         10%          $3.75         $33.70
+  5417   K. CONKLIN            4       48527       $87.50         15%         $13.13         $74.37
+  5417   K. CONKLIN            5       50150       $18.95         06%          $1.14         $17.81
+  5417   K. CONKLIN            5       54652       $38.92         06%          $2.34         $36.58
+  5417   K. CONKLIN            5       59765       $98.95         06%          $5.94         $93.01
+  5417   K. CONKLIN            7       71572       $18.95         12%          $2.27         $16.68
+  5417   K. CONKLIN            8       85175       $80.10         09%          $7.21         $72.89
+  5417   K. CONKLIN            9       90275        $4.60         20%           $.92          $3.68
+  5417   K. CONKLIN            9       91572       $18.57         20%          $3.71         $14.86
+  5417   K. CONKLIN            9       97576       $84.95         20%         $16.99         $67.96
+                                                                                            $482.91 *
+
+
+  6213   Z. HAMPTON            1       15792       $64.25         05%          $3.21         $61.04
+  6213   Z. HAMPTON            1       19975       $98.75         05%          $4.94         $93.81
+
+
+
+
+
+
+
+
+                          C U S T O M E R  C H A R G E  R E P O R T                      PAGE     2
+
+CUST. NO.     CUST. NAME     DEPT.    ITEM NO.    ITEM COST    DISCT. %    DISCT. AMT.    CHARGE
+
+  6213   Z. HAMPTON            3       34576       $51.15         10%          $5.12         $46.03
+  6213   Z. HAMPTON            4       49512       $85.20         15%         $12.78         $72.42
+                                                                                            $273.30 *
+
+
+  7545   M. LARSON             1       14676       $38.45         05%          $1.92         $36.53
+  7545   M. LARSON             1       18592       $82.51         05%          $4.13         $78.38
+  7545   M. LARSON             1       19994       $98.98         05%          $4.95         $94.03
+  7545   M. LARSON             2       21214       $15.15         07%          $1.06         $14.09
+  7545   M. LARSON             3       37515       $82.12         10%          $8.21         $73.91
+  7545   M. LARSON             3       38592       $96.15         10%          $9.62         $86.53
+  7545   M. LARSON             4       48485       $87.14         15%         $13.07         $74.07
+  7545   M. LARSON             5       52762       $37.92         06%          $2.28         $35.64
+  7545   M. LARSON             5       57684       $80.15         06%          $4.81         $75.34
+  7545   M. LARSON             7       79015       $96.25         12%         $11.55         $84.70
+  7545   M. LARSON             8       80123        $5.60         09%           $.50          $5.10
+  7545   M. LARSON             8       82462       $20.15         09%          $1.81         $18.34
+  7545   M. LARSON             9       91520       $18.15         20%          $3.63         $14.52
+  7545   M. LARSON             9       93715       $40.15         20%          $8.03         $32.12
+                                                                                            $723.30 *
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([Charge Report 2])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
+0152 J. LANGDON       64025 00945
+0152 J. LANGDON       41915 01370
+0152 J. LANGDON       17410 00251
+2468 L. MORRISEY      18520 00375
+2468 L. MORRISEY      20012 00420
+2468 L. MORRISEY      31572 01015
+2468 L. MORRISEY      48792 03750
+2468 L. MORRISEY      50407 01515
+2468 L. MORRISEY      61575 02010
+2468 L. MORRISEY      79204 05170
+2468 L. MORRISEY      85075 03784
+2468 L. MORRISEY      98476 08794
+3451 M. JACKSON       37847 02790
+3451 M. JACKSON       58492 06850
+3451 M. JACKSON       60010 02040
+3451 M. JACKSON       85260 07852
+3451 M. JACKSON       90520 02752
+4512 S. LEVITT        24680 03050
+4512 S. LEVITT        56784 05253
+4512 S. LEVITT        60410 01215
+4512 S. LEVITT        78952 08925
+4512 S. LEVITT        85278 04975
+4512 S. LEVITT        87492 06425
+4512 S. LEVITT        97204 08475
+5417 K. CONKLIN       13579 03572
+5417 K. CONKLIN       24615 01875
+5417 K. CONKLIN       34928 03745
+5417 K. CONKLIN       48527 08750
+5417 K. CONKLIN       50150 01895
+5417 K. CONKLIN       54652 03892
+5417 K. CONKLIN       59765 09895
+5417 K. CONKLIN       71572 01895
+5417 K. CONKLIN       85175 08010
+5417 K. CONKLIN       90275 00460
+5417 K. CONKLIN       91572 01857
+5417 K. CONKLIN       97576 08495
+6213 Z. HAMPTON       15792 06425
+6213 Z. HAMPTON       19975 09875
+6213 Z. HAMPTON       34576 05115
+6213 Z. HAMPTON       49512 08520
+7545 M. LARSON        14676 03845
+7545 M. LARSON        18592 08251
+7545 M. LARSON        19994 09898
+7545 M. LARSON        21214 01515
+7545 M. LARSON        37515 08212
+7545 M. LARSON        38592 09615
+7545 M. LARSON        48485 08714
+7545 M. LARSON        52762 03792
+7545 M. LARSON        57684 08015
+7545 M. LARSON        79015 09625
+7545 M. LARSON        80123 00560
+7545 M. LARSON        82462 02015
+7545 M. LARSON        91520 01815
+7545 M. LARSON        93715 04015
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      * ************************************************************* *
+      * REPORT WRITER EXAMPLE #3.                                     *
+      * ************************************************************* *
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      
+           SELECT TRANSACTION-DATA
+               ASSIGN TO EXTERNAL DATAIN
+                         ORGANIZATION IS LINE SEQUENTIAL.
+      
+           SELECT REPORT-FILE
+               ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+      
+       DATA DIVISION.
+       FILE SECTION.
+      
+       FD  TRANSACTION-DATA
+           LABEL RECORDS ARE OMITTED
+           BLOCK CONTAINS 0 RECORDS
+           RECORD CONTAINS 80 CHARACTERS
+           DATA RECORD IS TRANSACTION-RECORD.
+      
+       01  TRANSACTION-RECORD.
+           03  TR-CUSTOMER-NUMBER      PIC 9(04).
+           03  FILLER                  PIC X(01).
+           03  TR-CUSTOMER-NAME        PIC X(16).
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-NUMBER          PIC 9(05).
+           03  FILLER                  REDEFINES TR-ITEM-NUMBER.
+               05  TR-ITEM-DEPARTMENT  PIC 9(01).
+               05  FILLER              PIC 9(04).
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-COST            PIC 9(03)V99.
+           03  FILLER                  PIC X(47).
+      
+       FD  REPORT-FILE
+           LABEL RECORDS ARE OMITTED
+           REPORT IS CUSTOMER-REPORT.
+      
+       WORKING-STORAGE SECTION.
+       77  END-OF-FILE-SWITCH          PIC X(1)    VALUE 'N'.
+           88  END-OF-FILE                         VALUE 'Y'.
+      
+       01  DISCOUNT-TABLE.
+           02  FILLER                  PIC 99      VALUE 05.
+           02  FILLER                  PIC 99      VALUE 07.
+           02  FILLER                  PIC 99      VALUE 10.
+           02  FILLER                  PIC 99      VALUE 15.
+           02  FILLER                  PIC 99      VALUE 06.
+           02  FILLER                  PIC 99      VALUE 22.
+           02  FILLER                  PIC 99      VALUE 12.
+           02  FILLER                  PIC 99      VALUE 09.
+           02  FILLER                  PIC 99      VALUE 20.
+       01  FILLER                      REDEFINES DISCOUNT-TABLE.
+           02  DISCOUNT                OCCURS 9 TIMES
+                                       INDEXED BY DISCOUNT-IX
+                                       PIC V99.
+      
+       01  CALCULATED-FIELDS.
+           03  WS-DISCOUNT-AMT         PIC 9(3)V99.
+           03  WS-CHARGE-AMT           PIC 9(3)V99.
+      
+       REPORT SECTION.
+       RD  CUSTOMER-REPORT
+           CONTROLS ARE FINAL, TR-CUSTOMER-NUMBER
+           PAGE LIMIT IS 66 LINES
+           HEADING 1
+           FIRST DETAIL 5
+           LAST DETAIL 58.
+      
+       01  PAGE-HEAD-GROUP TYPE PAGE HEADING.
+           02  LINE 1.
+               03  COLUMN 27   PIC X(41) VALUE
+                   'C U S T O M E R  C H A R G E  R E P O R T'.
+               03  COLUMN 90   PIC X(04) VALUE 'PAGE'.
+               03  COLUMN 95   PIC ZZZZ9 SOURCE PAGE-COUNTER.
+           02  LINE PLUS 2.
+               03  COLUMN 01   PIC X(09) VALUE 'CUST. NO.'.
+               03  COLUMN 15   PIC X(10) VALUE 'CUST. NAME'.
+               03  COLUMN 30   PIC X(05) VALUE 'DEPT.'.
+               03  COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
+               03  COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
+               03  COLUMN 64   PIC X(08) VALUE 'DISCT. %'.
+               03  COLUMN 76   PIC X(11) VALUE 'DISCT. AMT.'.
+               03  COLUMN 91   PIC X(06) VALUE 'CHARGE'.
+      
+       01  CHARGE-DETAIL TYPE DETAIL.
+           02  LINE PLUS 1.
+               03  COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER
+                                                GROUP INDICATE.
+               03  COLUMN 10   PIC X(16) SOURCE TR-CUSTOMER-NAME
+                                                GROUP INDICATE.
+               03  COLUMN 32   PIC 9(01) SOURCE TR-ITEM-DEPARTMENT.
+               03  COLUMN 40   PIC 9(05) SOURCE TR-ITEM-NUMBER.
+               03  COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
+               03  COLUMN 67   PIC V99 SOURCE DISCOUNT (DISCOUNT-IX).
+               03  COLUMN 69   PIC X(01) VALUE '%'.
+               03  COLUMN 78   PIC $$$$.99 SOURCE WS-DISCOUNT-AMT.
+               03  COLUMN 93   PIC $$$$.99 SOURCE WS-CHARGE-AMT.
+      
+       01  CUSTOMER-TOTAL TYPE CONTROL FOOTING TR-CUSTOMER-NUMBER
+           NEXT GROUP IS PLUS 2.
+           02  LINE PLUS 1.
+               03  COLUMN 50   PIC $$$$$.99 SUM TR-ITEM-COST.
+               03  COLUMN 59   PIC X VALUE '*'.
+               03  COLUMN 77   PIC $$$$$.99 SUM WS-DISCOUNT-AMT.
+               03  COLUMN 86   PIC X VALUE '*'.
+               03  COLUMN 92   PIC $$$$$.99 SUM WS-CHARGE-AMT.
+               03  COLUMN 101  PIC X VALUE '*'.
+      
+       01  FINAL-TOTAL TYPE CONTROL FOOTING FINAL.
+           02  LINE PLUS 1.
+               03  COLUMN 10   PIC X(12) VALUE 'GRAND TOTALS'.
+               03  COLUMN 48   PIC $$$,$$$.99 SUM TR-ITEM-COST.
+               03  COLUMN 59   PIC XX VALUE '**'.
+               03  COLUMN 75   PIC $$$,$$$.99 SUM WS-DISCOUNT-AMT.
+               03  COLUMN 86   PIC XX VALUE '**'.
+               03  COLUMN 90   PIC $$$,$$$.99 SUM WS-CHARGE-AMT.
+               03  COLUMN 101  PIC XX VALUE '**'.
+      
+       PROCEDURE DIVISION.
+      
+       000-INITIATE.
+      
+           OPEN INPUT TRANSACTION-DATA,
+                OUTPUT REPORT-FILE.
+      
+           INITIATE CUSTOMER-REPORT.
+      
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      *    END-READ.
+      
+           PERFORM 100-PROCESS-TRANSACTION-DATA THRU 199-EXIT
+               UNTIL END-OF-FILE.
+      
+       000-TERMINATE.
+           TERMINATE CUSTOMER-REPORT.
+      
+           CLOSE TRANSACTION-DATA,
+               REPORT-FILE.
+      
+           STOP RUN.
+      
+       100-PROCESS-TRANSACTION-DATA.
+           SET DISCOUNT-IX TO TR-ITEM-DEPARTMENT.
+           COMPUTE WS-DISCOUNT-AMT ROUNDED =
+               TR-ITEM-COST * DISCOUNT (DISCOUNT-IX).
+           COMPUTE WS-CHARGE-AMT =
+               TR-ITEM-COST - WS-DISCOUNT-AMT.
+           GENERATE CHARGE-DETAIL.
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      *    END-READ.
+      
+       199-EXIT.
+           EXIT.
+      
+      
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
+[prog.cob: 25: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 27: warning: RECORD clause ignored for LINE SEQUENTIAL
+prog.cob: 28: warning: DATA RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 44: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+])
+
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [                          C U S T O M E R  C H A R G E  R E P O R T                      PAGE     1
+
+CUST. NO.     CUST. NAME     DEPT.    ITEM NO.    ITEM COST    DISCT. %    DISCT. AMT.    CHARGE
+
+   152   J. LANGDON            8       87653       $24.75         09%          $2.23         $22.52
+                               6       64025        $9.45         22%          $2.08          $7.37
+                               4       41915       $13.70         15%          $2.06         $11.64
+                               1       17410        $2.51         05%           $.13          $2.38
+                                                   $50.41 *                    $6.50 *       $43.91 *
+
+
+  2468   L. MORRISEY           1       18520        $3.75         05%           $.19          $3.56
+                               2       20012        $4.20         07%           $.29          $3.91
+                               3       31572       $10.15         10%          $1.02          $9.13
+                               4       48792       $37.50         15%          $5.63         $31.87
+                               5       50407       $15.15         06%           $.91         $14.24
+                               6       61575       $20.10         22%          $4.42         $15.68
+                               7       79204       $51.70         12%          $6.20         $45.50
+                               8       85075       $37.84         09%          $3.41         $34.43
+                               9       98476       $87.94         20%         $17.59         $70.35
+                                                  $268.33 *                   $39.66 *      $228.67 *
+
+
+  3451   M. JACKSON            3       37847       $27.90         10%          $2.79         $25.11
+                               5       58492       $68.50         06%          $4.11         $64.39
+                               6       60010       $20.40         22%          $4.49         $15.91
+                               8       85260       $78.52         09%          $7.07         $71.45
+                               9       90520       $27.52         20%          $5.50         $22.02
+                                                  $222.84 *                   $23.96 *      $198.88 *
+
+
+  4512   S. LEVITT             2       24680       $30.50         07%          $2.14         $28.36
+                               5       56784       $52.53         06%          $3.15         $49.38
+                               6       60410       $12.15         22%          $2.67          $9.48
+                               7       78952       $89.25         12%         $10.71         $78.54
+                               8       85278       $49.75         09%          $4.48         $45.27
+                               8       87492       $64.25         09%          $5.78         $58.47
+                               9       97204       $84.75         20%         $16.95         $67.80
+                                                  $383.18 *                   $45.88 *      $337.30 *
+
+
+  5417   K. CONKLIN            1       13579       $35.72         05%          $1.79         $33.93
+                               2       24615       $18.75         07%          $1.31         $17.44
+                               3       34928       $37.45         10%          $3.75         $33.70
+                               4       48527       $87.50         15%         $13.13         $74.37
+                               5       50150       $18.95         06%          $1.14         $17.81
+                               5       54652       $38.92         06%          $2.34         $36.58
+                               5       59765       $98.95         06%          $5.94         $93.01
+                               7       71572       $18.95         12%          $2.27         $16.68
+                               8       85175       $80.10         09%          $7.21         $72.89
+                               9       90275        $4.60         20%           $.92          $3.68
+                               9       91572       $18.57         20%          $3.71         $14.86
+                               9       97576       $84.95         20%         $16.99         $67.96
+                                                  $543.41 *                   $60.50 *      $482.91 *
+
+
+  6213   Z. HAMPTON            1       15792       $64.25         05%          $3.21         $61.04
+                               1       19975       $98.75         05%          $4.94         $93.81
+
+
+
+
+
+
+
+
+                          C U S T O M E R  C H A R G E  R E P O R T                      PAGE     2
+
+CUST. NO.     CUST. NAME     DEPT.    ITEM NO.    ITEM COST    DISCT. %    DISCT. AMT.    CHARGE
+
+  6213   Z. HAMPTON            3       34576       $51.15         10%          $5.12         $46.03
+                               4       49512       $85.20         15%         $12.78         $72.42
+                                                  $299.35 *                   $26.05 *      $273.30 *
+
+
+  7545   M. LARSON             1       14676       $38.45         05%          $1.92         $36.53
+                               1       18592       $82.51         05%          $4.13         $78.38
+                               1       19994       $98.98         05%          $4.95         $94.03
+                               2       21214       $15.15         07%          $1.06         $14.09
+                               3       37515       $82.12         10%          $8.21         $73.91
+                               3       38592       $96.15         10%          $9.62         $86.53
+                               4       48485       $87.14         15%         $13.07         $74.07
+                               5       52762       $37.92         06%          $2.28         $35.64
+                               5       57684       $80.15         06%          $4.81         $75.34
+                               7       79015       $96.25         12%         $11.55         $84.70
+                               8       80123        $5.60         09%           $.50          $5.10
+                               8       82462       $20.15         09%          $1.81         $18.34
+                               9       91520       $18.15         20%          $3.63         $14.52
+                               9       93715       $40.15         20%          $8.03         $32.12
+                                                  $798.87 *                   $75.57 *      $723.30 *
+         GRAND TOTALS                           $2,566.39 **                 $278.12 **   $2,288.27 **
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([Charge Report 3])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
+0152 J. LANGDON       64025 00945
+0152 J. LANGDON       41915 01370
+0152 J. LANGDON       17410 00251
+2468 L. MORRISEY      18520 00375
+2468 L. MORRISEY      20012 00420
+2468 L. MORRISEY      31572 01015
+2468 L. MORRISEY      48792 03750
+2468 L. MORRISEY      50407 01515
+2468 L. MORRISEY      61575 02010
+2468 L. MORRISEY      79204 05170
+2468 L. MORRISEY      85075 03784
+2468 L. MORRISEY      98476 08794
+3451 M. JACKSON       37847 02790
+3451 M. JACKSON       58492 06850
+3451 M. JACKSON       60010 02040
+3451 M. JACKSON       85260 07852
+3451 M. JACKSON       90520 02752
+4512 S. LEVITT        24680 03050
+4512 S. LEVITT        56784 05253
+4512 S. LEVITT        60410 01215
+4512 S. LEVITT        78952 08925
+4512 S. LEVITT        85278 04975
+4512 S. LEVITT        87492 06425
+4512 S. LEVITT        97204 08475
+5417 K. CONKLIN       13579 03572
+5417 K. CONKLIN       24615 01875
+5417 K. CONKLIN       34928 03745
+5417 K. CONKLIN       48527 08750
+5417 K. CONKLIN       50150 01895
+5417 K. CONKLIN       54652 03892
+5417 K. CONKLIN       59765 09895
+5417 K. CONKLIN       71572 01895
+5417 K. CONKLIN       85175 08010
+5417 K. CONKLIN       90275 00460
+5417 K. CONKLIN       91572 01857
+5417 K. CONKLIN       97576 08495
+6213 Z. HAMPTON       15792 06425
+6213 Z. HAMPTON       19975 09875
+6213 Z. HAMPTON       34576 05115
+6213 Z. HAMPTON       49512 08520
+7545 M. LARSON        14676 03845
+7545 M. LARSON        18592 08251
+7545 M. LARSON        19994 09898
+7545 M. LARSON        21214 01515
+7545 M. LARSON        37515 08212
+7545 M. LARSON        38592 09615
+7545 M. LARSON        48485 08714
+7545 M. LARSON        52762 03792
+7545 M. LARSON        57684 08015
+7545 M. LARSON        79015 09625
+7545 M. LARSON        80123 00560
+7545 M. LARSON        82462 02015
+7545 M. LARSON        91520 01815
+7545 M. LARSON        93715 04015
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      * ************************************************************* *
+      * * MODIFICATIONS:                                              *
+      * * ADDED GROUP ITEM TO INPUT RECORD DEFINITION AND CHANGED     * 20110227
+      * * REPORT SECTION REFERENCES TO ELEMENTS UNDER GROUP TO FIX    * 20110227
+      * * MISMATCHED CUSTOMER NAME/NUMBER ON REPORT.                  * 20110227
+      * ************************************************************* *
+      
+      * ************************************************************* *
+      * REPORT WRITER EXAMPLE #4.                                     *
+      * ************************************************************* *
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      
+           SELECT TRANSACTION-DATA
+               ASSIGN TO EXTERNAL DATAIN
+                         ORGANIZATION IS LINE SEQUENTIAL.
+      
+           SELECT REPORT-FILE
+               ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+      
+       DATA DIVISION.
+       FILE SECTION.
+      
+       FD  TRANSACTION-DATA
+           LABEL RECORDS ARE OMITTED
+           BLOCK CONTAINS 0 RECORDS
+           RECORD CONTAINS 80 CHARACTERS
+           DATA RECORD IS TRANSACTION-RECORD.
+      
+       01  TRANSACTION-RECORD.
+           03  TR-CUSTOMER.                                             20110227
+               05  TR-CUSTOMER-NUMBER  PIC 9(04).                       20110227
+               05  FILLER              PIC X(01).                       20110227
+               05  TR-CUSTOMER-NAME    PIC X(16).                       20110227
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-NUMBER          PIC 9(05).
+           03  FILLER                  REDEFINES TR-ITEM-NUMBER.
+               05  TR-ITEM-DEPARTMENT  PIC 9(01).
+               05  FILLER              PIC 9(04).
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-COST            PIC 9(03)V99.
+           03  FILLER                  PIC X(47).
+      
+       FD  REPORT-FILE
+           LABEL RECORDS ARE OMITTED
+           REPORT IS CUSTOMER-REPORT.
+      
+       WORKING-STORAGE SECTION.
+       77  END-OF-FILE-SWITCH          PIC X(1)    VALUE 'N'.
+           88  END-OF-FILE                         VALUE 'Y'.
+      
+       01  DISCOUNT-TABLE.
+           02  FILLER                  PIC 99      VALUE 05.
+           02  FILLER                  PIC 99      VALUE 07.
+           02  FILLER                  PIC 99      VALUE 10.
+           02  FILLER                  PIC 99      VALUE 15.
+           02  FILLER                  PIC 99      VALUE 06.
+           02  FILLER                  PIC 99      VALUE 22.
+           02  FILLER                  PIC 99      VALUE 12.
+           02  FILLER                  PIC 99      VALUE 09.
+           02  FILLER                  PIC 99      VALUE 20.
+       01  FILLER                      REDEFINES DISCOUNT-TABLE.
+           02  DISCOUNT                OCCURS 9 TIMES
+                                       INDEXED BY DISCOUNT-IX
+                                       PIC V99.
+      
+       01  CALCULATED-FIELDS.
+           03  WS-DISCOUNT-AMT         PIC 9(3)V99.
+           03  WS-CHARGE-AMT           PIC 9(3)V99.
+      
+       REPORT SECTION.
+       RD  CUSTOMER-REPORT
+           CONTROLS ARE FINAL, TR-CUSTOMER
+           PAGE LIMIT IS 66 LINES
+           HEADING 1
+           FIRST DETAIL 5
+           LAST DETAIL 58.
+      
+       01  PAGE-HEAD-GROUP TYPE PAGE HEADING.
+           02  LINE 1.
+               03  COLUMN 27   PIC X(41) VALUE
+                   'C U S T O M E R  C H A R G E  R E P O R T'.
+               03  COLUMN 90   PIC X(04) VALUE 'PAGE'.
+               03  COLUMN 95   PIC ZZZZ9 SOURCE PAGE-COUNTER.
+           02  LINE PLUS 2.
+               03  COLUMN 01   PIC X(09) VALUE 'CUST. NO.'.
+               03  COLUMN 15   PIC X(10) VALUE 'CUST. NAME'.
+               03  COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
+               03  COLUMN 76   PIC X(11) VALUE 'DISCT. AMT.'.
+               03  COLUMN 91   PIC X(06) VALUE 'CHARGE'.
+      
+       01  CHARGE-DETAIL TYPE DETAIL.
+           02  LINE PLUS 1.
+               03  COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
+               03  COLUMN 78   PIC $$$$.99 SOURCE WS-DISCOUNT-AMT.
+               03  COLUMN 93   PIC $$$$.99 SOURCE WS-CHARGE-AMT.
+      
+       01  CUSTOMER-TOTAL TYPE CONTROL FOOTING TR-CUSTOMER              20110227
+           NEXT GROUP IS PLUS 2.
+           02  LINE PLUS 1.
+               03  COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
+               03  COLUMN 10   PIC X(16) SOURCE TR-CUSTOMER-NAME.
+               03  COLUMN 50   PIC $$$$$.99 SUM TR-ITEM-COST.
+               03  COLUMN 77   PIC $$$$$.99 SUM WS-DISCOUNT-AMT.
+               03  COLUMN 92   PIC $$$$$.99 SUM WS-CHARGE-AMT.
+      
+       01  FINAL-TOTAL TYPE CONTROL FOOTING FINAL.
+           02  LINE PLUS 1.
+               03  COLUMN 10   PIC X(12) VALUE 'GRAND TOTALS'.
+               03  COLUMN 48   PIC $$$,$$$.99 SUM TR-ITEM-COST.
+               03  COLUMN 59   PIC X VALUE '*'.
+               03  COLUMN 75   PIC $$$,$$$.99 SUM WS-DISCOUNT-AMT.
+               03  COLUMN 86   PIC X VALUE '*'.
+               03  COLUMN 90   PIC $$$,$$$.99 SUM WS-CHARGE-AMT.
+               03  COLUMN 101  PIC X VALUE '*'.
+      
+       PROCEDURE DIVISION.
+      
+       000-INITIATE.
+      
+           OPEN INPUT TRANSACTION-DATA,
+                OUTPUT REPORT-FILE.
+      
+           INITIATE CUSTOMER-REPORT.
+      
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH
+           END-READ.
+      
+           PERFORM 100-PROCESS-TRANSACTION-DATA THRU 199-EXIT
+               UNTIL END-OF-FILE.
+      
+       000-TERMINATE.
+           TERMINATE CUSTOMER-REPORT.
+      
+           CLOSE TRANSACTION-DATA,
+                 REPORT-FILE.
+      
+           STOP RUN.
+      
+       100-PROCESS-TRANSACTION-DATA.
+           SET DISCOUNT-IX TO TR-ITEM-DEPARTMENT.
+           COMPUTE WS-DISCOUNT-AMT ROUNDED =
+               TR-ITEM-COST * DISCOUNT (DISCOUNT-IX).
+           COMPUTE WS-CHARGE-AMT =
+               TR-ITEM-COST - WS-DISCOUNT-AMT.
+           GENERATE CUSTOMER-REPORT.
+           READ TRANSACTION-DATA
+             AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      *    END-READ.
+      
+       199-EXIT.
+           EXIT.
+      
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
+[prog.cob: 32: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 34: warning: RECORD clause ignored for LINE SEQUENTIAL
+prog.cob: 35: warning: DATA RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 52: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+])
+
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [                          C U S T O M E R  C H A R G E  R E P O R T                      PAGE     1
+
+CUST. NO.     CUST. NAME                          ITEM COST                DISCT. AMT.    CHARGE
+
+   152   J. LANGDON                                $50.41                      $6.50         $43.91
+
+
+  2468   L. MORRISEY                              $268.33                     $39.66        $228.67
+
+
+  3451   M. JACKSON                               $222.84                     $23.96        $198.88
+
+
+  4512   S. LEVITT                                $383.18                     $45.88        $337.30
+
+
+  5417   K. CONKLIN                               $543.41                     $60.50        $482.91
+
+
+  6213   Z. HAMPTON                               $299.35                     $26.05        $273.30
+
+
+  7545   M. LARSON                                $798.87                     $75.57        $723.30
+         GRAND TOTALS                           $2,566.39 *                  $278.12 *    $2,288.27 *
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([Charge Report 4])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[05 A 007328
+05 A 090620
+05 A 034602
+05 A 017837
+13 A 005035
+13 A 049851
+13 A 012139
+22 A 077572
+29 A 013491
+33 A 050628
+33 A 044987
+33 A 050162
+39 A 068745
+39 A 058384
+39 A 053005
+44 A 085669
+44 A 057891
+49 A 065134
+03 B 032035
+03 B 054694
+03 B 069591
+03 B 046023
+03 B 025725
+19 B 045550
+19 B 099371
+19 B 049703
+25 B 047000
+25 B 087106
+31 B 049157
+34 B 005994
+09 C 007980
+14 C 092224
+14 C 062942
+23 C 002974
+28 C 042394
+28 C 014745
+34 C 053467
+34 C 054332
+42 C 089295
+42 C 073826
+04 D 029685
+04 D 060676
+06 D 013230
+06 D 042290
+15 D 013076
+15 D 024104
+15 D 013078
+38 D 078771
+38 D 085871
+11 E 099350
+17 E 066301
+27 E 038144
+27 E 097807
+27 E 008055
+08 F 073201
+09 F 008278
+09 F 040898
+09 F 039688
+16 F 019308
+16 F 015173
+16 F 022865
+16 F 003568
+36 F 029276
+40 F 078631
+40 F 010249
+40 F 059583
+48 F 043877
+48 F 006755
+01 G 018347
+20 G 098123
+21 G 077346
+22 G 025953
+26 G 009587
+41 G 083126
+41 G 073046
+32 H 038823
+32 H 009989
+32 H 065838
+32 H 024994
+32 H 016065
+32 H 097042
+43 H 077895
+45 H 038692
+46 H 088151
+46 H 069538
+09 J 039764
+18 J 088890
+18 J 039421
+37 J 044560
+45 J 018770
+45 J 032993
+45 J 089631
+45 J 072659
+02 K 075925
+02 K 072909
+02 K 040544
+12 K 002138
+12 K 029239
+35 K 065936
+35 K 093046
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      
+      * ************************************************************* *
+      * REPORT WRITER EXAMPLE #5.                                     *
+      * ************************************************************* *
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      
+           SELECT SALES-DATA
+               ASSIGN TO EXTERNAL DATAIN
+                         ORGANIZATION IS LINE SEQUENTIAL.
+      
+           SELECT REPORT-FILE
+               ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+      
+       DATA DIVISION.
+       FILE SECTION.
+      
+       FD  SALES-DATA
+           LABEL RECORDS ARE OMITTED
+           BLOCK CONTAINS 0 RECORDS
+           RECORD CONTAINS 80 CHARACTERS
+           DATA RECORD IS SALES-RECORD.
+      
+       01  SALES-RECORD.
+           03  SR-SALESMAN-NUMBER      PIC 9(02).
+           03  FILLER                  PIC X(01).
+           03  SR-DISTRICT-CODE        PIC X(01).
+           03  FILLER                  PIC X(01).
+           03  SR-SALE-AMOUNT          PIC 9(04)V99.
+           03  FILLER                  PIC X(69).
+      
+       FD  REPORT-FILE
+           LABEL RECORDS ARE OMITTED
+           REPORT IS DISTRICT-SALES-REPORT.
+      
+       WORKING-STORAGE SECTION.
+       77  END-OF-FILE-SWITCH          PIC X(1)    VALUE 'N'.
+           88  END-OF-FILE                         VALUE 'Y'.
+      
+       01  COMMISSION-TABLE.
+           02  FILLER                  PIC X(03)   VALUE 'A20'.
+           02  FILLER                  PIC X(03)   VALUE 'B18'.
+           02  FILLER                  PIC X(03)   VALUE 'C15'.
+           02  FILLER                  PIC X(03)   VALUE 'D12'.
+           02  FILLER                  PIC X(03)   VALUE 'E10'.
+           02  FILLER                  PIC X(03)   VALUE 'F12'.
+           02  FILLER                  PIC X(03)   VALUE 'G10'.
+           02  FILLER                  PIC X(03)   VALUE 'H08'.
+           02  FILLER                  PIC X(03)   VALUE 'J05'.
+           02  FILLER                  PIC X(03)   VALUE 'K07'.
+       01  FILLER                      REDEFINES COMMISSION-TABLE.
+           02  COMMISSION-ENTRY        OCCURS 10 TIMES
+                                       INDEXED BY COMMISSION-IX.
+               03  CE-DISTRICT         PIC X(01).
+               03  CE-RATE             PIC V99.
+      
+       01  CALCULATED-FIELDS.
+           03  WS-COMMISSION           PIC 9(5)V99.
+      
+       REPORT SECTION.
+       RD  DISTRICT-SALES-REPORT
+           CONTROLS ARE FINAL, SR-DISTRICT-CODE, SR-SALESMAN-NUMBER
+           PAGE LIMIT IS 66 LINES
+           HEADING 1
+           FIRST DETAIL 5
+           LAST DETAIL 58.
+      
+       01  PAGE-HEAD-GROUP TYPE PAGE HEADING.
+           02  LINE 1.
+               03  COLUMN 27   PIC X(41) VALUE
+                   'D I S T R I C T   S A L E S   R E P O R T'.
+               03  COLUMN 90   PIC X(04) VALUE 'PAGE'.
+               03  COLUMN 95   PIC ZZZZ9 SOURCE PAGE-COUNTER.
+           02  LINE 3.
+               03  COLUMN 20   PIC X(26) VALUE
+                   '-------- SALESMAN --------'.
+               03  COLUMN 54   PIC X(15) VALUE
+                   '-- DISTRICT --'.
+           02  LINE 4.
+               03  COLUMN 20   PIC X(03) VALUE 'NO.'.
+               03  COLUMN 28   PIC X(05) VALUE 'SALES'.
+               03  COLUMN 37   PIC X(10) VALUE 'COMMISSION'.
+               03  COLUMN 54   PIC X(03) VALUE 'NO.'.
+               03  COLUMN 61   PIC X(05) VALUE 'SALES'.
+      
+       01  SALE-DETAIL TYPE DETAIL.
+           02  LINE PLUS 1.
+               03  COLUMN 01   PIC 99      SOURCE SR-SALESMAN-NUMBER.
+               03  COLUMN 04   PIC X       SOURCE SR-DISTRICT-CODE.
+               03  COLUMN 06   PIC 9999.99 SOURCE SR-SALE-AMOUNT.
+      
+       01  SALESMAN-TOTAL TYPE CONTROL FOOTING SR-SALESMAN-NUMBER.
+           02  LINE PLUS 1.
+               03  COLUMN 20   PIC 99    SOURCE SR-SALESMAN-NUMBER.
+               03  ST-SALES-AMT COLUMN 24 PIC $$$,$$9.99 SUM
+                       SR-SALE-AMOUNT.
+               03  COLUMN 37 PIC $$$,$$9.99 SOURCE WS-COMMISSION.
+      
+       01  DISTRICT-TOTAL TYPE CONTROL FOOTING SR-DISTRICT-CODE
+           NEXT GROUP PLUS 2.
+           02  LINE PLUS 1.
+               03  COLUMN 54   PIC X     SOURCE SR-DISTRICT-CODE.
+               03  COLUMN 58   PIC $$$,$$9.99 SUM ST-SALES-AMT.
+      
+       01  FINAL-TOTAL TYPE CONTROL FOOTING FINAL.
+           02  LINE PLUS 2.
+               03  COLUMN 15   PIC X(19) VALUE
+                   'MONTHLY TOTAL SALES'.
+               03  COLUMN 57   PIC $$$$,$$9.99 SUM ST-SALES-AMT.
+               03  COLUMN 69   PIC XX VALUE '**'.
+      
+       PROCEDURE DIVISION.
+      
+       DECLARATIVES.
+       USE-SALESMAN-TOTAL SECTION. USE BEFORE REPORTING SALESMAN-TOTAL.
+       USE-SALESMAN-TOTAL-PROC.
+           SET COMMISSION-IX TO +1.
+           SEARCH COMMISSION-ENTRY
+               AT END
+                   MOVE +0.00 TO WS-COMMISSION
+               WHEN CE-DISTRICT (COMMISSION-IX) = SR-DISTRICT-CODE
+                   COMPUTE WS-COMMISSION ROUNDED =
+                       CE-RATE (COMMISSION-IX) * ST-SALES-AMT.
+      
+       USE-SALESMAN-TOTAL-EXIT.
+           EXIT.
+      
+       END DECLARATIVES.
+      
+       000-INITIATE.
+      
+           OPEN INPUT SALES-DATA,
+                OUTPUT REPORT-FILE.
+      
+           INITIATE DISTRICT-SALES-REPORT.
+      
+           READ SALES-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      *    END-READ.
+      
+           PERFORM 100-PROCESS-SALES-DATA THRU 199-EXIT
+               UNTIL END-OF-FILE.
+      
+       000-TERMINATE.
+           TERMINATE DISTRICT-SALES-REPORT.
+      
+           CLOSE SALES-DATA,
+                 REPORT-FILE.
+      
+           STOP RUN.
+      
+       100-PROCESS-SALES-DATA.
+           GENERATE DISTRICT-SALES-REPORT.
+           READ SALES-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      *    END-READ.
+      
+       199-EXIT.
+           EXIT.
+      
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
+[prog.cob: 26: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 28: warning: RECORD clause ignored for LINE SEQUENTIAL
+prog.cob: 29: warning: DATA RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 40: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+prog.cob: in section 'USE-SALESMAN-TOTAL':
+prog.cob: in paragraph 'USE-SALESMAN-TOTAL-PROC':
+prog.cob: 127: warning: ignoring sign
+])
+
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [                          D I S T R I C T   S A L E S   R E P O R T                      PAGE     1
+
+                   -------- SALESMAN --------        -- DISTRICT --
+                   NO.     SALES    COMMISSION       NO.    SALES
+                   05   $1,503.87      $300.77
+                   13     $670.25      $134.05
+                   22     $775.72      $155.14
+                   29     $134.91       $26.98
+                   33   $1,457.77      $291.55
+                   39   $1,801.34      $360.27
+                   44   $1,435.60      $287.12
+                   49     $651.34      $130.27
+                                                     A    $8,430.80
+
+
+                   03   $2,280.68      $410.52
+                   19   $1,946.24      $350.32
+                   25   $1,341.06      $241.39
+                   31     $491.57       $88.48
+                   34      $59.94       $10.79
+                                                     B    $6,119.49
+
+
+                   09      $79.80       $11.97
+                   14   $1,551.66      $232.75
+                   23      $29.74        $4.46
+                   28     $571.39       $85.71
+                   34   $1,077.99      $161.70
+                   42   $1,631.21      $244.68
+                                                     C    $4,941.79
+
+
+                   04     $903.61      $108.43
+                   06     $555.20       $66.62
+                   15     $502.58       $60.31
+                   38   $1,646.42      $197.57
+                                                     D    $3,607.81
+
+
+                   11     $993.50       $99.35
+                   17     $663.01       $66.30
+                   27   $1,440.06      $144.01
+                                                     E    $3,096.57
+
+
+                   08     $732.01       $87.84
+                   09     $888.64      $106.64
+                   16     $609.14       $73.10
+                   36     $292.76       $35.13
+                   40   $1,484.63      $178.16
+                   48     $506.32       $60.76
+                                                     F    $4,513.50
+
+
+                   01     $183.47       $18.35
+                   20     $981.23       $98.12
+                   21     $773.46       $77.35
+                   22     $259.53       $25.95
+
+
+
+
+
+
+
+
+                          D I S T R I C T   S A L E S   R E P O R T                      PAGE     2
+
+                   -------- SALESMAN --------        -- DISTRICT --
+                   NO.     SALES    COMMISSION       NO.    SALES
+                   26      $95.87        $9.59
+                   41   $1,561.72      $156.17
+                                                     G    $3,855.28
+
+
+                   32   $2,527.51      $202.20
+                   43     $778.95       $62.32
+                   45     $386.92       $30.95
+                   46   $1,576.89      $126.15
+                                                     H    $5,270.27
+
+
+                   09     $397.64       $19.88
+                   18   $1,283.11       $64.16
+                   37     $445.60       $22.28
+                   45   $2,140.53      $107.03
+                                                     J    $4,266.88
+
+
+                   02   $1,893.78      $132.56
+                   12     $313.77       $21.96
+                   35   $1,589.82      $111.29
+                                                     K    $3,797.37
+
+              MONTHLY TOTAL SALES                        $47,899.76 **
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([Payroll Report])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[01 6622 M GAVIN SHAFER         19740201 026000 01521 03362 00075 021042
+01 6622 M GAVIN SHAFER         19740215 026000 01521 03362 00175 020942
+01 6622 M GAVIN SHAFER         19740301 026000 01521 03362 00175 020942
+01 6622 M GAVIN SHAFER         19740315 026000 01521 03362 00050 021067
+01 7078 F VERA ALSTON          19740101 030000 01755 02304 00050 025891
+01 7078 F VERA ALSTON          19740115 030000 01755 02304 00100 025841
+01 7078 F VERA ALSTON          19740201 030000 01755 02304 00050 025891
+01 7078 F VERA ALSTON          19740215 030000 01755 02304 00000 025941
+01 7078 F VERA ALSTON          19740301 030000 01755 02304 00075 025866
+01 7078 F VERA ALSTON          19740315 030000 01755 02304 00100 025841
+01 8093 M GRADY KAISER         19740101 045000 02633 05819 00175 036374
+01 8093 M GRADY KAISER         19740115 045000 02633 05819 00100 036449
+01 8093 M GRADY KAISER         19740201 045000 02633 05819 00100 036449
+01 8093 M GRADY KAISER         19740215 047500 02779 03648 00100 040973
+01 8093 M GRADY KAISER         19740301 047500 02779 03648 00175 040898
+05 1720 F PAULINE WINSTON      19740101 013000 00761 20110 00050 010080
+05 1720 F PAULINE WINSTON      19740115 013000 00761 02110 00000 010130
+05 1720 F PAULINE WINSTON      19740201 014000 00819 02272 00075 010834
+05 1720 F PAULINE WINSTON      19740215 014000 00819 02272 00175 010734
+05 1720 F PAULINE WINSTON      19740301 014000 00819 02272 00050 010859
+05 2116 M HERMAN COX           19740101 010000 00585 01293 00175 007947
+05 2116 M HERMAN COX           19740115 010000 00585 01293 00175 007947
+05 2116 M HERMAN COX           19740201 010000 00585 01293 00100 008022
+05 2116 M HERMAN COX           19740215 010000 00585 01293 00100 008022
+05 2116 M HERMAN COX           19740301 010000 00585 01293 00075 008047
+05 2116 M HERMAN COX           19740315 011000 00644 01187 00100 009070
+05 6925 M ADOLF TRUJILLO       19740115 012500 00731 02379 00050 009340
+05 6925 M ADOLF TRUJILLO       19740201 012500 00731 02379 00100 009290
+05 6925 M ADOLF TRUJILLO       19740215 012500 00731 02379 00175 009215
+05 6925 M ADOLF TRUJILLO       19740301 012500 00731 02379 00075 009315
+05 6925 M ADOLF TRUJILLO       19740315 012500 00731 02379 00000 009390
+10 1504 F TIFFANY KEIR         19740101 029000 01697 03129 00050 024124
+10 1504 F TIFFANY KEIR         19740115 029000 01697 03129 00000 024174
+10 1504 F TIFFANY KEIR         19740201 029000 01697 03129 00075 024099
+10 1504 F TIFFANY KEIR         19740215 029000 01697 03129 00000 024174
+10 1504 F TIFFANY KEIR         19740301 029000 01697 03129 00000 024174
+10 1504 F TIFFANY KEIR         19740315 029000 01697 03129 00050 024124
+10 6640 M ALEXANDER CATHEY     19740101 032500 01901 06185 00000 024414
+10 6640 M ALEXANDER CATHEY     19740115 032500 01901 06185 00175 024239
+10 6640 M ALEXANDER CATHEY     19740201 032500 01901 06185 00175 024239
+10 6640 M ALEXANDER CATHEY     19740215 032500 01901 06185 00175 024239
+10 6640 M ALEXANDER CATHEY     19740301 032500 01901 06185 00100 024314
+10 6640 M ALEXANDER CATHEY     19740315 032500 01901 06185 00100 024314
+10 9465 M STEVE HUGHES         19740101 029500 01726 04788 00175 022811
+10 9465 M STEVE HUGHES         19740115 029500 01726 04788 00000 022986
+10 9465 M STEVE HUGHES         19740201 029500 01726 04788 00000 022986
+10 9465 M STEVE HUGHES         19740215 029500 01726 04788 00050 022936
+10 9465 M STEVE HUGHES         19740301 029500 01726 04788 00075 022911
+15 2903 F KAYLA VERBECK        19740101 014000 00819 02272 00050 010859
+15 2903 F KAYLA VERBECK        19740115 014000 00819 02272 00175 010734
+15 2903 F KAYLA VERBECK        19740201 014000 00819 02272 00050 010859
+15 2903 F KAYLA VERBECK        19740215 014000 00819 02272 00175 010734
+15 2903 F KAYLA VERBECK        19740301 014000 00819 02272 00000 010909
+15 2903 F KAYLA VERBECK        19740315 014000 00819 02272 00075 010834
+15 5196 F CLAIRE KELLAR        19740101 014500 00848 01114 00075 012463
+15 5196 F CLAIRE KELLAR        19740115 014500 00848 01114 00100 012438
+15 5196 F CLAIRE KELLAR        19740201 014500 00848 01114 00175 012363
+15 5196 F CLAIRE KELLAR        19740215 014500 00848 01114 00050 012488
+15 5196 F CLAIRE KELLAR        19740301 015300 00895 02912 00175 011318
+15 5196 F CLAIRE KELLAR        19740315 015300 00895 02912 00100 011393
+20 5190 F MARYANN GLAZENER     19740101 009000 00527 01164 00050 007260
+20 5190 F MARYANN GLAZENER     19740115 009000 00527 01164 00075 007235
+20 5190 F MARYANN GLAZENER     19740201 009000 00527 01164 00000 007310
+20 5190 F MARYANN GLAZENER     19740215 009000 00527 01164 00075 007235
+20 5190 F MARYANN GLAZENER     19740301 009000 00527 01164 00050 007260
+20 5190 F MARYANN GLAZENER     19740315 009000 00527 01164 00100 007210
+20 6580 F CAROLINE TROMBETTA   19740101 008000 00468 00863 00000 006669
+20 6580 F CAROLINE TROMBETTA   19740115 008000 00468 00863 00075 006594
+20 6580 F CAROLINE TROMBETTA   19740201 008000 00468 00863 00000 006569
+20 6580 F CAROLINE TROMBETTA   19740215 008000 00468 00863 00075 006594
+20 6580 F CAROLINE TROMBETTA   19740301 008000 00468 00863 00050 006619
+20 6580 F CAROLINE TROMBETTA   19740315 008000 00468 00863 00075 006594
+20 9507 F ADRIANA CHANGAZI     19740101 008300 00486 01347 00075 006392
+20 9507 F ADRIANA CHANGAZI     19740115 008300 00486 01347 00175 006292
+20 9507 F ADRIANA CHANGAZI     19740201 008300 00486 01347 00075 006392
+20 9507 F ADRIANA CHANGAZI     19740215 008300 00486 01347 00175 006292
+20 9507 F ADRIANA CHANGAZI     19740301 008300 00486 01347 00000 006467
+20 9507 F ADRIANA CHANGAZI     19740315 008300 00486 01347 00175 006292
+25 0428 M MELVIN BEHRENS       19740101 007800 00456 00842 00000 006502
+25 0428 M MELVIN BEHRENS       19740115 007800 00456 00842 00175 006327
+25 0428 M MELVIN BEHRENS       19740201 007800 00456 00842 00175 006327
+25 0428 M MELVIN BEHRENS       19740215 007800 00456 00842 00075 006427
+25 0428 M MELVIN BEHRENS       19740301 007800 00456 00842 00000 006502
+25 0428 M MELVIN BEHRENS       19740315 007800 00456 00842 00075 006427
+25 2003 M BALDWIN SIMONSEN     19740101 011000 00644 02093 00050 008213
+25 2003 M BALDWIN SIMONSEN     19740115 011000 00644 02093 00075 008188
+25 2003 M BALDWIN SIMONSEN     19740201 011000 00644 02093 00000 008263
+25 2003 M BALDWIN SIMONSEN     19740215 011000 00644 02093 00100 008163
+25 2003 M BALDWIN SIMONSEN     19740301 011500 00673 01487 00075 009265
+25 2003 M BALDWIN SIMONSEN     19740315 011500 00673 01487 00175 009165
+25 6491 M LEO TILLEY           19740101 010100 00591 00776 00050 008683
+25 6491 M LEO TILLEY           19740115 010100 00591 00776 00075 008658
+25 6491 M LEO TILLEY           19740201 010100 00591 00776 00050 008683
+25 6491 M LEO TILLEY           19740215 010100 00591 00776 00075 008658
+25 6491 M LEO TILLEY           19740301 010100 00591 00776 00100 008633
+25 6491 M LEO TILLEY           19740315 010100 00591 00776 00000 008733
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+      * ************************************************************* *
+      * * MODIFICATIONS:                                              *
+      * * CORRECT PARAGRAPH NAME AND GO TO CODING ERRORS.             * 
+      * ************************************************************* *
+      
+      * ************************************************************* *
+      * REPORT WRITER EXAMPLE #6.                                     *
+      * ************************************************************* *
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      
+           SELECT PAYROLL-REGISTER-DATA
+               ASSIGN TO EXTERNAL DATAIN
+                         ORGANIZATION IS LINE SEQUENTIAL.
+      
+           SELECT REPORT-FILE
+               ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+      
+       DATA DIVISION.
+       FILE SECTION.
+      
+       FD  PAYROLL-REGISTER-DATA
+           LABEL RECORDS ARE OMITTED
+           BLOCK CONTAINS 0 RECORDS
+           RECORD CONTAINS 80 CHARACTERS
+           DATA RECORD IS PAYROLL-REGISTER-RECORD.
+      
+       01  PAYROLL-REGISTER-RECORD.
+           03  PRR-DEPARTMENT-NUMBER   PIC 9(02).
+           03  FILLER                  PIC X(01).
+           03  PRR-EMPLOYEE-KEY.
+               05  PRR-EMPLOYEE-NO     PIC 9(04).
+               05  FILLER              PIC X(01).
+               05  PRR-GENDER          PIC X(01).
+               05  FILLER              PIC X(01).
+               05  PRR-EMPLOYEE-NAME   PIC X(20).
+           03  FILLER                  PIC X(01).
+           03  PRR-PAY-DATE            PIC 9(08).
+           03  FILLER                  REDEFINES PRR-PAY-DATE.
+               05  PRR-PAY-DATE-YEAR   PIC 9(04).
+               05  PRR-PAY-DATE-MONTH  PIC 9(02).
+               05  PRR-PAY-DATE-DAY    PIC 9(02).
+           03  FILLER                  PIC X(01).
+           03  PRR-GROSS-PAY           PIC 9(04)V99.
+           03  FILLER                  PIC X(01).
+           03  PRR-FICA-WH             PIC 9(03)V99.
+           03  FILLER                  PIC X(01).
+           03  PRR-FED-WH              PIC 9(03)V99.
+           03  FILLER                  PIC X(01).
+           03  PRR-MISC-DED            PIC 9(03)V99.
+           03  FILLER                  PIC X(01).
+           03  PRR-NET-PAY             PIC 9(04)V99.
+           03  FILLER                  PIC X(09).
+      
+       FD  REPORT-FILE
+           LABEL RECORDS ARE OMITTED
+           REPORT IS QUARTERLY-PAY-REGISTER.
+      
+       WORKING-STORAGE SECTION.
+       77  END-OF-FILE-SWITCH          PIC X(1)    VALUE 'N'.
+           88  END-OF-FILE                         VALUE 'Y'.
+       77  PR-SW                       PIC X(1)    VALUE 'N'.
+       77  SUM-FED-WH                  PIC 9(04)V99 VALUE 0.
+      
+       01  WS-EMPLOYEE-KEY.
+           03  WS-EMPLOYEE-NUMBER      PIC 9(04).
+           03  FILLER                  PIC X(03).
+           03  WS-EMPLOYEE-NAME        PIC X(20).
+      
+       01  WS-PERCENTS-COMPUTED.
+           03  WPC-DEPT                OCCURS 6 TIMES
+                                       INDEXED BY WPCD-IX.
+               05  WPC-PERCENT         OCCURS 5 TIMES
+                                       INDEXED BY WPCC-IX
+                                       PIC 9(3)V99.
+      
+       01  DEPARTMENT-TABLE.
+           03  FILLER PIC X(17) VALUE '01MANAGEMENT     '.
+           03  FILLER PIC X(50) VALUE ZEROS.
+           03  FILLER PIC X(17) VALUE '05ADMINISTRATIVE '.
+           03  FILLER PIC X(50) VALUE ZEROS.
+           03  FILLER PIC X(17) VALUE '10SKILLED NURSING'.
+           03  FILLER PIC X(50) VALUE ZEROS.
+           03  FILLER PIC X(17) VALUE '15PATIENT SUPPORT'.
+           03  FILLER PIC X(50) VALUE ZEROS.
+           03  FILLER PIC X(17) VALUE '20HOUSEKEEPING   '.
+           03  FILLER PIC X(50) VALUE ZEROS.
+           03  FILLER PIC X(17) VALUE '25MAINTENANCE    '.
+           03  FILLER PIC X(50) VALUE ZEROS.
+       01  FILLER REDEFINES DEPARTMENT-TABLE.
+           03  DEPARTMENT-ENTRY      OCCURS 6 TIMES
+                                     INDEXED BY DE-IX.
+               05  DE-NUMBER         PIC 9(02).
+               05  DE-NAME           PIC X(15).
+               05  DE-GROSS          PIC 9(08)V99.
+               05  DE-FICA           PIC 9(08)V99.
+               05  DE-FWT            PIC 9(08)V99.
+               05  DE-MISC           PIC 9(08)V99.
+               05  DE-NET            PIC 9(08)V99.
+      
+       REPORT SECTION.
+       RD  QUARTERLY-PAY-REGISTER
+           CONTROLS ARE FINAL, PRR-DEPARTMENT-NUMBER,
+               PRR-EMPLOYEE-KEY
+           PAGE LIMIT IS 66 LINES
+           HEADING 1
+           FIRST DETAIL 7
+           LAST DETAIL 60.
+      
+       01  TYPE PAGE HEADING.
+           02  LINE 1.
+               03  COLUMN 39   PIC X(13) VALUE 'C E N T U R Y'.
+               03  COLUMN 55   PIC X(13) VALUE 'M E D I C A L'.
+               03  COLUMN 71   PIC X(11) VALUE 'C E N T E R'.
+           02  LINE 2.
+               03  COLUMN 35   PIC X(17) VALUE 'Q U A R T E R L Y'.
+               03  COLUMN 55   PIC X(13) VALUE 'P A Y R O L L'.
+               03  COLUMN 71   PIC X(15) VALUE 'R E G I S T E R'.
+               03  COLUMN 111  PIC X(04) VALUE 'PAGE'.
+               03  COLUMN 116  PIC ZZZZ9 SOURCE PAGE-COUNTER.
+           02  LINE 4.
+               03  COLUMN 06   PIC X(9) VALUE ALL '-'.
+               03  COLUMN 15   PIC X(28) VALUE
+                   ' EMPLOYEE ---------'.
+               03  COLUMN 40   PIC X(05) VALUE 'GROSS'.
+               03  COLUMN 54   PIC X(04) VALUE 'FICA'.
+               03  COLUMN 66   PIC X(07) VALUE 'FED W/H'.
+               03  COLUMN 80   PIC X(05) VALUE 'MISC.'.
+               03  COLUMN 95   PIC X(03) VALUE 'NET'.
+           02  LINE 5.
+               03  COLUMN 07   PIC X(02) VALUE 'NO'.
+               03  COLUMN 22   PIC X(04) VALUE 'NAME'.
+               03  COLUMN 41   PIC X(03) VALUE 'PAY'.
+               03  COLUMN 55   PIC X(03) VALUE 'TAX'.
+               03  COLUMN 68   PIC X(03) VALUE 'TAX'.
+               03  COLUMN 79   PIC X(07) VALUE 'DEDUCT.'.
+               03  COLUMN 95   PIC X(03) VALUE 'PAY'.
+      
+       01  DEPT-HEAD TYPE CONTROL HEADING PRR-DEPARTMENT-NUMBER
+           NEXT GROUP +1.
+           02  LINE PLUS 1.
+               03 COLUMN 01    PIC X(18) VALUE
+                  'DEPARTMENT NUMBER:'.
+               03  COLUMN 21   PIC 9(02) SOURCE PRR-DEPARTMENT-NUMBER.
+               03  COLUMN 24   PIC X(15) SOURCE DE-NAME (DE-IX).
+      
+       01  EMPLOYEE-DETAIL TYPE DETAIL.
+           02  LINE +1.
+               03  COLUMN 01   PIC X(27) SOURCE PRR-EMPLOYEE-KEY.
+               03  COLUMN 50   PIC 9(04).99 SOURCE PRR-GROSS-PAY.
+               03  COLUMN 60   PIC 9(03).99 SOURCE PRR-FICA-WH.
+               03  COLUMN 70   PIC 9(03).99 SOURCE PRR-FED-WH.
+               03  COLUMN 80   PIC 9(03).99 SOURCE PRR-MISC-DED.
+               03  COLUMN 90   PIC 9(04).99 SOURCE PRR-NET-PAY.
+      
+       01  EMPL-FOOT TYPE CONTROL FOOTING PRR-EMPLOYEE-KEY.
+           02  LINE PLUS 1
+                      PRESENT WHEN SUM-FED-WH > 80.00
+                  .
+               03  COLUMN 06   PIC ZZZ9  SOURCE WS-EMPLOYEE-NUMBER.
+               03  COLUMN 14   PIC X(20) SOURCE WS-EMPLOYEE-NAME.
+               03  COLUMN 38   PIC $$,$$9.99 SUM PRR-GROSS-PAY.
+               03  COLUMN 53   PIC $$$9.99 SUM PRR-FICA-WH.
+               03  COLUMN 66   PIC $$$9.99 SUM PRR-FED-WH.
+               03  COLUMN 79   PIC $$$9.99 SUM PRR-MISC-DED.
+               03  COLUMN 92   PIC $$,$$9.99 SUM PRR-NET-PAY.
+      
+       01  DEPT-FOOT TYPE CONTROL FOOTING PRR-DEPARTMENT-NUMBER
+           NEXT GROUP PLUS 2.
+           02  LINE PLUS 2.
+               03  COLUMN 14   PIC X(20) VALUE
+                   'DEPARTMENT TOTALS'.
+               03  DEPT-FOOT-GROSS       COLUMN 38   PIC $$,$$9.99
+                                         SUM PRR-GROSS-PAY.
+               03  COLUMN 48   PIC X         VALUE '*'.
+               03  DEPT-FOOT-FICA        COLUMN 53   PIC $$$9.99
+                                         SUM PRR-FICA-WH.
+               03  COLUMN 61   PIC X         VALUE '*'.
+               03  DEPT-FOOT-FWT         COLUMN 66   PIC $$$9.99
+                                         SUM PRR-FED-WH.
+               03  COLUMN 74   PIC X         VALUE '*'.
+               03  DEPT-FOOT-MISC        COLUMN 79   PIC $$$9.99
+                                         SUM PRR-MISC-DED.
+               03  COLUMN 87   PIC X         VALUE '*'.
+               03  DEPT-FOOT-NET         COLUMN 92   PIC $$,$$9.99
+                                         SUM PRR-NET-PAY.
+               03  COLUMN 102  PIC X         VALUE '*'.
+      
+       01  COMP-FOOT TYPE CONTROL FOOTING FINAL.
+           02  LINE PLUS 2.
+               03  COLUMN 14   PIC X(20) VALUE
+                   'COMPANY TOTALS'.
+               03  CO-GROSS    COLUMN 37   PIC $$$,$$9.99
+                               SUM PRR-GROSS-PAY.
+               03  COLUMN 48   PIC XX        VALUE '**'.
+               03  CO-FICA     COLUMN 51   PIC $$,$$9.99
+                               SUM PRR-FICA-WH.
+               03  COLUMN 61   PIC XX        VALUE '**'.
+               03  CO-FWT      COLUMN 64   PIC $$,$$9.99
+                               SUM PRR-FED-WH.
+               03  COLUMN 74   PIC XX        VALUE '**'.
+               03  CO-MISC     COLUMN 77   PIC $$,$$9.99
+                               SUM PRR-MISC-DED.
+               03  COLUMN 87   PIC XX        VALUE '**'.
+               03  CO-NET      COLUMN 91   PIC $$$,$$9.99
+                               SUM PRR-NET-PAY.
+               03  COLUMN 102  PIC XX        VALUE '**'.
+      
+       01  REPORT-FOOT TYPE REPORT FOOTING.
+           02  LINE 1.
+               03  COLUMN 39   PIC X(13) VALUE 'C e n t u r y'.
+               03  COLUMN 55   PIC X(13) VALUE 'M e d i c a l'.
+               03  COLUMN 71   PIC X(11) VALUE 'C e n t e r'.
+           02  LINE 2.
+               03  COLUMN 35   PIC X(17) VALUE 'Q u a r t e r l y'.
+               03  COLUMN 55   PIC X(13) VALUE 'P a y r o l l'.
+               03  COLUMN 71   PIC X(15) VALUE 'R e g i s t e r'.
+               03  COLUMN 111  PIC X(04) VALUE 'PAGE'.
+               03  COLUMN 116  PIC ZZZZ9 SOURCE PAGE-COUNTER.
+           02  LINE 4.
+               03  COLUMN 40   PIC X(05) VALUE 'GROSS'.
+               03  COLUMN 58   PIC X(04) VALUE 'FICA'.
+               03  COLUMN 74   PIC X(07) VALUE 'FED W/H'.
+               03  COLUMN 92   PIC X(05) VALUE 'MISC.'.
+               03  COLUMN 111  PIC X(03) VALUE 'NET'.
+           02  LINE 5.
+               03  COLUMN 41   PIC X(03) VALUE 'PAY'.
+               03  COLUMN 59   PIC X(03) VALUE 'TAX'.
+               03  COLUMN 76   PIC X(03) VALUE 'TAX'.
+               03  COLUMN 91   PIC X(07) VALUE 'DEDUCT.'.
+               03  COLUMN 111  PIC X(03) VALUE 'PAY'.
+      
+           02  LINE PLUS 2.
+               03  COLUMN 05   PIC X(29) VALUE
+                   '* * * DEPARTMENT TOTALS * * *'.
+           02  LINE PLUS 2.
+               03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (1).
+               03  COLUMN 08   PIC X(15) SOURCE DE-NAME (1).
+               03  COLUMN 38   PIC $$,$$9.99 SOURCE DE-GROSS (1).
+               03  COLUMN 48   PIC ZZ9 SOURCE WPC-PERCENT (1 1).
+               03  COLUMN 51   PIC X VALUE '%'.
+               03  COLUMN 57   PIC $$$9.99   SOURCE DE-FICA (1).
+               03  COLUMN 65   PIC ZZ9 SOURCE WPC-PERCENT (1 2).
+               03  COLUMN 68   PIC X VALUE '%'.
+               03  COLUMN 74   PIC $$$9.99   SOURCE DE-FWT (1).
+               03  COLUMN 82   PIC ZZ9 SOURCE WPC-PERCENT (1 3).
+               03  COLUMN 85   PIC X VALUE '%'.
+               03  COLUMN 91   PIC $$$9.99   SOURCE DE-MISC (1).
+               03  COLUMN 99   PIC ZZ9 SOURCE WPC-PERCENT (1 4).
+               03  COLUMN 102  PIC X VALUE '%'.
+               03  COLUMN 108  PIC $$,$$9.99 SOURCE DE-NET (1).
+               03  COLUMN 118  PIC ZZ9 SOURCE WPC-PERCENT (1 5).
+               03  COLUMN 121  PIC X VALUE '%'.
+           02  LINE PLUS 2.
+               03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (2).
+               03  COLUMN 08   PIC X(15) SOURCE DE-NAME (2).
+               03  COLUMN 38   PIC $$,$$9.99 SOURCE DE-GROSS (2).
+               03  COLUMN 48   PIC ZZ9 SOURCE WPC-PERCENT (2 1).
+               03  COLUMN 51   PIC X VALUE '%'.
+               03  COLUMN 57   PIC $$$9.99   SOURCE DE-FICA (2).
+               03  COLUMN 65   PIC ZZ9 SOURCE WPC-PERCENT (2 2).
+               03  COLUMN 68   PIC X VALUE '%'.
+               03  COLUMN 74   PIC $$$9.99   SOURCE DE-FWT (2).
+               03  COLUMN 82   PIC ZZ9 SOURCE WPC-PERCENT (2 3).
+               03  COLUMN 85   PIC X VALUE '%'.
+               03  COLUMN 91   PIC $$$9.99   SOURCE DE-MISC (2).
+               03  COLUMN 99   PIC ZZ9 SOURCE WPC-PERCENT (2 4).
+               03  COLUMN 102  PIC X VALUE '%'.
+               03  COLUMN 108  PIC $$,$$9.99 SOURCE DE-NET (2).
+               03  COLUMN 118  PIC ZZ9 SOURCE WPC-PERCENT (2 5).
+               03  COLUMN 121  PIC X VALUE '%'.
+           02  LINE PLUS 2.
+               03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (3).
+               03  COLUMN 08   PIC X(15) SOURCE DE-NAME (3).
+               03  COLUMN 38   PIC $$,$$9.99 SOURCE DE-GROSS (3).
+               03  COLUMN 48   PIC ZZ9 SOURCE WPC-PERCENT (3 1).
+               03  COLUMN 51   PIC X VALUE '%'.
+               03  COLUMN 57   PIC $$$9.99   SOURCE DE-FICA (3).
+               03  COLUMN 65   PIC ZZ9 SOURCE WPC-PERCENT (3 2).
+               03  COLUMN 68   PIC X VALUE '%'.
+               03  COLUMN 74   PIC $$$9.99   SOURCE DE-FWT (3).
+               03  COLUMN 82   PIC ZZ9 SOURCE WPC-PERCENT (3 3).
+               03  COLUMN 85   PIC X VALUE '%'.
+               03  COLUMN 91   PIC $$$9.99   SOURCE DE-MISC (3).
+               03  COLUMN 99   PIC ZZ9 SOURCE WPC-PERCENT (3 4).
+               03  COLUMN 102  PIC X VALUE '%'.
+               03  COLUMN 108  PIC $$,$$9.99 SOURCE DE-NET (3).
+               03  COLUMN 118  PIC ZZ9 SOURCE WPC-PERCENT (3 5).
+               03  COLUMN 121  PIC X VALUE '%'.
+           02  LINE PLUS 2.
+               03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (4).
+               03  COLUMN 08   PIC X(15) SOURCE DE-NAME (4).
+               03  COLUMN 38   PIC $$,$$9.99 SOURCE DE-GROSS (4).
+               03  COLUMN 48   PIC ZZ9 SOURCE WPC-PERCENT (4 1).
+               03  COLUMN 51   PIC X VALUE '%'.
+               03  COLUMN 57   PIC $$$9.99   SOURCE DE-FICA (4).
+               03  COLUMN 65   PIC ZZ9 SOURCE WPC-PERCENT (4 2).
+               03  COLUMN 68   PIC X VALUE '%'.
+               03  COLUMN 74   PIC $$$9.99   SOURCE DE-FWT (4).
+               03  COLUMN 82   PIC ZZ9 SOURCE WPC-PERCENT (4 3).
+               03  COLUMN 85   PIC X VALUE '%'.
+               03  COLUMN 91   PIC $$$9.99   SOURCE DE-MISC (4).
+               03  COLUMN 99   PIC ZZ9 SOURCE WPC-PERCENT (4 4).
+               03  COLUMN 102  PIC X VALUE '%'.
+               03  COLUMN 108  PIC $$,$$9.99 SOURCE DE-NET (4).
+               03  COLUMN 118  PIC ZZ9 SOURCE WPC-PERCENT (4 5).
+               03  COLUMN 121  PIC X VALUE '%'.
+           02  LINE PLUS 2.
+               03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (5).
+               03  COLUMN 08   PIC X(15) SOURCE DE-NAME (5).
+               03  COLUMN 38   PIC $$,$$9.99 SOURCE DE-GROSS (5).
+               03  COLUMN 48   PIC ZZ9 SOURCE WPC-PERCENT (5 1).
+               03  COLUMN 51   PIC X VALUE '%'.
+               03  COLUMN 57   PIC $$$9.99   SOURCE DE-FICA (5).
+               03  COLUMN 65   PIC ZZ9 SOURCE WPC-PERCENT (5 2).
+               03  COLUMN 68   PIC X VALUE '%'.
+               03  COLUMN 74   PIC $$$9.99   SOURCE DE-FWT (5).
+               03  COLUMN 82   PIC ZZ9 SOURCE WPC-PERCENT (5 3).
+               03  COLUMN 85   PIC X VALUE '%'.
+               03  COLUMN 91   PIC $$$9.99   SOURCE DE-MISC (5).
+               03  COLUMN 99   PIC ZZ9 SOURCE WPC-PERCENT (5 4).
+               03  COLUMN 102  PIC X VALUE '%'.
+               03  COLUMN 108  PIC $$,$$9.99 SOURCE DE-NET (5).
+               03  COLUMN 118  PIC ZZ9 SOURCE WPC-PERCENT (5 5).
+               03  COLUMN 121  PIC X VALUE '%'.
+           02  LINE PLUS 2.
+               03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (6).
+               03  COLUMN 08   PIC X(15) SOURCE DE-NAME (6).
+               03  COLUMN 38   PIC $$,$$9.99 SOURCE DE-GROSS (6).
+               03  COLUMN 48   PIC ZZ9 SOURCE WPC-PERCENT (6 1).
+               03  COLUMN 51   PIC X VALUE '%'.
+               03  COLUMN 57   PIC $$$9.99   SOURCE DE-FICA (6).
+               03  COLUMN 65   PIC ZZ9 SOURCE WPC-PERCENT (6 2).
+               03  COLUMN 68   PIC X VALUE '%'.
+               03  COLUMN 74   PIC $$$9.99   SOURCE DE-FWT (6).
+               03  COLUMN 82   PIC ZZ9 SOURCE WPC-PERCENT (6 3).
+               03  COLUMN 85   PIC X VALUE '%'.
+               03  COLUMN 91   PIC $$$9.99   SOURCE DE-MISC (6).
+               03  COLUMN 99   PIC ZZ9 SOURCE WPC-PERCENT (6 4).
+               03  COLUMN 102  PIC X VALUE '%'.
+               03  COLUMN 108  PIC $$,$$9.99 SOURCE DE-NET (6).
+               03  COLUMN 118  PIC ZZ9 SOURCE WPC-PERCENT (6 5).
+               03  COLUMN 121  PIC X VALUE '%'.
+           02  LINE PLUS 2.
+               03  COLUMN 37   PIC $$$,$$9.99 SOURCE CO-GROSS.
+               03  COLUMN 48   PIC X(5) VALUE '100%'.
+               03  COLUMN 55   PIC $$,$$9.99  SOURCE CO-FICA.
+               03  COLUMN 65   PIC X(5) VALUE '100%'.
+               03  COLUMN 72   PIC $$,$$9.99  SOURCE CO-FWT.
+               03  COLUMN 82   PIC X(5) VALUE '100%'.
+               03  COLUMN 89   PIC $$,$$9.99  SOURCE CO-MISC.
+               03  COLUMN 99   PIC X(5) VALUE '100%'.
+               03  COLUMN 107  PIC $$$,$$9.99 SOURCE CO-NET.
+               03  COLUMN 118  PIC X(5) VALUE '100%'.
+      
+       PROCEDURE DIVISION.
+      
+       DECLARATIVES.
+      
+       DEPT-HEAD-USE SECTION. USE BEFORE REPORTING DEPT-HEAD.
+       DEPT-HEAD-PROC.
+           SET DE-IX TO +1.
+           SEARCH DEPARTMENT-ENTRY
+               WHEN DE-NUMBER (DE-IX) = PRR-DEPARTMENT-NUMBER
+                   MOVE ZEROS TO DE-GROSS (DE-IX), DE-FICA (DE-IX),
+                                 DE-FWT (DE-IX), DE-MISC (DE-IX),
+                                 DE-NET (DE-IX).
+      
+       DEPT-HEAD-EXIT.
+           EXIT.
+      
+       EMPL-FOOT-USE SECTION. USE BEFORE REPORTING EMPL-FOOT.
+       EMPL-FOOT-PROC.
+           MOVE PRR-EMPLOYEE-KEY TO WS-EMPLOYEE-KEY.
+           MOVE 'Y' TO PR-SW.
+      
+       EMPL-FOOT-EXIT.                                                  
+           EXIT.
+      
+       DEPT-FOOT-USE SECTION. USE BEFORE REPORTING DEPT-FOOT.
+       DEPT-FOOT-PROC.
+           MOVE DEPT-FOOT-GROSS TO DE-GROSS (DE-IX).
+           MOVE DEPT-FOOT-FICA TO DE-FICA (DE-IX).
+           MOVE DEPT-FOOT-FWT TO DE-FWT (DE-IX).
+           MOVE DEPT-FOOT-MISC TO DE-MISC (DE-IX).
+           MOVE DEPT-FOOT-NET TO DE-NET (DE-IX).
+      *     SUPPRESS PRINTING.
+      
+       DEPT-FOOT-EXIT.
+           EXIT.
+      
+       COMP-FOOT-USE SECTION. USE BEFORE REPORTING COMP-FOOT.
+       COMP-FOOT-PROC.
+           PERFORM COMP-FOOT-CALC
+               VARYING WPCD-IX FROM +1 BY +1
+               UNTIL WPCD-IX > +6.
+           GO TO COMP-FOOT-EXIT.                                        
+      
+       COMP-FOOT-CALC.
+           SET DE-IX TO WPCD-IX.
+           SET WPCC-IX TO +1.
+           COMPUTE WPC-PERCENT (WPCD-IX WPCC-IX) ROUNDED =
+               ((DE-GROSS (DE-IX) / CO-GROSS) * 100) + .5.
+           SET WPCC-IX TO +2.
+           COMPUTE WPC-PERCENT (WPCD-IX WPCC-IX) ROUNDED =
+               ((DE-FICA (DE-IX) / CO-FICA) * 100) + .5.
+           SET WPCC-IX TO +3.
+           COMPUTE WPC-PERCENT (WPCD-IX WPCC-IX) ROUNDED =
+               ((DE-FWT (DE-IX) / CO-FWT) * 100) + .5.
+           SET WPCC-IX TO +4.
+           COMPUTE WPC-PERCENT (WPCD-IX WPCC-IX) ROUNDED =
+               ((DE-MISC (DE-IX) / CO-MISC) * 100) + .5.
+           SET WPCC-IX TO +5.
+           COMPUTE WPC-PERCENT (WPCD-IX WPCC-IX) ROUNDED =
+               ((DE-NET (DE-IX) / CO-NET) * 100) + .5.
+      
+       COMP-FOOT-EXIT.
+           EXIT.
+      
+       END DECLARATIVES.
+      
+       000-INITIATE.
+      
+           OPEN INPUT PAYROLL-REGISTER-DATA,
+                OUTPUT REPORT-FILE.
+      
+           INITIATE QUARTERLY-PAY-REGISTER.
+      
+           READ PAYROLL-REGISTER-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      
+           PERFORM 100-PROCESS-PAYROLL-DATA THRU 199-EXIT
+               UNTIL END-OF-FILE.
+      
+       000-TERMINATE.
+           TERMINATE QUARTERLY-PAY-REGISTER.
+      
+           CLOSE PAYROLL-REGISTER-DATA,
+                 REPORT-FILE.
+      
+           STOP RUN.
+      
+       100-PROCESS-PAYROLL-DATA.
+           ADD PRR-FED-WH TO SUM-FED-WH.
+           GENERATE QUARTERLY-PAY-REGISTER.
+           IF PR-SW = 'Y'
+               MOVE 'N' TO PR-SW
+               MOVE ZERO TO SUM-FED-WH.
+           READ PAYROLL-REGISTER-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      
+       199-EXIT.
+           EXIT.
+      
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
+[prog.cob: 30: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 32: warning: RECORD clause ignored for LINE SEQUENTIAL
+prog.cob: 33: warning: DATA RECORDS is obsolete in Micro Focus COBOL
+prog.cob: 63: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+])
+
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [                                      C E N T U R Y   M E D I C A L   C E N T E R
+                                  Q U A R T E R L Y   P A Y R O L L   R E G I S T E R                         PAGE     1
+
+     --------- EMPLOYEE ---------      GROSS         FICA        FED W/H       MISC.          NET
+      NO             NAME               PAY           TAX          TAX        DEDUCT.         PAY
+
+DEPARTMENT NUMBER:  01 MANAGEMENT
+
+     6622    GAVIN SHAFER            $1,040.00       $60.84      $134.48        $4.75        $839.93
+     7078    VERA ALSTON             $1,800.00      $105.30      $138.24        $3.75      $1,552.71
+     8093    GRADY KAISER            $2,300.00      $134.57      $247.53        $6.50      $1,911.43
+
+             DEPARTMENT TOTALS       $5,140.00 *    $300.71 *    $520.25 *     $15.00 *    $4,304.07 *
+
+
+DEPARTMENT NUMBER:  05 ADMINISTRATIVE
+
+     1720    PAULINE WINSTON           $680.00       $39.79      $290.36        $3.50        $526.37
+     2116    HERMAN COX                $610.00       $35.69       $76.52        $7.25        $490.55
+     6925    ADOLF TRUJILLO            $625.00       $36.55      $118.95        $4.00        $465.50
+
+             DEPARTMENT TOTALS       $1,915.00 *    $112.03 *    $485.83 *     $14.75 *    $1,482.42 *
+
+
+DEPARTMENT NUMBER:  10 SKILLED NURSING
+
+     1504    TIFFANY KEIR            $1,740.00      $101.82      $187.74        $1.75      $1,448.69
+     6640    ALEXANDER CATHEY        $1,950.00      $114.06      $371.10        $7.25      $1,457.59
+     9465    STEVE HUGHES            $1,475.00       $86.30      $239.40        $3.00      $1,146.30
+
+             DEPARTMENT TOTALS       $5,165.00 *    $302.18 *    $798.24 *     $12.00 *    $4,052.58 *
+
+
+DEPARTMENT NUMBER:  15 PATIENT SUPPORT
+
+     2903    KAYLA VERBECK             $840.00       $49.14      $136.32        $5.25        $649.29
+     5196    CLAIRE KELLAR             $886.00       $51.82      $102.80        $6.75        $724.63
+
+             DEPARTMENT TOTALS       $1,726.00 *    $100.96 *    $239.12 *     $12.00 *    $1,373.92 *
+
+
+DEPARTMENT NUMBER:  20 HOUSEKEEPING
+
+
+             DEPARTMENT TOTALS       $1,518.00 *     $88.86 *    $202.44 *     $13.00 *    $1,212.76 *
+
+
+DEPARTMENT NUMBER:  25 MAINTENANCE
+
+     2003    BALDWIN SIMONSEN          $670.00       $39.22      $113.46        $4.75        $512.57
+
+             DEPARTMENT TOTALS       $1,744.00 *    $102.04 *    $210.54 *     $13.25 *    $1,418.17 *
+
+             COMPANY TOTALS         $17,208.00 ** $1,006.78 ** $2,456.42 **    $80.00 **  $13,843.92 **
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                      C e n t u r y   M e d i c a l   C e n t e r
+                                  Q u a r t e r l y   P a y r o l l   R e g i s t e r                         PAGE     2
+
+                                       GROSS             FICA            FED W/H           MISC.              NET
+                                        PAY               TAX              TAX            DEDUCT.             PAY
+
+    * * * DEPARTMENT TOTALS * * *
+
+    01 MANAGEMENT                    $5,140.00  30%     $300.71  30%     $520.25  21%      $15.00  19%     $4,304.07  31%
+
+    05 ADMINISTRATIVE                $1,915.00  11%     $112.03  11%     $485.83  20%      $14.75  18%     $1,482.42  11%
+
+    10 SKILLED NURSING               $5,165.00  30%     $302.18  30%     $798.24  33%      $12.00  15%     $4,052.58  29%
+
+    15 PATIENT SUPPORT               $1,726.00  10%     $100.96  10%     $239.12  10%      $12.00  15%     $1,373.92  10%
+
+    20 HOUSEKEEPING                  $1,518.00   9%      $88.86   9%     $202.44   8%      $13.00  16%     $1,212.76   9%
+
+    25 MAINTENANCE                   $1,744.00  10%     $102.04  10%     $210.54   9%      $13.25  17%     $1,418.17  10%
+
+                                    $17,208.00 100%   $1,006.78 100%   $2,456.42 100%      $80.00 100%    $13,843.92 100%
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([STUDENT REPORT])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[00123Dorken, Keith       CS 08
+00124Allinson, Sandy     MA 08
+00125Allinson, Nina      MA 08
+00126Allinson, Natalia   MA 08
+00127Allinson, Kristina  MBA08
+00131Norman, Nancy       SC 06
+00132Norman, Becky       SC 06
+00133Norman, Michelle    SC 06
+00134Norman, James       AM 06
+12345Norman, Ron         CS 08
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+               SELECT INPUT-FILE ASSIGN TO EXTERNAL STUDENT
+                              ORGANIZATION IS LINE SEQUENTIAL. 
+               SELECT PRINT-FILE ASSIGN TO EXTERNAL 
+                              LINE ADVANCING REPORT1.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD   INPUT-FILE
+            RECORD CONTAINS 30 CHARACTERS.
+       01   INPUT-REC.
+               05  STUDENT-ID               PIC  9(5).
+               05  STUDENT-NAME             PIC  X(20).
+               05  MAJOR                    PIC  XXX.
+               05  NUM-COURSES              PIC  99.
+
+       FD   PRINT-FILE
+             REPORT IS STUDENT-REPORT STUDENT-REPORT2.
+
+       WORKING-STORAGE SECTION.
+       01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".          
+       01   REPORT-DUMMY.
+            05  FILLER        PIC X(3) VALUE SPACES.
+            05  COLUMN-4      PIC 9(6).
+            05  FILLER        PIC X(5) VALUE SPACES.
+            05  COLUMN-15     PIC X(20).
+            05  FILLER        PIC X(5) VALUE SPACES.
+            05  COLUMN-40     PIC XXX.
+            05  FILLER        PIC X(4) VALUE SPACES.
+            05  COLUMN-46     PIC Z99.9.
+
+       REPORT SECTION.
+       RD   STUDENT-REPORT
+           PAGE LIMIT 50 LINES
+           HEADING 2
+           FIRST DETAIL 5
+           LAST DETAIL 45
+           FOOTING 48.
+       01   REPORT-LINE
+            TYPE DETAIL
+             LINE PLUS  1.
+            05  COLUMN 1 PIC 9(2) 
+                  SOURCE LINE-COUNTER OF STUDENT-REPORT.
+            05  COLUMN 4      PIC 9(6)     SOURCE    STUDENT-ID.
+            05  COLUMN 15     PIC X(20)    SOURCE    STUDENT-NAME.
+            05  COLUMN 40     PIC XXX      SOURCE    MAJOR.
+            05  COLUMN 45     PIC XXX      VALUE "-*-".
+            05  COLUMN 52     PIC 99       SOURCE    NUM-COURSES.
+
+       RD  STUDENT-REPORT2
+           PAGE LIMIT 60 LINES
+           HEADING 2
+           FIRST DETAIL 5
+           LAST DETAIL 55
+           FOOTING 58.
+       01   REPORT-LINE2
+            TYPE DETAIL
+             LINE PLUS  1.
+            05  COLUMN 4      PIC 9(6)     SOURCE    STUDENT-ID.
+            05  COLUMN 15     PIC X(20)    SOURCE    STUDENT-NAME.
+            05  COLUMN 40     PIC XXX      SOURCE    MAJOR.
+            05  COLUMN 45     PIC 99       SOURCE    NUM-COURSES.
+       01   REPORT-LINE3
+            TYPE DETAIL
+             LINE PLUS  2.
+            05  COLUMN 4      PIC 9(6)     SOURCE    STUDENT-ID.
+            05  COLUMN 15     PIC X(20)    SOURCE    STUDENT-NAME.
+            05  COLUMN 40     PIC XXX      SOURCE    MAJOR.
+
+       PROCEDURE DIVISION.
+       A000-MAINLINE.
+           DISPLAY "Report Test 1" UPON CONSOLE.
+           OPEN  INPUT  INPUT-FILE
+                 OUTPUT PRINT-FILE
+           MOVE SPACES TO REPORT-DUMMY.
+           MOVE 5 TO COLUMN-4.
+           MOVE "Hello" TO COLUMN-15.
+           MOVE "Bye" TO COLUMN-40.
+           MOVE 75 TO COLUMN-46.
+           MOVE REPORT-DUMMY (2:47) TO REPORT-DUMMY.
+           DISPLAY "'" REPORT-DUMMY "'" UPON CONSOLE.
+           PERFORM DO-INIT.
+           READ INPUT-FILE
+               AT END
+                   MOVE "NO" TO ARE-THERE-MORE-RECORDS.
+           PERFORM A001-LOOP
+               UNTIL ARE-THERE-MORE-RECORDS = "NO ".
+           PERFORM DO-TERM.
+           CLOSE INPUT-FILE
+                 PRINT-FILE.
+           STOP RUN.
+
+       A001-LOOP.
+           GENERATE REPORT-LINE.
+           READ INPUT-FILE
+               AT END
+                   MOVE "NO " TO ARE-THERE-MORE-RECORDS.
+       DO-INIT.
+           INITIATE STUDENT-REPORT.
+
+       DO-TERM.
+           TERMINATE STUDENT-REPORT.
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
+[prog.cob: 16: warning: RECORD clause ignored for LINE SEQUENTIAL
+])
+
+AT_CHECK([DD_STUDENT="./inp_data" DD_REPORT1="./report.txt" $COBCRUN_DIRECT ./prog], [0], 
+[Report Test 1
+'  000005     Hello                    Bye     7    '
+], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [
+
+
+
+05 000123     Dorken, Keith            CS   -*-    08
+06 000124     Allinson, Sandy          MA   -*-    08
+07 000125     Allinson, Nina           MA   -*-    08
+08 000126     Allinson, Natalia        MA   -*-    08
+09 000127     Allinson, Kristina       MBA  -*-    08
+10 000131     Norman, Nancy            SC   -*-    06
+11 000132     Norman, Becky            SC   -*-    06
+12 000133     Norman, Michelle         SC   -*-    06
+13 000134     Norman, James            AM   -*-    06
+14 012345     Norman, Ron              CS   -*-    08
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([ORDER REPORT])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[10001090001012010590416      $
+10001090002013016950416      $
+10002090002023016950416      $
+10002090001022010590416      $
+10003090007023016950417      $
+10003090008032010590417      $
+10003090009023016950417      $
+10003090010032010590417      $
+10004090007023016950417      $
+10004090008032010590417      $
+10004090009023016950417      $
+10004090010032010590417      $
+10004090011032010590417      $
+10004090012032010590417      $
+10004090013032010590417      $
+10004090014032010590417      $
+10004090015032010590417      $
+10005090007023016950417      $
+10005090008032010590417      $
+10005090009023016950417      $
+10005090010032010590417      $
+10005090011032010590417      $
+10005090012032010590417      $
+10005090013032010590417      $
+10005090014032010590417      $
+10005090015032010590417      $
+10005090016032010590417      $
+10005090017032010590417      $
+10005090018032010590417      $
+10006090007023016950417      $
+10006090008032010590417      $
+10006090009023016950417      $
+10006090010032010590417      $
+10006090011032010590417      $
+10006090012032010590417      $
+10006090013032010590417      $
+10006090014032010590417      $
+10006090015032010590417      $
+10006090016032010590417      $
+10006090017032010590417      $
+10006090018032010590417      $
+10006090019032010590417      $
+10006090020032010590417      $
+10007090007023016950417      $
+10007090008032010590417      $
+10007090009023016950417      $
+10007090010032010590417      $
+10007090011032010590417      $
+10007090012032010590417      $
+10007090013032010590417      $
+10007090014032010590417      $
+10007090015032010590417      $
+10007090016032010590417      $
+10007090017032010590417      $
+10007090018032010590417      $
+10007090019032010590417      $
+10007090020032010590417      $
+10007090021032010590417      $
+10007090022032010590417      $
+10008090007023016950417      $
+10008090008032010590417      $
+10008090009023016950417      $
+10008090010032010590417      $
+10008090011032010590417      $
+10008090012032010590417      $
+10008090013032010590417      $
+10008090014032010590417      $
+10008090015032010590417      $
+10008090016032010590417      $
+10008090017032010590417      $
+10008090018032010590417      $
+10008090019032010590417      $
+10008090020032010590417      $
+10008090021032010590417      $
+10008090022032010590417      $
+10009090007023016950417      $
+10009090008032010590417      $
+10009090009023016950417      $
+10009090010032010590417      $
+10009090011032010590417      $
+10009090012032010590417      $
+10009090013032010590417      $
+10009090014032010590417      $
+10009090015032010590417      $
+10009090016032010590417      $
+10009090017032010590417      $
+10009090018032010590417      $
+10009090019032010590417      $
+10009090020032010590417      $
+10009090021032010590417      $
+10009090022032010590417      $
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT CUST-ORDER-FILE ASSIGN TO EXTERNAL CUSTORD
+                          ORGANIZATION IS LINE SEQUENTIAL. 
+           SELECT CUST-PRINT-FILE ASSIGN TO EXTERNAL 
+                          LINE ADVANCING REPORT2.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  CUST-ORDER-FILE
+            RECORD CONTAINS 30 CHARACTERS.
+       01  CUST-ORDER-REC.
+           05  CUST-NUM      PIC 9(5).
+           05  ITEM-NUM      PIC 9(6).
+           05  NUM-ORD       PIC 999.
+           05  PRICE         PIC 999V99.
+           05  SHIPPING      PIC 99V99.
+           05  FILLER        PIC X(7).
+
+       FD  CUST-PRINT-FILE
+            REPORT IS ORDER-REPORT.
+
+       WORKING-STORAGE SECTION.
+       01    INDICATORS.
+           05  ARE-THERE-MORE-RECORDS     PIC XXX   VALUE 'YES'.
+               88  THERE-ARE-NO-MORE-RECORDS        VALUE 'NO '.
+       01    CONSTANTS.
+           05  SALES-TAX     PIC 9V99        VALUE 0.05.
+       01      WORK-AREAS.
+           05  AMT-TAX       PIC 9999V99      VALUE 0.
+           05  AMT-ORDER     PIC 9(5)V99      VALUE 0.
+           05  TOT-ORDER     PIC 9(6)V99      VALUE 0.
+       
+       REPORT SECTION.
+       RD    ORDER-REPORT
+           CONTROLS ARE FINAL
+           PAGE 55 LINES
+           FIRST DETAIL 6.
+       01    TYPE REPORT HEADING
+                  LINE 1.
+           10    COLUMN 44    PIC X(21)    
+                                  VALUE 'CUSTOMER ORDER REPORT'.
+       01  TYPE PAGE HEADING.
+           05  LINE 2.
+               10  COLUMN  94   PIC X(5) VALUE 'PAGE'.
+               10  COLUMN 106    PIC ZZ9
+                      SOURCE PAGE-COUNTER.
+           05  LINE 4.
+               10  COLUMN 11    PIC X(8) VALUE 'CUST NUM'.
+               10  COLUMN 26    PIC XXXX VALUE 'PART'.
+               10  COLUMN 39    PIC X(7) VALUE '# ITEMS'.
+               10  COLUMN 50    PIC X(5) VALUE 'PRICE'.
+               10  COLUMN 66    PIC X(8) VALUE 'QUANTITY'.
+               10  COLUMN 82    PIC XXX  VALUE 'TAX'.
+               10  COLUMN 91    PIC X(8) VALUE 'SHIPPING'.
+               10  COLUMN 108   PIC X(5) VALUE 'TOTAL'.
+
+       01    DETAIL-LINE TYPE IS DETAIL
+             LINE PLUS 1.
+           05  COLUMN 12        PIC 9(5)
+                      SOURCE CUST-NUM.
+           05  COLUMN 25        PIC 9(6)
+                      SOURCE ITEM-NUM.
+           05  COLUMN 41        PIC 999
+                      SOURCE NUM-ORD.
+           05  COLUMN 49        PIC ZZZ.99
+                      SOURCE PRICE.
+           05  COLUMN 64        PIC ZZ,ZZZ.99
+                      SOURCE AMT-ORDER.
+           05  COLUMN 80        PIC Z,ZZZ.99
+                      SOURCE AMT-TAX.
+           05  COLUMN 93        PIC ZZ.99
+                      SOURCE SHIPPING.
+           05  COLUMN 104        PIC ZZZ,ZZZ.99
+                      SOURCE TOT-ORDER.
+           
+       
+       01     TYPE CONTROL FOOTING FINAL
+           LINE PLUS 2.
+           05  COLUMN 42        PIC X(12)
+                      VALUE 'FINAL TOTALS'.
+           05  COLUMN 63        PIC ZZZ,ZZZ.99
+                      SOURCE AMT-ORDER.
+           05  COLUMN 79        PIC ZZ,ZZZ.99
+                      SUM AMT-TAX.
+           05  COLUMN 92        PIC ZZZ.99
+                      SUM SHIPPING.
+           05  COLUMN 102        PIC Z,ZZZ,ZZZ.99
+                      SUM TOT-ORDER.
+
+       PROCEDURE DIVISION.
+       A000-MAINLINE.
+           DISPLAY "Report test 2" UPON CONSOLE.
+           OPEN INPUT  CUST-ORDER-FILE
+                OUTPUT CUST-PRINT-FILE.
+           INITIATE ORDER-REPORT.
+           READ CUST-ORDER-FILE
+                AT END
+                    MOVE 'NO' TO ARE-THERE-MORE-RECORDS.
+           PERFORM A001-LOOP
+                UNTIL THERE-ARE-NO-MORE-RECORDS.
+           TERMINATE ORDER-REPORT.
+           CLOSE CUST-ORDER-FILE
+                  CUST-PRINT-FILE.
+           DISPLAY "Report test 2 completed" UPON CONSOLE.
+           STOP RUN.
+       A001-LOOP.
+           MULTIPLY NUM-ORD BY PRICE GIVING AMT-ORDER.
+           MULTIPLY AMT-ORDER BY SALES-TAX GIVING AMT-TAX.
+           ADD AMT-ORDER SHIPPING AMT-TAX GIVING TOT-ORDER.
+           GENERATE DETAIL-LINE.
+           READ CUST-ORDER-FILE
+                AT END
+                    MOVE 'NO' TO ARE-THERE-MORE-RECORDS.
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
+[prog.cob: 16: warning: RECORD clause ignored for LINE SEQUENTIAL
+])
+
+AT_CHECK([DD_CUSTORD="./inp_data" DD_REPORT2="./report.txt" $COBCRUN_DIRECT ./prog], [0],
+[Report test 2
+Report test 2 completed
+], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [                                           CUSTOMER ORDER REPORT
+                                                                                             PAGE          1
+
+          CUST NUM       PART         # ITEMS    PRICE           QUANTITY        TAX      SHIPPING         TOTAL
+
+           10001        090001          012      10.59            127.08           6.35      4.16          137.59
+           10001        090002          013      16.95            220.35          11.01      4.16          235.52
+           10002        090002          023      16.95            389.85          19.49      4.16          413.50
+           10002        090001          022      10.59            232.98          11.64      4.16          248.78
+           10003        090007          023      16.95            389.85          19.49      4.17          413.51
+           10003        090008          032      10.59            338.88          16.94      4.17          359.99
+           10003        090009          023      16.95            389.85          19.49      4.17          413.51
+           10003        090010          032      10.59            338.88          16.94      4.17          359.99
+           10004        090007          023      16.95            389.85          19.49      4.17          413.51
+           10004        090008          032      10.59            338.88          16.94      4.17          359.99
+           10004        090009          023      16.95            389.85          19.49      4.17          413.51
+           10004        090010          032      10.59            338.88          16.94      4.17          359.99
+           10004        090011          032      10.59            338.88          16.94      4.17          359.99
+           10004        090012          032      10.59            338.88          16.94      4.17          359.99
+           10004        090013          032      10.59            338.88          16.94      4.17          359.99
+           10004        090014          032      10.59            338.88          16.94      4.17          359.99
+           10004        090015          032      10.59            338.88          16.94      4.17          359.99
+           10005        090007          023      16.95            389.85          19.49      4.17          413.51
+           10005        090008          032      10.59            338.88          16.94      4.17          359.99
+           10005        090009          023      16.95            389.85          19.49      4.17          413.51
+           10005        090010          032      10.59            338.88          16.94      4.17          359.99
+           10005        090011          032      10.59            338.88          16.94      4.17          359.99
+           10005        090012          032      10.59            338.88          16.94      4.17          359.99
+           10005        090013          032      10.59            338.88          16.94      4.17          359.99
+           10005        090014          032      10.59            338.88          16.94      4.17          359.99
+           10005        090015          032      10.59            338.88          16.94      4.17          359.99
+           10005        090016          032      10.59            338.88          16.94      4.17          359.99
+           10005        090017          032      10.59            338.88          16.94      4.17          359.99
+           10005        090018          032      10.59            338.88          16.94      4.17          359.99
+           10006        090007          023      16.95            389.85          19.49      4.17          413.51
+           10006        090008          032      10.59            338.88          16.94      4.17          359.99
+           10006        090009          023      16.95            389.85          19.49      4.17          413.51
+           10006        090010          032      10.59            338.88          16.94      4.17          359.99
+           10006        090011          032      10.59            338.88          16.94      4.17          359.99
+           10006        090012          032      10.59            338.88          16.94      4.17          359.99
+           10006        090013          032      10.59            338.88          16.94      4.17          359.99
+           10006        090014          032      10.59            338.88          16.94      4.17          359.99
+           10006        090015          032      10.59            338.88          16.94      4.17          359.99
+           10006        090016          032      10.59            338.88          16.94      4.17          359.99
+           10006        090017          032      10.59            338.88          16.94      4.17          359.99
+           10006        090018          032      10.59            338.88          16.94      4.17          359.99
+           10006        090019          032      10.59            338.88          16.94      4.17          359.99
+           10006        090020          032      10.59            338.88          16.94      4.17          359.99
+           10007        090007          023      16.95            389.85          19.49      4.17          413.51
+           10007        090008          032      10.59            338.88          16.94      4.17          359.99
+           10007        090009          023      16.95            389.85          19.49      4.17          413.51
+           10007        090010          032      10.59            338.88          16.94      4.17          359.99
+           10007        090011          032      10.59            338.88          16.94      4.17          359.99
+           10007        090012          032      10.59            338.88          16.94      4.17          359.99
+           10007        090013          032      10.59            338.88          16.94      4.17          359.99
+
+                                                                                             PAGE          2
+
+          CUST NUM       PART         # ITEMS    PRICE           QUANTITY        TAX      SHIPPING         TOTAL
+
+           10007        090014          032      10.59            338.88          16.94      4.17          359.99
+           10007        090015          032      10.59            338.88          16.94      4.17          359.99
+           10007        090016          032      10.59            338.88          16.94      4.17          359.99
+           10007        090017          032      10.59            338.88          16.94      4.17          359.99
+           10007        090018          032      10.59            338.88          16.94      4.17          359.99
+           10007        090019          032      10.59            338.88          16.94      4.17          359.99
+           10007        090020          032      10.59            338.88          16.94      4.17          359.99
+           10007        090021          032      10.59            338.88          16.94      4.17          359.99
+           10007        090022          032      10.59            338.88          16.94      4.17          359.99
+           10008        090007          023      16.95            389.85          19.49      4.17          413.51
+           10008        090008          032      10.59            338.88          16.94      4.17          359.99
+           10008        090009          023      16.95            389.85          19.49      4.17          413.51
+           10008        090010          032      10.59            338.88          16.94      4.17          359.99
+           10008        090011          032      10.59            338.88          16.94      4.17          359.99
+           10008        090012          032      10.59            338.88          16.94      4.17          359.99
+           10008        090013          032      10.59            338.88          16.94      4.17          359.99
+           10008        090014          032      10.59            338.88          16.94      4.17          359.99
+           10008        090015          032      10.59            338.88          16.94      4.17          359.99
+           10008        090016          032      10.59            338.88          16.94      4.17          359.99
+           10008        090017          032      10.59            338.88          16.94      4.17          359.99
+           10008        090018          032      10.59            338.88          16.94      4.17          359.99
+           10008        090019          032      10.59            338.88          16.94      4.17          359.99
+           10008        090020          032      10.59            338.88          16.94      4.17          359.99
+           10008        090021          032      10.59            338.88          16.94      4.17          359.99
+           10008        090022          032      10.59            338.88          16.94      4.17          359.99
+           10009        090007          023      16.95            389.85          19.49      4.17          413.51
+           10009        090008          032      10.59            338.88          16.94      4.17          359.99
+           10009        090009          023      16.95            389.85          19.49      4.17          413.51
+           10009        090010          032      10.59            338.88          16.94      4.17          359.99
+           10009        090011          032      10.59            338.88          16.94      4.17          359.99
+           10009        090012          032      10.59            338.88          16.94      4.17          359.99
+           10009        090013          032      10.59            338.88          16.94      4.17          359.99
+           10009        090014          032      10.59            338.88          16.94      4.17          359.99
+           10009        090015          032      10.59            338.88          16.94      4.17          359.99
+           10009        090016          032      10.59            338.88          16.94      4.17          359.99
+           10009        090017          032      10.59            338.88          16.94      4.17          359.99
+           10009        090018          032      10.59            338.88          16.94      4.17          359.99
+           10009        090019          032      10.59            338.88          16.94      4.17          359.99
+           10009        090020          032      10.59            338.88          16.94      4.17          359.99
+           10009        090021          032      10.59            338.88          16.94      4.17          359.99
+           10009        090022          032      10.59            338.88          16.94      4.17          359.99
+
+                                         FINAL TOTALS             338.88       1,557.97    379.43       33,103.80
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([Control Break Report])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[Norman, Ronald J    25CS Malcolm, Mike        Waterloo
+Dorken, Keith A     35CS Malcolm, Mike        Waterloo
+Norman, James J     25CS Manning, Eric        Waterloo
+Dorken, Kevin       35CS Manning, Eric        Waterloo
+Allinson, A R       25EC Manning, Eric        Whistler
+Norman, Michelle    27EC Manning, Donna       Toronto 
+Dorken, Melissa     37EC Manning, Donna       Toronto 
+Norman, Becky       27EC DiMetri, Donna       Toronto 
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT STUDENT-FILE ASSIGN TO EXTERNAL STUDREC
+                          ORGANIZATION IS LINE SEQUENTIAL. 
+           SELECT PRINT-FILE ASSIGN TO EXTERNAL
+                          LINE ADVANCING REPORT3.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD    STUDENT-FILE.
+       01    STUDENT-REC        PIC X(60).
+
+       FD    PRINT-FILE
+           REPORT IS CONTROL-BREAK.
+           
+       WORKING-STORAGE SECTION.
+       01    INDICATORS.
+           05  ARE-THERE-MORE-RECORDS PIC XXX VALUE 'YES'.
+             88 THERE-ARE-NO-MORE-RECORDS VALUE 'NO'.
+
+       01     CONSTANTS.
+           05  NUM        PIC 99 VALUE 1.
+
+       01    STUDENT-AREA.
+           05  STUDENT-NAME   PIC X(20).
+           05  COURSE-PTS     PIC 99.
+           05  MAJOR          PIC XXX.
+           05  ADVISOR        PIC X(20).
+           05  CAMPUS         PIC X(15).
+
+       REPORT SECTION.
+       RD    CONTROL-BREAK
+           CONTROLS ARE MAJOR ADVISOR
+           PAGE LIMIT 50 LINES
+           HEADING 1
+           FIRST DETAIL 5
+           FOOTING 48.
+       01  TYPE IS PAGE HEADING.
+           05  LINE 1.
+                10  COLUMN 61    PIC X(4) VALUE 'PAGE'.
+                10  COLUMN 66    PIC ZZZ9 SOURCE PAGE-COUNTER.
+           05  LINE PLUS 2.
+                10  COLUMN 26     PIC X(23)
+                       VALUE 'STUDENT ADVISEMENT LIST'.
+
+       01  TYPE IS CONTROL HEADING MAJOR.
+           05     LINE 5 ON NEXT PAGE.
+                10  COLUMN 37    PIC X(5)  VALUE 'MAJOR'.
+                10  COLUMN 44    PIC X(20) SOURCE MAJOR.
+
+           05     LINE 7.
+                10  COLUMN  4    PIC X(12) VALUE 'STUDENT NAME'.
+                10  COLUMN 25    PIC XXX   VALUE 'PTS'.
+                10  COLUMN 34    PIC X(6)  VALUE 'CAMPUS'.
+                10  COLUMN 60    PIC X(8)  VALUE 'ADVISOR'.
+           05     LINE PLUS 1.
+                10  COLUMN  4    PIC X(68) VALUE ALL '-'.
+
+       01    TRANS-LINE TYPE IS DETAIL.
+           05     LINE NUMBER PLUS 1.
+                10  COLUMN  3    PIC X(20) SOURCE STUDENT-NAME.
+                10  COLUMN 26    PIC 99    SOURCE COURSE-PTS.
+                10  COLUMN 34    PIC X(15) SOURCE CAMPUS.
+                10  COLUMN 60    PIC X(20) SOURCE ADVISOR 
+                                 GROUP INDICATE.
+
+       01    TYPE IS CONTROL FOOTING ADVISOR.
+           05     LINE PLUS 2.
+                10  COLUMN 5     PIC X(8)  VALUE 'ADVISOR'.
+                10  COLUMN 13    PIC X(20) SOURCE ADVISOR.
+                10  COLUMN 34    PIC X(6)  VALUE 'TOTAL'.
+                10  ADV-TOTAL
+                    COLUMN 40    PIC ZZ9   SUM NUM.
+           05     LINE PLUS 1.
+                10  COLUMN 1     PIC X(8)  VALUE ' '.
+       
+       01    TYPE IS CONTROL FOOTING MAJOR.
+           05     LINE PLUS 2.
+                10  COLUMN 5    PIC X(11)  VALUE 'MAJOR TOTAL'.
+                10  MAJ-TOTAL
+                    COLUMN 22    PIC ZZ9   SUM ADV-TOTAL.
+
+       01    TYPE IS CONTROL FOOTING FINAL.
+           05  LINE PLUS 3.
+                10  COLUMN 10    PIC X(11) VALUE 'FINAL TOTAL'.
+                10  STU-TOTAL
+                    COLUMN 21    PIC ZZZ9 SUM MAJ-TOTAL.
+
+       PROCEDURE DIVISION.
+       A000-CREATE-REPORTS.
+           OPEN INPUT STUDENT-FILE
+                OUTPUT PRINT-FILE.
+           INITIATE CONTROL-BREAK.
+           READ STUDENT-FILE INTO STUDENT-AREA
+                AT END
+                    MOVE 'NO ' TO ARE-THERE-MORE-RECORDS.
+           PERFORM A001-LOOP
+                UNTIL THERE-ARE-NO-MORE-RECORDS.
+           TERMINATE CONTROL-BREAK.
+           CLOSE STUDENT-FILE
+                   PRINT-FILE.
+           STOP RUN.
+
+       A001-LOOP.
+           GENERATE TRANS-LINE.
+           READ STUDENT-FILE INTO STUDENT-AREA
+                AT END
+                    MOVE 'NO ' TO ARE-THERE-MORE-RECORDS.
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+
+AT_CHECK([DD_STUDREC="./inp_data" DD_REPORT3="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [                                                            PAGE    1
+
+                         STUDENT ADVISEMENT LIST
+
+                                    MAJOR  CS
+
+   STUDENT NAME         PTS      CAMPUS                    ADVISOR
+   --------------------------------------------------------------------
+  Norman, Ronald J       25       Waterloo                 Malcolm, Mike
+  Dorken, Keith A        35       Waterloo
+
+    ADVISOR Malcolm, Mike        TOTAL   2
+
+  Norman, James J        25       Waterloo                 Manning, Eric
+  Dorken, Kevin          35       Waterloo
+
+    ADVISOR Manning, Eric        TOTAL   2
+
+
+    MAJOR TOTAL        4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                            PAGE    2
+
+                         STUDENT ADVISEMENT LIST
+
+                                    MAJOR  EC
+
+   STUDENT NAME         PTS      CAMPUS                    ADVISOR
+   --------------------------------------------------------------------
+  Allinson, A R          25       Whistler                 Manning, Eric
+
+    ADVISOR Manning, Eric        TOTAL   1
+
+  Norman, Michelle       27       Toronto                  Manning, Donna
+  Dorken, Melissa        37       Toronto
+
+    ADVISOR Manning, Donna       TOTAL   2
+
+  Norman, Becky          27       Toronto                  DiMetri, Donna
+
+    ADVISOR DiMetri, Donna       TOTAL   1
+
+
+    MAJOR TOTAL        4
+
+
+         FINAL TOTAL   8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([Inventory Report])
+AT_KEYWORDS([report])
+
+#REPORT WRITER tests currently skipped
+AT_SKIP_IF(true)
+
+AT_DATA([inp_data],[01Data Processing   02000500012388
+02Cow Milking       02000600054398
+03Grass Cutting     03000600054397
+03Lawn mowing       03000600054397
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT INV-FILE ASSIGN TO EXTERNAL INVFILE
+                          ORGANIZATION IS LINE SEQUENTIAL. 
+           SELECT REPORT-FILE ASSIGN TO EXTERNAL
+                          LINE ADVANCING REPORT4.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD    INV-FILE.
+       01    INV-REC.
+           05     DEPT-IN        PIC 99.
+           05     DEPT-NAM-IN    PIC X(18).
+           05     MONTH-IN       PIC 99.
+           05     ITEM-NO-IN     PIC 9(5).
+           05     INV-TOT-IN     PIC 9(6)V99.
+
+       FD    REPORT-FILE
+           REPORT IS INV-REPORT.
+
+       WORKING-STORAGE SECTION.
+       01  INDICATORS.
+           05  ARE-THERE-MORE-RECORDS    PIC XXX VALUE 'YES'.
+
+       REPORT SECTION.
+       RD  INV-REPORT
+           CONTROLS ARE FINAL DEPT-IN MONTH-IN
+           PAGE LIMIT 25 LINES
+           HEADING 2
+           FIRST DETAIL 5
+           LAST DETAIL 18
+           FOOTING 20.
+       01  TYPE IS REPORT HEADING.
+           05  LINE 2 COLUMN 50  PIC X(16) VALUE 'INVENTORY REPORT'.
+
+       01  TYPE IS CONTROL HEADING DEPT-IN
+           LINE NUMBER IS PLUS 2
+           NEXT GROUP IS PLUS 2.
+           05 COLUMN 2        PIC X(13) VALUE 'DEPARTMENT #:'.
+           05 COLUMN 27       PIC 99    SOURCE DEPT-IN.
+           05 COLUMN 31       PIC X(16) VALUE 'DEPARTMENT NAME:'.
+           05 COLUMN 50       PIC X(18) SOURCE DEPT-NAM-IN.
+
+       01  INV-DETAIL TYPE IS DETAIL
+           LINE PLUS 2.
+           05 COLUMN 10       PIC 99  SOURCE MONTH-IN GROUP INDICATE.
+           05 COLUMN 25       PIC 9(5) SOURCE ITEM-NO-IN.
+           05 COLUMN 40       PIC ZZZ,ZZZ.99 SOURCE IS INV-TOT-IN.
+
+       01  TYPE IS CONTROL FOOTING MONTH-IN
+           LINE PLUS 2.
+           05 MONTH-TOTAL COLUMN 55 PIC Z,ZZZ,ZZZ.99 SUM INV-TOT-IN.
+
+       01  TYPE IS CONTROL FOOTING DEPT-IN
+           LINE PLUS 2.
+           05 DEPT-TOTAL COLUMN 75 PIC ZZ,ZZZ,ZZZ.99 SUM MONTH-TOTAL.
+
+       01  TYPE IS CONTROL FOOTING FINAL
+           LINE PLUS 2.
+           05 FINAL-TOTAL COLUMN 95 PIC ZZZ,ZZZ,ZZZ.99 SUM DEPT-TOTAL.
+
+       PROCEDURE DIVISION.
+       A000-MAINLINE.
+           OPEN INPUT INV-FILE
+                OUTPUT REPORT-FILE.
+           INITIATE INV-REPORT.
+           READ INV-FILE
+                AT END
+                    MOVE 'NO ' TO ARE-THERE-MORE-RECORDS.
+           PERFORM A001-LOOP
+                UNTIL ARE-THERE-MORE-RECORDS = 'NO '.
+           TERMINATE INV-REPORT.
+           CLOSE INV-FILE
+                REPORT-FILE.
+           STOP RUN.
+       A001-LOOP.
+           GENERATE INV-DETAIL.
+           READ INV-FILE
+                AT END
+                    MOVE 'NO ' TO ARE-THERE-MORE-RECORDS.
+       
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+
+AT_CHECK([DD_INVFILE="./inp_data" DD_REPORT4="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [
+                                                 INVENTORY REPORT
+
+
+ DEPARTMENT #:            01  DEPARTMENT NAME:   Data Processing
+
+         02             00050            1,238.80
+
+
+                                                          1,238.80
+
+                                                                                    .00
+
+                                                                               1,238.80
+
+ DEPARTMENT #:            02  DEPARTMENT NAME:   Cow Milking
+
+         02             00060            5,439.80
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                          5,439.80
+
+                                                                                    .00
+
+                                                                               5,439.80
+
+ DEPARTMENT #:            03  DEPARTMENT NAME:   Grass Cutting
+
+         03             00060            5,439.70
+
+
+                        00060            5,439.70
+
+                                                         10,879.40
+
+
+
+
+
+
+
+                                                                                    .00
+
+                                                                              10,879.40
+
+                                                                                                   17,558.00
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0], [], [])
+
+AT_CLEANUP

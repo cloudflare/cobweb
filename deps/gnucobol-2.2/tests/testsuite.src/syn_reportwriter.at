@@ -1,0 +1,183 @@
+## Copyright (C) 2014-2015 Free Software Foundation, Inc.
+## Written by Simon Sobisch
+## 
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2014 REPORT WRITER module
+
+AT_SETUP([REPORT SECTION clause numbers])
+AT_KEYWORDS([report])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+           SELECT report-file ASSIGN "whatever".
+
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  report-file  REPORT r.
+       
+       REPORT           SECTION.
+       RD  r.
+       01  valid-num    TYPE DETAIL.
+           03  x        LINE 1.
+       01  invalid-nums TYPE DETAIL.
+           03  a        LINE +1.
+           03  b        LINE -1.
+           03  c        LINE 1.0.
+           03  d        LINE 0.
+
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+[prog.cob: 11: warning: REPORT WRITER is not implemented
+prog.cob: 13: warning: REPORT SECTION is not implemented
+prog.cob: 18: error: unsigned positive integer value expected
+prog.cob: 19: error: unsigned positive integer value expected
+prog.cob: 20: error: unsigned positive integer value expected
+prog.cob: 21: error: unsigned positive integer value expected
+])
+
+AT_CLEANUP
+
+
+# Temporarily removed RW tests, they will be added back in 3.0
+# AT_SETUP([Check REPORT error/warning])
+# AT_KEYWORDS([report])
+# 
+# #REPORT WRITER tests currently skipped
+# AT_SKIP_IF(true)
+# 
+# AT_DATA([prog.cob], [
+#        IDENTIFICATION   DIVISION.
+#        PROGRAM-ID.      prog.
+#        ENVIRONMENT      DIVISION.
+#        INPUT-OUTPUT     SECTION.
+#        FILE-CONTROL.
+#            SELECT TRANSACTION-DATA
+#            ASSIGN TO EXTERNAL DATAIN
+#            ORGANIZATION IS LINE SEQUENTIAL.
+#            
+#            SELECT REPORT-FILE
+#            ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+# 
+#        DATA             DIVISION.
+#        FILE             SECTION.
+#        FD TRANSACTION-DATA
+#           LABEL RECORDS ARE OMITTED
+#           BLOCK CONTAINS 0 RECORDS
+#           RECORD CONTAINS 80 CHARACTERS
+#           DATA RECORD IS TRANSACTION-RECORD.
+#        01 TRANSACTION-RECORD.
+#           03 TR-CUSTOMER-NUMBER     PIC 9(04).
+#           03 FILLER                 PIC X(01).
+#           03 TR-CUSTOMER-NAME       PIC X(16).
+#           03 FILLER                 PIC X(01).
+#           03 TR-ITEM-NUMBER         PIC 9(05).
+#           03 FILLER                 REDEFINES TR-ITEM-NUMBER.
+#              05 TR-ITEM-DEPARTMENT  PIC 9(01).
+#              05 FILLER              PIC 9(04).
+#           03 FILLER                 PIC X(01).
+#           03 TR-ITEM-COST           PIC 9(03)V99.
+#           03 FILLER                 PIC X(47).
+#        FD REPORT-FILE
+#           LABEL RECORDS ARE OMITTED
+#           REPORT IS NO-REPORT.
+#        WORKING-STORAGE  SECTION.
+#        01 END-OF-FILE-SWITCH        PIC X(1)    VALUE 'N'.
+#           88 END-OF-FILE            VALUE 'Y'.
+#       
+#        REPORT           SECTION.
+#        RD SOME-REPORT
+#           PAGE LIMIT IS 66 LINES
+#           HEADING 1
+#           FIRST DETAIL 5
+#           LAST DETAIL 58.
+#       
+#        01 PAGE-HEAD-GROUP TYPE PAGE HEADING.
+#           02 LINE 1.
+#              03 COLUMN 27   PIC X(41) VALUE
+#                 'S A M P L E  R E P O R T'.
+#           02 LINE PLUS 2.
+#              03 COLUMN 01   PIC X(09) VALUE 'CUST. NO.'.
+#              03 COLUMN 15   PIC X(10) VALUE 'CUST. NAME'.
+#              03 COLUMN 30   PIC X(05) VALUE 'DEPT.'.
+#              03 COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
+#              03 COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
+#       
+#        01 CHARGE-DETAIL TYPE DETAIL.
+#           02 LINE PLUS 1.
+#              03 COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
+#              03 COLUMN 10   PIC X(16) SOURCE TR-CUSTOMER-NAME.
+#              03 COLUMN 32   PIC 9(01) SOURCE TR-ITEM-DEPARTMENT.
+#              03 COLUMN 40   PIC 9(05) SOURCE TR-ITEM-NUMBER.
+#              03 COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
+#        PROCEDURE        DIVISION.
+#       
+#            OPEN INPUT TRANSACTION-DATA,
+#                 OUTPUT REPORT-FILE.
+#       
+#            INITIATE CUSTOMER-REPORT.
+#       
+#            READ TRANSACTION-DATA
+#                AT END
+#                    MOVE 'Y' TO END-OF-FILE-SWITCH 
+#            END-READ.
+#       
+#            PERFORM UNTIL FOREVER
+#               GENERATE CHARGE-DETAIL
+#               READ TRANSACTION-DATA
+#                   AT END
+#                      EXIT PERFORM
+#               END-READ
+#            END-PERFORM.
+#       
+#            TERMINATE CUSTOMER-REPORT.
+#       
+#            CLOSE TRANSACTION-DATA,
+#                  REPORT-FILE.
+#       
+#            STOP RUN.
+# ])
+# 
+# # Parsing + error with -std=cobol2014
+# AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], ,
+# [prog.cob: 17: error: lABEL RECORDS does not conform to COBOL 2014
+# prog.cob: 19: warning: RECORD clause ignored for LINE SEQUENTIAL
+# prog.cob: 20: error: DATA RECORDS does not conform to COBOL 2014
+# prog.cob: 34: error: lABEL RECORDS does not conform to COBOL 2014
+# prog.cob: 41: error: 'SOME-REPORT' is not defined
+# prog.cob: 41: error: 'SOME-REPORT' is not a report name
+# ])
+# 
+# # Check for correct compile and a warning
+# AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], ,
+# [prog.cob: 17: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+# prog.cob: 19: warning: RECORD clause ignored for LINE SEQUENTIAL
+# prog.cob: 20: warning: DATA RECORDS is obsolete in Micro Focus COBOL
+# prog.cob: 34: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+# prog.cob: 41: error: 'SOME-REPORT' is not defined
+# prog.cob: 41: error: 'SOME-REPORT' is not a report name
+# ])
+# 
+# AT_CLEANUP

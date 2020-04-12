@@ -1,0 +1,626 @@
+/*
+   Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
+
+   This file is part of GnuCOBOL.
+
+   The GnuCOBOL runtime library is free software: you can redistribute it
+   and/or modify it under the terms of the GNU Lesser General Public License
+   as published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   GnuCOBOL is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public License
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/* COB_EXCEPTION (code, tag, name, critical) */
+
+/* Argument error */
+COB_EXCEPTION  (0100, COB_EC_ARGUMENT,
+		"EC-ARGUMENT", 0)
+
+/* Function argument error */
+COB_EXCEPTION  (0101, COB_EC_ARGUMENT_FUNCTION,
+		"EC-ARGUMENT-FUNCTION", 1)
+
+/* Implementation-defined argument error */
+COB_EXCEPTION  (0102, COB_EC_ARGUMENT_IMP,
+		"EC-ARGUMENT-IMP", 0)
+
+
+/* Boundary violation */
+COB_EXCEPTION  (0200, COB_EC_BOUND,
+		"EC-BOUND", 0)
+
+/* Implementation-defined boundary violation */
+COB_EXCEPTION  (0201, COB_EC_BOUND_IMP,
+		"EC-BOUND-IMP", 0)
+
+/* OCCURS ... DEPENDING ON data item out of bounds */
+COB_EXCEPTION  (0202, COB_EC_BOUND_ODO,
+		"EC-BOUND-ODO", 1)
+
+/* Dynamic table capacity exceeded expected value */
+COB_EXCEPTION  (0203, COB_EC_BOUND_OVERFLOW,
+		"EC-BOUND-OVERFLOW", 1)
+
+/* Data-pointer contains an address that is out of bounds */
+COB_EXCEPTION  (0204, COB_EC_BOUND_PTR,
+		"EC-BOUND-PTR", 1)
+
+/* Reference modifier out of bounds */
+COB_EXCEPTION  (0205, COB_EC_BOUND_REF_MOD,
+		"EC-BOUND-REF-MOD", 1)
+
+/* Invalid SET of dynamic table capacity */
+COB_EXCEPTION  (0206, COB_EC_BOUND_SET,
+		"EC-BOUND-SET", 1)
+
+/* Subscript out of bounds */
+COB_EXCEPTION  (0207, COB_EC_BOUND_SUBSCRIPT,
+		"EC-BOUND-SUBSCRIPT", 1)
+
+/* Dynamic table capacity exceeded maximum size */
+COB_EXCEPTION  (0208, COB_EC_BOUND_TABLE_LIMIT,
+		"EC-BOUND-TABLE-LIMIT", 1)
+
+
+/* Data exception */
+COB_EXCEPTION  (0300, COB_EC_DATA,
+		"EC-DATA", 0)
+
+/* Conversion failed because of incomplete character correspondence */
+COB_EXCEPTION  (0301, COB_EC_DATA_CONVERSION,
+		"EC-DATA-CONVERSION", 0)
+
+/* Implementation-defined data exception */
+COB_EXCEPTION  (0302, COB_EC_DATA_IMP,
+		"EC-DATA-IMP", 0)
+
+/* Incompatible data exception */
+COB_EXCEPTION  (0303, COB_EC_DATA_INCOMPATIBLE,
+		"EC-DATA-INCOMPATIBLE", 1)
+
+/* Using floating-point usage data item which is NaN or an infinity */
+COB_EXCEPTION  (0304, COB_EC_DATA_NOT_FINITE,
+		"EC-DATA-NOT-FINITE", 1)
+
+/* Exponent overflow during MOVE to item with floating-point usage */
+COB_EXCEPTION  (0305, COB_EC_DATA_OVERFLOW,
+		"EC-DATA-OVERFLOW", 1)
+
+/* Based item data-pointer is set to NULL when referenced */
+COB_EXCEPTION  (0306, COB_EC_DATA_PTR_NULL,
+		"EC-DATA-PTR-NULL", 1)
+
+
+/* Execution control flow violation */
+COB_EXCEPTION  (0400, COB_EC_FLOW,
+		"EC-FLOW", 0)
+
+/* EXIT PROGRAM in a global declarative */
+COB_EXCEPTION  (0401, COB_EC_FLOW_GLOBAL_EXIT,
+		"EC-FLOW-GLOBAL-EXIT", 1)
+
+/* GOBACK in a global declarative */
+COB_EXCEPTION  (0402, COB_EC_FLOW_GLOBAL_GOBACK,
+		"EC-FLOW-GLOBAL-GOBACK", 1)
+
+/* Implementation-defined control flow violation */
+COB_EXCEPTION  (0403, COB_EC_FLOW_IMP,
+		"EC-FLOW-IMP", 0)
+
+/* RELEASE not in range of SORT */
+COB_EXCEPTION  (0404, COB_EC_FLOW_RELEASE,
+		"EC-FLOW-RELEASE", 1)
+
+/* GENERATE, INITIATE, or TERMINATE during USE BEFORE REPORTING declarative */
+COB_EXCEPTION  (0405, COB_EC_FLOW_REPORT,
+		"EC-FLOW-REPORT", 1)
+
+/* RETURN not in range of MERGE or SORT */
+COB_EXCEPTION  (0406, COB_EC_FLOW_RETURN,
+		"EC-FLOW-RETURN", 1)
+
+/* Invalid use of SET for dynamic table */
+COB_EXCEPTION  (0407, COB_EC_FLOW_SEARCH,
+		"EC-FLOW-SEARCH", 1)
+
+/* A USE statement caused another to be executed */
+COB_EXCEPTION  (0408, COB_EC_FLOW_USE,
+		"EC-FLOW-USE", 1)
+
+
+/* input-output exception */
+COB_EXCEPTION  (0500, COB_EC_I_O,
+		"EC-I-O", 0)
+
+/* I-O status "1x" */
+COB_EXCEPTION  (0501, COB_EC_I_O_AT_END,
+		"EC-I-O-AT-END", 0)
+
+/* An end of page condition occurred */
+COB_EXCEPTION  (0502, COB_EC_I_O_EOP,
+		"EC-I-O-EOP", 0)
+
+/* A page overflow condition occurred */
+COB_EXCEPTION  (0503, COB_EC_I_O_EOP_OVERFLOW,
+		"EC-I-O-EOP-OVERFLOW", 0)
+
+/* I-O status "6x" */
+COB_EXCEPTION  (0504, COB_EC_I_O_FILE_SHARING,
+		"EC-I-O-FILE-SHARING", 0)
+
+/* I-O status "9x" */
+COB_EXCEPTION  (0505, COB_EC_I_O_IMP,
+		"EC-I-O-IMP", 0)
+
+/* I-O status "2x" */
+COB_EXCEPTION  (0506, COB_EC_I_O_INVALID_KEY,
+		"EC-I-O-INVALID-KEY", 0)
+
+/* The value of a LINAGE data-item is not within the required range */
+COB_EXCEPTION  (0507, COB_EC_I_O_LINAGE,
+		"EC-I-O-LINAGE", 1)
+
+/* I-O status "4x" */
+COB_EXCEPTION  (0508, COB_EC_I_O_LOGIC_ERROR,
+		"EC-I-O-LOGIC-ERROR", 1)
+
+/* I-O status "3x" */
+COB_EXCEPTION  (0509, COB_EC_I_O_PERMANENT_ERROR,
+		"EC-I-O-PERMANENT-ERROR", 1)
+
+/* I-O status "5x" */
+COB_EXCEPTION  (050A, COB_EC_I_O_RECORD_OPERATION,
+		"EC-I-O-RECORD-OPERATION", 0)
+
+
+/* Implementation-defined exception condition */
+COB_EXCEPTION  (0600, COB_EC_IMP,
+		"EC-IMP", 0)
+
+/* Implementation-defined accept condition */
+COB_EXCEPTION  (0601, COB_EC_IMP_ACCEPT,
+		"EC-IMP-ACCEPT", 0)
+
+/* Implementation-defined display condition */
+COB_EXCEPTION  (0602, COB_EC_IMP_DISPLAY,
+		"EC-IMP-DISPLAY", 0)
+
+/* Current UTC time cannot be found */
+COB_EXCEPTION  (0603, COB_EC_IMP_UTC_UNKNOWN,
+		"EC-IMP-UTC-UNKNOWN", 1)
+
+
+/* Any locale related exception */
+COB_EXCEPTION  (0700, COB_EC_LOCALE,
+		"EC-LOCALE", 0)
+
+/* Implementation-defined locale related exception */
+COB_EXCEPTION  (0701, COB_EC_LOCALE_IMP,
+		"EC-LOCALE-IMP", 0)
+
+/* The referenced locale does not specify the expected characters in LC_COLLATE */
+COB_EXCEPTION  (0702, COB_EC_LOCALE_INCOMPATIBLE,
+		"EC-LOCALE-INCOMPATIBLE", 0)
+
+/* Locale content is invalid or incomplete */
+COB_EXCEPTION  (0703, COB_EC_LOCALE_INVALID,
+		"EC-LOCALE-INVALID", 1)
+
+/* Pointer does not reference a saved locale */
+COB_EXCEPTION  (0704, COB_EC_LOCALE_INVALID_PTR,
+		"EC-LOCALE-INVALID-PTR", 1)
+
+/* The specified locale is not available */
+COB_EXCEPTION  (0705, COB_EC_LOCALE_MISSING,
+		"EC-LOCALE-MISSING", 1)
+
+/* Digits were truncated in locale editing */
+COB_EXCEPTION  (0706, COB_EC_LOCALE_SIZE,
+		"EC-LOCALE-SIZE", 1)
+
+
+/* Any predefined OO related exception */
+COB_EXCEPTION  (0800, COB_EC_OO,
+		"EC-OO", 0)
+
+/* Failure for an object-view */
+COB_EXCEPTION  (0801, COB_EC_OO_CONFORMANCE,
+		"EC-OO-CONFORMANCE", 1)
+
+/* An exception object was not handled */
+COB_EXCEPTION  (0802, COB_EC_OO_EXCEPTION,
+		"EC-OO-EXCEPTION", 1)
+
+/* Invalid assignment of finalizable/finalized object reference */
+COB_EXCEPTION  (0803, COB_EC_OO_FINALIZABLE,
+		"EC-OO-FINALIZABLE", 1)
+
+/* Implementation-defined OO exception */
+COB_EXCEPTION  (0804, COB_EC_OO_IMP,
+		"EC-OO-IMP", 0)
+
+/* Requested method is not available */
+COB_EXCEPTION  (0805, COB_EC_OO_METHOD,
+		"EC-OO-METHOD", 1)
+
+/* Method invocation was attempted with a null object reference */
+COB_EXCEPTION  (0806, COB_EC_OO_NULL,
+		"EC-OO-NULL", 1)
+
+/* Insufficient system resources to create the object or expand the object */
+COB_EXCEPTION  (0807, COB_EC_OO_RESOURCE,
+		"EC-OO-RESOURCE", 1)
+
+/* A runtime type check failed */
+COB_EXCEPTION  (0808, COB_EC_OO_UNIVERSAL,
+		"EC-OO-UNIVERSAL", 1)
+
+
+/* Ordering exception */
+COB_EXCEPTION  (0900, COB_EC_ORDER,
+		"EC-ORDER", 0)
+
+/* Implementation-defined ordering exception */
+COB_EXCEPTION  (0901, COB_EC_ORDER_IMP,
+		"EC-ORDER-IMP", 0)
+
+/* ISO/IEC 14651:2001 ordering table or ordering level not supported */
+COB_EXCEPTION  (0902, COB_EC_ORDER_NOT_SUPPORTED,
+		"EC-ORDER-NOT-SUPPORTED", 1)
+
+
+/* Size error exception */
+COB_EXCEPTION  (1000, COB_EC_SIZE,
+		"EC-SIZE", 0)
+
+/* Invalid pointer arithmetic */
+COB_EXCEPTION  (1001, COB_EC_SIZE_ADDRESS,
+		"EC-SIZE-ADDRESS", 1)
+
+/* Exponentiation rules violated */
+COB_EXCEPTION  (1002, COB_EC_SIZE_EXPONENTIATION,
+		"EC-SIZE-EXPONENTIATION", 1)
+
+/* Implementation-defined size error exception */
+COB_EXCEPTION  (1003, COB_EC_SIZE_IMP,
+		"EC-SIZE-IMP", 0)
+
+/* Arithmetic overflow in calculation */
+COB_EXCEPTION  (1004, COB_EC_SIZE_OVERFLOW,
+		"EC-SIZE-OVERFLOW", 1)
+
+/* Significant digits truncated in store */
+COB_EXCEPTION  (1005, COB_EC_SIZE_TRUNCATION,
+		"EC-SIZE-TRUNCATION", 1)
+
+/* Floating-point underflow */
+COB_EXCEPTION  (1006, COB_EC_SIZE_UNDERFLOW,
+		"EC-SIZE-UNDERFLOW", 1)
+
+/* Division by zero */
+COB_EXCEPTION  (1007, COB_EC_SIZE_ZERO_DIVIDE,
+		"EC-SIZE-ZERO-DIVIDE", 1)
+
+
+/* SORT or MERGE exception */
+COB_EXCEPTION  (1100, COB_EC_SORT_MERGE,
+		"EC-SORT-MERGE", 0)
+
+/* File SORT or MERGE executed when one is already active */
+COB_EXCEPTION  (1101, COB_EC_SORT_MERGE_ACTIVE,
+		"EC-SORT-MERGE-ACTIVE", 1)
+
+/* USING or GIVING file is open upon execution of a SORT or MERGE */
+COB_EXCEPTION  (1102, COB_EC_SORT_MERGE_FILE_OPEN,
+		"EC-SORT-MERGE-FILE-OPEN", 1)
+
+/* Implementation-defined SORT or MERGE exception */
+COB_EXCEPTION  (1103, COB_EC_SORT_MERGE_IMP,
+		"EC-SORT-MERGE-IMP", 0)
+
+/* RELEASE record too long or too short */
+COB_EXCEPTION  (1104, COB_EC_SORT_MERGE_RELEASE,
+		"EC-SORT-MERGE-RELEASE", 1)
+
+/* RETURN executed when at end condition exists */
+COB_EXCEPTION  (1105, COB_EC_SORT_MERGE_RETURN,
+		"EC-SORT-MERGE-RETURN", 1)
+
+/* Sequence error on MERGE USING file */
+COB_EXCEPTION  (1106, COB_EC_SORT_MERGE_SEQUENCE,
+		"EC-SORT-MERGE-SEQUENCE", 1)
+
+
+/* Storage allocation exception */
+COB_EXCEPTION  (1200, COB_EC_STORAGE,
+		"EC-STORAGE", 0)
+
+/* Implementation-defined storage allocation exception */
+COB_EXCEPTION  (1201, COB_EC_STORAGE_IMP,
+		"EC-STORAGE-IMP", 0)
+
+/* The data-pointer specified in a FREE statement does not identify
+   currently allocated storage */
+COB_EXCEPTION  (1202, COB_EC_STORAGE_NOT_ALLOC,
+		"EC-STORAGE-NOT-ALLOC", 0)
+
+/* The amount of storage requested by an ALLOCATE statement is not available */
+COB_EXCEPTION  (1203, COB_EC_STORAGE_NOT_AVAIL,
+		"EC-STORAGE-NOT-AVAIL", 0)
+
+
+/* User-defined exception condition */
+COB_EXCEPTION  (1300, COB_EC_USER,
+		"EC-USER", 0)
+
+
+/* VALIDATE exception */
+COB_EXCEPTION  (1400, COB_EC_VALIDATE,
+		"EC-VALIDATE", 0)
+
+/* VALIDATE content error */
+COB_EXCEPTION  (1401, COB_EC_VALIDATE_CONTENT,
+		"EC-VALIDATE-CONTENT", 0)
+
+/* VALIDATE format error */
+COB_EXCEPTION  (1402, COB_EC_VALIDATE_FORMAT,
+		"EC-VALIDATE-FORMAT", 0)
+
+/* Implementation-defined VALIDATE exception */
+COB_EXCEPTION  (1403, COB_EC_VALIDATE_IMP,
+		"EC-VALIDATE-IMP", 0)
+
+/* VALIDATE relation error */
+COB_EXCEPTION  (1404, COB_EC_VALIDATE_RELATION,
+		"EC-VALIDATE-RELATION", 0)
+
+/* VARYING clause expression non-integer */
+COB_EXCEPTION  (1405, COB_EC_VALIDATE_VARYING,
+		"EC-VALIDATE-VARYING", 1)
+
+
+/* FUNCTION exception */
+COB_EXCEPTION  (1500, COB_EC_FUNCTION,
+		"EC-FUNCTION", 0)
+
+/* FUNCTION signature mismatch */
+COB_EXCEPTION  (1501, COB_EC_FUNCTION_PTR_INVALID,
+		"EC-FUNCTION-PTR-INVALID", 1)
+
+/* FUNCTION pointer is NULL */
+COB_EXCEPTION  (1502, COB_EC_FUNCTION_PTR_NULL,
+		"EC-FUNCTION-PTR-NULL", 1)
+
+
+/* XML exception */
+COB_EXCEPTION  (1600, COB_EC_XML,
+		"EC-XML", 0)
+
+/* XML encoding mismatch with CODE-SET */
+COB_EXCEPTION  (1601, COB_EC_XML_CODESET,
+		"EC-XML-CODESET", 1)
+
+/* XML character cannot be encoded according to CODE-SET */
+COB_EXCEPTION  (1602, COB_EC_XML_CODESET_CONVERSION,
+		"EC-XML-CODESET-CONVERSION", 1)
+
+/* XML */
+COB_EXCEPTION  (1603, COB_EC_XML_COUNT,
+		"EC-XML-COUNT", 1)
+
+/* XML */
+COB_EXCEPTION  (1604, COB_EC_XML_DOCUMENT_TYPE,
+		"EC-XML-DOCUMENT-TYPE", 1)
+
+/* XML */
+COB_EXCEPTION  (1605, COB_EC_XML_IMPLICIT_CLOSE,
+		"EC-XML-IMPLICIT-CLOSE", 1)
+
+/* XML */
+COB_EXCEPTION  (1606, COB_EC_XML_INVALID,
+		"EC-XML-INVALID", 1)
+
+/* XML */
+COB_EXCEPTION  (1607, COB_EC_XML_NAMESPACE,
+		"EC-XML-NAMESPACE", 1)
+
+/* XML */
+COB_EXCEPTION  (1608, COB_EC_XML_STACKED_OPEN,
+		"EC-XML-STACKED-OPEN", 1)
+
+/* XML */
+COB_EXCEPTION  (1609, COB_EC_XML_RANGE,
+		"EC-XML-RANGE", 1)
+
+
+/* Overflow condition */
+COB_EXCEPTION  (0A00, COB_EC_OVERFLOW,
+		"EC-OVERFLOW", 0)
+
+/* Implementation-defined overflow condition */
+COB_EXCEPTION  (0A01, COB_EC_OVERFLOW_IMP,
+		"EC-OVERFLOW-IMP", 0)
+
+/* STRING overflow condition */
+COB_EXCEPTION  (0A02, COB_EC_OVERFLOW_STRING,
+		"EC-OVERFLOW-STRING", 0)
+
+/* UNSTRING overflow condition */
+COB_EXCEPTION  (0A03, COB_EC_OVERFLOW_UNSTRING,
+		"EC-OVERFLOW-UNSTRING", 0)
+
+
+/* Inter-program communication exception */
+COB_EXCEPTION  (0B00, COB_EC_PROGRAM,
+		"EC-PROGRAM", 0)
+
+/* Parameter mismatch */
+COB_EXCEPTION  (0B01, COB_EC_PROGRAM_ARG_MISMATCH,
+		"EC-PROGRAM-ARG-MISMATCH", 1)
+
+/* Reference to an omitted argument */
+COB_EXCEPTION  (0B02, COB_EC_PROGRAM_ARG_OMITTED,
+		"EC-PROGRAM-ARG-OMITTED", 1)
+
+/* Canceled program active */
+COB_EXCEPTION  (0B03, COB_EC_PROGRAM_CANCEL_ACTIVE,
+		"EC-PROGRAM-CANCEL-ACTIVE", 1)
+
+/* Implementation-defined inter-program communication exception */
+COB_EXCEPTION  (0B04, COB_EC_PROGRAM_IMP,
+		"EC-PROGRAM-IMP", 0)
+
+/* Called program not found */
+COB_EXCEPTION  (0B05, COB_EC_PROGRAM_NOT_FOUND,
+		"EC-PROGRAM-NOT-FOUND", 1)
+
+/* Program-pointer used in CALL is set to NULL */
+COB_EXCEPTION  (0B06, COB_EC_PROGRAM_PTR_NULL,
+		"EC-PROGRAM-PTR-NULL", 1)
+
+/* Called program active */
+COB_EXCEPTION  (0B07, COB_EC_PROGRAM_RECURSIVE_CALL,
+		"EC-PROGRAM-RECURSIVE-CALL", 1)
+
+/* Resources not available for called program */
+COB_EXCEPTION  (0B08, COB_EC_PROGRAM_RESOURCES,
+		"EC-PROGRAM-RESOURCES", 1)
+
+
+/* EXIT ... RAISING or GOBACK RAISING exception */
+COB_EXCEPTION  (0C00, COB_EC_RAISING,
+		"EC-RAISING", 0)
+
+/* Implementation-defined EXIT ... RAISING or GOBACK RAISING exception */
+COB_EXCEPTION  (0C01, COB_EC_RAISING_IMP,
+		"EC-RAISING-IMP", 0)
+
+/* EXIT ... RAISING or GOBACK RAISING an EC-IMP or EC-USER exception
+   condition not specified in RAISING phrase of procedure division header */
+COB_EXCEPTION  (0C02, COB_EC_RAISING_NOT_SPECIFIED,
+		"EC-RAISING-NOT-SPECIFIED", 1)
+
+
+/* Range exception */
+COB_EXCEPTION  (0D00, COB_EC_RANGE,
+		"EC-RANGE", 0)
+
+/* Implementation-defined range exception */
+COB_EXCEPTION  (0D01, COB_EC_RANGE_IMP,
+		"EC-RANGE-IMP", 0)
+
+/* Index made negative or too large for container */
+COB_EXCEPTION  (0D02, COB_EC_RANGE_INDEX,
+		"EC-RANGE-INDEX", 1)
+
+/* Size of replace item in inspect differs */
+COB_EXCEPTION  (0D03, COB_EC_RANGE_INSPECT_SIZE,
+		"EC-RANGE-INSPECT-SIZE", 1)
+
+/* Starting value of THROUGH range greater than ending value */
+COB_EXCEPTION  (0D04, COB_EC_RANGE_INVALID,
+		"EC-RANGE-INVALID", 0)
+
+/* Setting of varied item in PERFORM is negative */
+COB_EXCEPTION  (0D05, COB_EC_RANGE_PERFORM_VARYING,
+		"EC-RANGE-PERFORM-VARYING", 1)
+
+/* Pointer SET UP or DOWN is outsize range */
+COB_EXCEPTION  (0D06, COB_EC_RANGE_PTR,
+		"EC-RANGE-PTR", 1)
+
+/* No table entry found in SEARCH because initial index out of range */
+COB_EXCEPTION  (0D07, COB_EC_RANGE_SEARCH_INDEX,
+		"EC-RANGE-SEARCH-INDEX", 0)
+
+/* No table entry found in SEARCH because no entry matched criteria */
+COB_EXCEPTION  (0D08, COB_EC_RANGE_SEARCH_NO_MATCH,
+		"EC-RANGE-SEARCH-NO-MATCH", 0)
+
+
+/* Report write exception */
+COB_EXCEPTION  (0E00, COB_EC_REPORT,
+		"EC-REPORT", 0)
+
+/* INITIATE on an active report */
+COB_EXCEPTION  (0E01, COB_EC_REPORT_ACTIVE,
+		"EC-REPORT-ACTIVE", 1)
+
+/* Overlapping report items */
+COB_EXCEPTION  (0E02, COB_EC_REPORT_COLUMN_OVERLAP,
+		"EC-REPORT-COLUMN-OVERLAP", 1)
+
+/* INITIATE statement executed for file not opened in extend or output mode */
+COB_EXCEPTION  (0E03, COB_EC_REPORT_FILE_MODE,
+		"EC-REPORT-FILE-MODE", 1)
+
+/* Implementation-defined report write exception */
+COB_EXCEPTION  (0E04, COB_EC_REPORT_IMP,
+		"EC-REPORT-IMP", 0)
+
+/* GENERATE or TERMINATE on an inactive report */
+COB_EXCEPTION  (0E05, COB_EC_REPORT_INACTIVE,
+		"EC-REPORT-INACTIVE", 1)
+
+/* Overlapping report lines */
+COB_EXCEPTION  (0E06, COB_EC_REPORT_LINE_OVERLAP,
+		"EC-REPORT-LINE-OVERLAP", 0)
+
+/* Report file closed with active report */
+COB_EXCEPTION  (0E08, COB_EC_REPORT_NOT_TERMINATED,
+		"EC-REPORT-NOT-TERMINATED", 0)
+
+/* Vertical page limit exceeded */
+COB_EXCEPTION  (0E09, COB_EC_REPORT_PAGE_LIMIT,
+		"EC-REPORT-PAGE-LIMIT", 0)
+
+/* Page width exceeded */
+COB_EXCEPTION  (0E0A, COB_EC_REPORT_PAGE_WIDTH,
+		"EC-REPORT-PAGE-WIDTH", 0)
+
+/* Overflow of sum counter */
+COB_EXCEPTION  (0E0B, COB_EC_REPORT_SUM_SIZE,
+		"EC-REPORT-SUM-SIZE", 1)
+
+/* VARYING clause expression non-integer */
+COB_EXCEPTION  (0E0C, COB_EC_REPORT_VARYING,
+		"EC-REPORT-VARYING", 1)
+
+
+/* Screen handling exception */
+COB_EXCEPTION  (0F00, COB_EC_SCREEN,
+		"EC-SCREEN", 0)
+
+/* Screen fields overlap */
+COB_EXCEPTION  (0F01, COB_EC_SCREEN_FIELD_OVERLAP,
+		"EC-SCREEN-FIELD-OVERLAP", 0)
+
+/* Implementation-defined screen handling exception */
+COB_EXCEPTION  (0F02, COB_EC_SCREEN_IMP,
+		"EC-SCREEN-IMP", 0)
+
+/* Screen field too long for line */
+COB_EXCEPTION  (0F03, COB_EC_SCREEN_ITEM_TRUNCATED,
+		"EC-SCREEN-ITEM-TRUNCATED", 0)
+
+/* Screen item line number exceeds terminal size */
+COB_EXCEPTION  (0F04, COB_EC_SCREEN_LINE_NUMBER,
+		"EC-SCREEN-LINE-NUMBER", 0)
+
+/* Screen item starting column exceeds line size */
+COB_EXCEPTION  (0F05, COB_EC_SCREEN_STARTING_COLUMN,
+		"EC-SCREEN-STARTING-COLUMN", 0)
+
+
+/* All exceptions */
+COB_EXCEPTION  (FFFF, COB_EC_ALL,
+		"EC-ALL", 0)

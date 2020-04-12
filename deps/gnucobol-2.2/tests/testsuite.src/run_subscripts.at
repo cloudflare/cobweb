@@ -1,0 +1,286 @@
+## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+## 
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2002 8.4.1.2 Subscripts
+
+## 8.4.1.2.3 General rules
+
+
+AT_SETUP([Subscript out of bounds])
+AT_KEYWORDS([runsubscripts subscripts])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X OCCURS 10.
+       01 I             PIC 9 VALUE 0.
+       PROCEDURE        DIVISION.
+           DISPLAY X(I)
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob: 10: subscript of 'X' out of bounds: 0
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X OCCURS 10.
+       01 I             PIC 99 VALUE 11.
+       PROCEDURE        DIVISION.
+           DISPLAY X(I)
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [1], [],
+[libcob: prog2.cob: 10: subscript of 'X' out of bounds: 11
+libcob: prog2.cob: 10: maximum subscript for 'X': 10
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Value of DEPENDING ON N out of bounds])
+AT_KEYWORDS([runsubscripts subscripts])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X OCCURS 4 TO 6 DEPENDING ON N.
+       01 N             PIC 9.
+       PROCEDURE        DIVISION.
+           MOVE 5 TO N.
+           MOVE '12345' TO G
+           DISPLAY X(3) WITH NO ADVANCING
+           END-DISPLAY.
+           MOVE 3 TO N.
+           DISPLAY X(5)
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [3],
+[libcob: prog.cob: 15: OCCURS DEPENDING ON 'N' out of bounds: 3
+libcob: prog.cob: 15: minimum subscript for 'X': 4
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X OCCURS 4 TO 6 DEPENDING ON N.
+       01 N             PIC 9 VALUE 7.
+       PROCEDURE        DIVISION.
+           DISPLAY X(5)
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [1], [],
+[libcob: prog2.cob: 10: OCCURS DEPENDING ON 'N' out of bounds: 7
+libcob: prog2.cob: 10: maximum subscript for 'X': 6
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Subscript bounds with OCCURS DEPENDING ON])
+AT_KEYWORDS([runsubscripts subscripts odo])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G.
+         02 X           PIC X OCCURS 4 TO 6 DEPENDING ON N.
+       01 N             PIC 9 VALUE 4.
+       PROCEDURE        DIVISION.
+           DISPLAY X(5)
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob: 10: subscript of 'X' out of bounds: 5
+libcob: prog.cob: 10: current maximum subscript for 'X': 4
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Subscript by arithmetic expression])
+AT_KEYWORDS([runsubscripts subscripts])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G             VALUE "1234".
+         02 X           PIC X OCCURS 4.
+       01 Z             PIC X.
+       PROCEDURE        DIVISION.
+           MOVE X((3 + 1) / 2) TO Z.
+           IF Z NOT = "2"
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           MOVE X(2 ** 2) TO Z.
+           IF Z NOT = "4"
+              DISPLAY Z
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([length of ODO w/- reference modification])
+AT_KEYWORDS([runsubscripts subscripts])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  PLINE.
+           03  PLINE-LEN PIC S9(4) COMP-5.
+           03  PLINE-TEXT.
+               04  FILLER    PIC X(1) OCCURS  1 TO 80
+                                      DEPENDING ON PLINE-LEN.
+       procedure division.
+       a-main section.
+             MOVE 5                    TO PLINE-LEN
+             MOVE 'the first part in'  TO PLINE-TEXT
+             MOVE 30                   TO PLINE-LEN
+             IF PLINE-TEXT NOT = 'the f'
+                DISPLAY 'text1 wrong: ' PLINE-TEXT
+                END-DISPLAY
+             END-IF
+             MOVE 'the first part in'  TO PLINE-TEXT
+             MOVE 4                    TO PLINE-LEN
+             MOVE 'second'             TO PLINE-TEXT
+             MOVE 14                   TO PLINE-LEN
+             IF PLINE-TEXT NOT = 'secofirst part'
+                DISPLAY 'text2 wrong: ' PLINE-TEXT
+                END-DISPLAY
+             END-IF
+             MOVE 80                   TO PLINE-LEN
+             MOVE SPACES               TO PLINE-TEXT
+             MOVE 5                    TO PLINE-LEN
+             MOVE 'the first part in'  TO PLINE-TEXT (2:)
+             MOVE 30                   TO PLINE-LEN
+             IF PLINE-TEXT NOT = ' the '
+                DISPLAY 'text3 wrong: ' PLINE-TEXT
+                END-DISPLAY
+             END-IF
+             MOVE 'the first part in'  TO PLINE-TEXT (2:)
+             MOVE 4                    TO PLINE-LEN
+             MOVE 'second'             TO PLINE-TEXT (2:)
+             MOVE 14                   TO PLINE-LEN
+             IF PLINE-TEXT NOT = ' sec first par'
+                DISPLAY 'text4 wrong: ' PLINE-TEXT
+                END-DISPLAY
+             END-IF
+             STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SEARCH ALL with OCCURS DEPENDING ON])
+AT_KEYWORDS([runsubscripts subscripts odo])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+      *
+       77  SCREEN-AKT         PIC 9(02) VALUE 0.
+       01  SCREEN-TAB.
+           03 SCREEN-ENTRY    OCCURS 0  TO  20
+                              DEPENDING ON  SCREEN-AKT
+                              ASCENDING KEY SCREEN-NAME
+                              INDEXED   BY  SCREEN-IDX.
+             05 SCREEN-NAME     PIC X(02).
+
+       PROCEDURE DIVISION.
+
+           SEARCH ALL SCREEN-ENTRY
+              AT END
+                 DISPLAY 'END'
+              WHEN SCREEN-NAME (SCREEN-IDX) = 'AB'
+                 DISPLAY 'FOUND'
+           END-SEARCH
+           MOVE 1 TO SCREEN-AKT
+           MOVE 'AB' TO  SCREEN-NAME (1)
+           SEARCH ALL SCREEN-ENTRY
+              AT END
+                 DISPLAY 'END'
+              WHEN SCREEN-NAME (SCREEN-IDX) = 'AB'
+                 DISPLAY 'FOUND'
+           END-SEARCH
+           MOVE 2 TO SCREEN-AKT
+           MOVE 'CD' TO  SCREEN-NAME (2)
+           SEARCH ALL SCREEN-ENTRY
+              AT END
+                 DISPLAY 'END'
+              WHEN SCREEN-NAME (SCREEN-IDX) = 'CD'
+                 DISPLAY 'FOUND'
+           END-SEARCH
+           EXIT PROGRAM.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [END
+FOUND
+FOUND
+], [])
+
+AT_CLEANUP
+

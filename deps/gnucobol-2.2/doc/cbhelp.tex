@@ -1,0 +1,228 @@
+@verbatim
+GnuCOBOL compiler for most COBOL dialects with lots of extensions
+
+Usage: cobc [options]... file...
+
+Options:
+  -h, -help             display this help and exit
+  -V, -version          display compiler version and exit
+  -i, -info             display compiler information (build/environment)
+                        and exit
+  -v, -verbose          display compiler version and the commands
+                        invoked by the compiler
+  -vv, -verbose=2       like -v but additional pass verbose option
+                        to assembler/compiler
+  -vvv, -verbose=3      like -vv but additional pass verbose option
+                        to linker
+  -q, -brief            reduced displays, commands invoked not shown
+  -###                  like -v but commands not executed
+  -x                    build an executable program
+  -m                    build a dynamically loadable module (default)
+  -j [<args>], -job[=<args>]	run program after build, passing <args>
+  -std=<dialect>        warnings/features for a specific dialect
+                        <dialect> can be one of:
+                        default, cobol2014, cobol2002, cobol85, xopen,
+                        ibm-strict, ibm, mvs-strict, mvs,
+                        mf-strict, mf, bs2000-strict, bs2000,
+                        acu-strict, acu, rm-strict, rm;
+                        see configuration files in directory config
+  -F, -free             use free source format
+  -fixed                use fixed source format (default)
+  -O, -O2, -O3, -Os     enable optimization
+  -g                    enable C compiler debug / stack check / trace
+  -d, -debug            enable all run-time error checking
+  -o <file>             place the output into <file>
+  -b                    combine all input files into a single
+                        dynamically loadable module
+  -E                    preprocess only; do not compile or link
+  -C                    translation only; convert COBOL to C
+  -S                    compile only; output assembly file
+  -c                    compile and assemble, but do not link
+  -T <file>             generate and place a wide program listing into <file>
+  -t <file>             generate and place a program listing into <file>
+  --tlines=<lines>      specify lines per page in listing, default = 55
+  --tsymbols            specify symbols in listing
+  -P[=<dir or file>]    generate preprocessed program listing (.lst)
+  -Xref                 specify cross reference in listing
+  -I <directory>        add <directory> to copy/include search path
+  -L <directory>        add <directory> to library search path
+  -l <lib>              link the library <lib>
+  -A <options>          add <options> to the C compile phase
+  -Q <options>          add <options> to the C link phase
+  -D <define>           define <define> for COBOL compilation
+  -K <entry>            generate CALL to <entry> as static
+  -conf=<file>          user-defined dialect configuration; see -std
+  -list-reserved        display reserved words
+  -list-intrinsics      display intrinsic functions
+  -list-mnemonics       display mnemonic names
+  -list-system          display system routines
+  -save-temps[=<dir>]   save intermediate files
+                        - default: current directory
+  -ext <extension>      add file extension for resolving COPY
+
+Warning options:
+  -W                    enable all warnings
+  -Wall                 enable most warnings (all except as noted below)
+  -Wno-<warning>        disable warning enabled by -W or -Wall
+  -Wno-unfinished       do not warn if unfinished features are used
+                        - ALWAYS active
+  -Wno-pending          do not warn if pending features are mentioned
+                        - ALWAYS active
+  -Wobsolete            warn if obsolete features are used
+  -Warchaic             warn if archaic features are used
+  -Wredefinition        warn incompatible redefinition of data items
+  -Wtruncate            warn field truncation from constant assignments
+  -Wpossible-truncate   warn possible field truncation
+                        - NOT set with -Wall
+  -Woverlap             warn overlapping MOVE items
+  -Wpossible-overlap    warn MOVE items that may overlap depending on variables
+                        - NOT set with -Wall
+  -Wparentheses         warn lack of parentheses around AND within OR
+  -Wstrict-typing       warn type mismatch strictly
+  -Wimplicit-define     warn implicitly defined data items
+  -Wcorresponding       warn CORRESPONDING with no matching items
+  -Winitial-value       warn if initial VALUE clause is ignored
+  -Wprototypes          warn missing FUNCTION prototypes/definitions
+  -Warithmetic-osvs     warn if arithmetic expression precision has changed
+  -Wcall-params         warn non 01/77 items for CALL params
+                        - NOT set with -Wall
+  -Wconstant-expression  warn expressions that always resolve to true/false
+  -Wcolumn-overflow     warn text after program-text area, FIXED format
+                        - NOT set with -Wall
+  -Wterminator          warn lack of scope terminator END-XXX
+                        - NOT set with -Wall
+  -Wlinkage             warn dangling LINKAGE items
+                        - NOT set with -Wall
+  -Wunreachable         warn likely unreachable statements
+                        - NOT set with -Wall
+  -Werror               treat all warnings as errors
+  -Werror=<warning>     treat specified <warning> as error
+
+Compiler options:
+  -fsign=[ASCII|EBCDIC]	define display sign representation
+                        - default: machine native
+  -ffold-copy=[UPPER|LOWER]	fold COPY subject to value
+                        - default: no transformation
+  -ffold-call=[UPPER|LOWER]	fold PROGRAM-ID, CALL, CANCEL subject to value
+                        - default: no transformation
+  -fdefaultbyte=<value>	initialize fields without VALUE to value
+                        - decimal 0..255 or any quoted character
+                        - default: initialize to picture
+  -fmax-errors=<number>	maximum number of errors to report
+                        - default: 100
+  -fintrinsics=[ALL|intrinsic function name(,name,...)]
+                        intrinsics to be used without FUNCTION keyword
+
+  -fno-recursive_check  disable check of recursive program call;
+                        effectively compiling as RECURSIVE program
+  -ftrace               generate trace code
+                        - executed SECTION/PARAGRAPH
+  -ftraceall            generate trace code
+                        - executed SECTION/PARAGRAPH/STATEMENTS
+                        - turned on by -debug
+  -fsyntax-only         syntax error checking only; don't emit any output
+  -fdebugging-line      enable debugging lines
+                        - 'D' in indicator column or floating >>D
+  -fsource-location     generate source location code
+                        - turned on by -debug/-g/-ftraceall
+  -fimplicit-init       automatic initialization of the COBOL runtime system
+  -fstack-check         PERFORM stack checking
+                        - turned on by -debug or -g
+  -fwrite-after         use AFTER 1 for WRITE of LINE SEQUENTIAL
+                        - default: BEFORE 1
+  -fmfcomment           '*' or '/' in column 1 treated as comment
+                        - FIXED format only
+  -facucomment          '$' in indicator area treated as '*',
+                        '|' treated as floating comment
+  -fnotrunc             allow numeric field overflow
+                        - non-ANSI behaviour
+  -fodoslide            adjust items following OCCURS DEPENDING
+                        - requires implicit/explicit relaxed syntax
+  -fsingle-quote        use a single quote (apostrophe) for QUOTE
+                        - default: double quote
+  -foptional-file       treat all files as OPTIONAL
+                        - unless NOT OPTIONAL specified
+
+Compiler dialect configuration options:
+  -freserved-words=<value>	use of complete/fixed reserved words
+  -ftab-width=1..12      set number of spaces that are asumed for tabs
+  -ftext-column=72..255  set right margin for source (fixed format only)
+  -fpic-length=<number>  maximum number of characters allowed in the character-string
+  -fword-length=1..61    maximum word-length for COBOL words / Programmer defined words
+  -fliteral-length=<number>	maximum literal size in general
+  -fnumeric-literal-length=1..38	maximum numeric literal size
+  -fassign-clause=<value>	set way of interpreting ASSIGN
+  -fbinary-size=<value>  binary byte size - defines the allocated bytes according to PIC
+  -fbinary-byteorder=<value>	binary byte order
+  -ffilename-mapping     resolve file names at run time using environment variables.
+  -fpretty-display       alternate formatting of numeric fields
+  -fbinary-truncate      numeric truncation according to ANSI
+  -fcomplex-odo          allow complex OCCURS DEPENDING ON
+  -findirect-redefines   allow REDEFINES to other than last equal level number
+  -flarger-redefines-ok  allow larger REDEFINES items
+  -frelax-syntax-checks  allow certain syntax variations (e.g. REDEFINES position)
+  -frelax-level-hierarchy	allow non-matching level numbers
+  -fsticky-linkage       LINKAGE-SECTION items remain allocated between invocations
+  -fmove-ibm             MOVE operates as on IBM (left to right, byte by byte)
+  -fperform-osvs         exit point of any currently executing perform is recognized if reached
+  -farithmetic-osvs      limit precision in intermediate results to precision of final result (less accurate)
+  -fconstant-folding     evaluate constant expressions at compile time
+  -fhostsign             allow hexadecimal value 'F' for NUMERIC test of signed PACKED DECIMAL field
+  -fprogram-name-redefinition	program names don't lead to a reserved identifier
+  -faccept-update        set WITH UPDATE clause as default for ACCEPT dest-item, instead of WITH NO UPDATE
+  -faccept-auto          set WITH AUTO clause as default for ACCEPT dest-item, instead of WITH TAB
+  -fconsole-is-crt       assume CONSOLE IS CRT if not set otherwise
+  -fno-echo-means-secure	NO-ECHO hides input with asterisks like SECURE
+  -fcomment-paragraphs=<support>	comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE-WRITTEN, ...)
+  -fmemory-size-clause=<support>	MEMORY-SIZE clause
+  -fmultiple-file-tape-clause=<support>	MULTIPLE-FILE-TAPE clause
+  -flabel-records-clause=<support>	LABEL-RECORDS clause
+  -fvalue-of-clause=<support>	VALUE-OF clause
+  -fdata-records-clause=<support>	DATA-RECORDS clause
+  -ftop-level-occurs-clause=<support>	OCCURS clause on top-level
+  -fsynchronized-clause=<support>	SYNCHRONIZED clause
+  -fgoto-statement-without-name=<support>	GOTO statement without name
+  -fstop-literal-statement=<support>	STOP-literal statement
+  -fstop-identifier-statement=<support>	STOP-identifier statement
+  -fdebugging-mode=<support>	DEBUGGING MODE and debugging indicator
+  -fuse-for-debugging=<support>	USE FOR DEBUGGING
+  -fpadding-character-clause=<support>	PADDING CHARACTER clause
+  -fnext-sentence-phrase=<support>	NEXT SENTENCE phrase
+  -flisting-statements=<support>	listing-directive statements EJECT, SKIP1, SKIP2, SKIP3
+  -ftitle-statement=<support>	listing-directive statement TITLE
+  -fentry-statement=<support>	ENTRY statement
+  -fmove-noninteger-to-alphanumeric=<support>	move noninteger to alphanumeric
+  -fmove-figurative-constant-to-numeric=<support>	move figurative constants to numeric
+  -fmove-figurative-quote-to-numeric=<support>	move figurative constant QUOTE to numeric
+  -fodo-without-to=<support>	OCCURS DEPENDING ON without to
+  -fsection-segments=<support>	section segments
+  -falter-statement=<support>	ALTER statement
+  -fcall-overflow=<support>	OVERFLOW clause for CALL
+  -fnumeric-boolean=<support>	boolean literals (B'1010')
+  -fhexadecimal-boolean=<support>	hexadecimal-boolean literals (BX'A')
+  -fnational-literals=<support>	national literals (N'UTF-16 string')
+  -fhexadecimal-national-literals=<support>	hexadecimal-national literals (NX'265E')
+  -facu-literals=<support>	ACUCOBOL-GT literals (#B #O #H #X)
+  -fword-continuation=<support>	continuation of COBOL words
+  -fnot-exception-before-exception=<support>	NOT ON EXCEPTION before ON EXCEPTION
+  -faccept-display-extensions=<support>	extensions to ACCEPT and DISPLAY
+  -frenames-uncommon-levels=<support>	RENAMES of 01-, 66- and 77-level items
+  -fconstant-78=<support>	constant with level 78 item (note: has left to right precedence in expressions)
+  -fconstant-01=<support>	constant with level 01 CONSTANT AS/FROM item
+  -fprogram-prototypes=<support>	CALL/CANCEL with program-prototype-name
+  -freference-out-of-declaratives=<support>	references to sections not in DECLARATIVES from within DECLARATIVES
+  -fnumeric-value-for-edited-item=<support>	numeric literals in VALUE clause of numeric-edited items
+  -fincorrect-conf-sec-order=<support>	incorrect order of CONFIGURATION SECTION paragraphs
+  -fdefine-constant-directive=<support>	allow >> DEFINE CONSTANT var AS literal
+	where <support> is one of the following:
+	'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'
+  -fnot-reserved=<word>  word to be taken out of the reserved words list
+  -freserved=<word>      word to be added to reserved words list
+  -freserved=<word>:<alias>	word to be added to reserved words list as alias
+
+
+Report bugs to: bug-gnucobol@gnu.org
+or (preferably) use the issue tracker via the home page.
+GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>
+General help using GNU software: <http://www.gnu.org/gethelp/>
+@end verbatim

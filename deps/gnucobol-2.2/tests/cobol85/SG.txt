@@ -1,0 +1,22 @@
+Filename    total pass fail deleted inspect
+--------    ----- ---- ---- ------- -------
+SG101A.CBL    151  151    0       0       0 OK
+SG102A.CBL      8    8    0       0       0 OK
+SG103A.CBL      7    7    0       0       0 OK
+SG104A.CBL      9    9    0       0       0 OK
+SG105A.CBL      9    9    0       0       0 OK
+SG106A.CBL      9    9    0       0       0 OK
+SG201A.CBL     79   79    0       0       0 OK
+SG202A.CBL      5    5    0       0       0 OK
+SG203A.CBL     18   18    0       0       0 OK
+SG204A.CBL     15   15    0       0       0 OK
+SG302M.CBL      0    0    0       0       0 OK
+SG303M.CBL      0    0    0       0       0 OK
+SG401M.CBL      0    0    0       0       0 OK
+--------    ----- ---- ---- ------- -------
+Total         310  310    0       0       0
+
+Number of programs:    13
+Successfully executed: 13
+Compile error:          0
+Execute error:          0

@@ -1,0 +1,1104 @@
+## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+
+AT_SETUP([READ INTO AT-END sequence])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN "./TEST-FILE".
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE.
+       01  TEST-REC     PIC X(10).
+       WORKING-STORAGE  SECTION.
+       01  X            PIC X(10).
+       PROCEDURE        DIVISION.
+           OPEN  OUTPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           OPEN  INPUT  TEST-FILE.
+           READ  TEST-FILE INTO X
+               AT END MOVE ALL ZERO TO X
+           END-READ.
+           CLOSE TEST-FILE.
+           IF X NOT = "0000000000"
+              DISPLAY "Expected zeros - Got " X
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([First READ on empty SEQUENTIAL INDEXED file])
+AT_KEYWORDS([runfile])
+
+AT_CHECK([test "$COB_HAS_ISAM" = "yes" || exit 77])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       "./TEST-FILE"
+                        ORGANIZATION IS  INDEXED
+                        ACCESS MODE  IS  SEQUENTIAL
+                        RECORD KEY   IS  TEST-KEY.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-KEY      PIC X(10).
+       PROCEDURE        DIVISION.
+           OPEN  OUTPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           OPEN  INPUT  TEST-FILE.
+           READ  TEST-FILE
+                 AT END
+                   CONTINUE
+                 NOT AT END
+                   DISPLAY "NOT OK"
+                   END-DISPLAY
+           END-READ.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([REWRITE a RELATIVE file with RANDOM access])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       "./TEST-FILE"
+                        ORGANIZATION IS RELATIVE
+                        ACCESS MODE  IS RANDOM
+                        RELATIVE KEY IS TEST-KEY.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X.
+       WORKING-STORAGE  SECTION.
+       01 TEST-KEY      PIC 9.
+       PROCEDURE        DIVISION.
+      *
+           OPEN OUTPUT TEST-FILE.
+           MOVE 1 TO TEST-KEY.
+           MOVE "A" TO TEST-REC.
+           WRITE TEST-REC
+           END-WRITE.
+           MOVE 2 TO TEST-KEY.
+           MOVE "B" TO TEST-REC.
+           WRITE TEST-REC
+           END-WRITE.
+           CLOSE TEST-FILE.
+      *
+           OPEN I-O TEST-FILE.
+           MOVE 1 TO TEST-KEY.
+           READ TEST-FILE
+           END-READ.
+           MOVE 2 TO TEST-KEY.
+           MOVE "C" TO TEST-REC.
+           REWRITE TEST-REC
+           END-REWRITE.
+           CLOSE TEST-FILE.
+      *
+           OPEN INPUT TEST-FILE.
+           MOVE 1 TO TEST-KEY.
+           READ TEST-FILE
+           END-READ.
+           IF TEST-REC NOT = "A"
+              DISPLAY "Expected 'A' - Got " TEST-REC
+              END-DISPLAY
+           END-IF.
+           MOVE 2 TO TEST-KEY.
+           READ TEST-FILE
+           END-READ.
+           IF TEST-REC NOT = "C"
+              DISPLAY "Expected 'C' - Got " TEST-REC
+              END-DISPLAY
+           END-IF.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SORT with SD, I/O SEQUENTIAL])
+AT_KEYWORDS([runfile using giving])
+
+# Note: We shouldn't use AT_DATA to create sequential record
+# data, because AT_DATA needs a \n at the end
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT SORT-IN   ASSIGN "test.txt".
+       SELECT SORT-OUT  ASSIGN "result.txt".
+       SELECT SORT-WRK  ASSIGN "SORT-WRK".
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD SORT-IN.
+       01 IN-REC        PIC X(6).
+       FD SORT-OUT.
+       01 OUT-REC       PIC X(6).
+       SD SORT-WRK.
+       01 WRK-REC       PIC X(6).
+       PROCEDURE        DIVISION.
+
+      * Special case: write test data in COBOL, see note above
+           OPEN OUTPUT SORT-IN.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           WRITE IN-REC FROM "world " END-WRITE.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           WRITE IN-REC FROM "hello " END-WRITE.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           CLOSE SORT-IN.
+
+           SORT SORT-WRK
+                ASCENDING KEY WRK-REC
+                USING  SORT-IN
+                GIVING SORT-OUT.
+             STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CHECK([cat result.txt], [0], [                              hello world ], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SORT with SD, I/O LINE SEQUENTIAL])
+AT_KEYWORDS([runfile using giving])
+
+# Note: We shouldn't use AT_DATA to create sequential record
+# data, because AT_DATA needs a \n at the end
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT SORT-IN   ASSIGN "test.txt"
+                        ORGANISATION LINE SEQUENTIAL.
+       SELECT SORT-OUT  ASSIGN "result.txt"
+                        ORGANISATION LINE SEQUENTIAL.
+       SELECT SORT-WRK  ASSIGN "SORT-WRK".
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD SORT-IN.
+       01 IN-REC        PIC X(20).
+       FD SORT-OUT.
+       01 OUT-REC       PIC X(20).
+       SD SORT-WRK.
+       01 WRK-REC       PIC X(6).
+       PROCEDURE        DIVISION.
+
+      * Special case: write test data in COBOL, see note above
+           OPEN OUTPUT SORT-IN.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           WRITE IN-REC FROM "world " END-WRITE.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           WRITE IN-REC FROM "hello " END-WRITE.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           WRITE IN-REC FROM SPACES   END-WRITE.
+           CLOSE SORT-IN.
+
+           SORT SORT-WRK
+                ASCENDING KEY WRK-REC
+                USING  SORT-IN
+                GIVING SORT-OUT.
+             STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CHECK([cat result.txt], [0], [
+
+
+
+
+hello
+world
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SORT with SD, I/O LINE SEQUENTIAL same file])
+AT_KEYWORDS([runfile using giving])
+
+AT_DATA([test.txt], [
+bla
+world
+hello
+
+blubb
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT SORT-IN   ASSIGN "test.txt"
+                        ORGANISATION LINE SEQUENTIAL.
+       SELECT SORT-WRK  ASSIGN "dummy".
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD SORT-IN.
+       01 IN-REC        PIC X(6).
+       SD SORT-WRK.
+       01 sort-entry    PIC X(6).
+       PROCEDURE        DIVISION.
+
+      * We can use normal test data as we want to
+      * create a line sequential file.
+      *     OPEN OUTPUT SORT-IN.
+      *     WRITE IN-REC FROM SPACES   END-WRITE.
+      *     WRITE IN-REC FROM "world " END-WRITE.
+      *     WRITE IN-REC FROM "hello " END-WRITE.
+      *     WRITE IN-REC FROM SPACES   END-WRITE.
+      *     CLOSE SORT-IN.
+
+           SORT SORT-WRK
+                ASCENDING sort-entry
+                USING  SORT-IN
+                GIVING SORT-IN.
+             STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CHECK([cat test.txt], [0], [
+
+bla
+blubb
+hello
+world
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SORT nonexistent file])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT SORT-IN   ASSIGN "SORT-IN".
+       SELECT SORT-OUT  ASSIGN "SORT-OUT".
+       SELECT SORT-WRK  ASSIGN "SORT-WRK".
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD SORT-IN.
+       01 IN-REC        PIC X(100).
+       FD SORT-OUT.
+       01 OUT-REC       PIC X(100).
+       SD SORT-WRK.
+       01 WRK-REC       PIC X(100).
+       PROCEDURE        DIVISION.
+           SORT SORT-WRK
+                ASCENDING KEY WRK-REC
+                USING  SORT-IN
+                GIVING SORT-OUT.
+             STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CHECK([cat SORT-OUT], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ASSIGN with LOCAL-STORAGE item])
+AT_KEYWORDS([runfile])
+
+AT_DATA([test.txt],
+[hello
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT test-file ASSIGN path
+                        ORGANIZATION LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE	            SECTION.
+       FD  test-file.
+       01  test-rec     PIC X(5).
+       LOCAL-STORAGE    SECTION.
+       01  path         PIC X(10) VALUE "test.txt".
+       PROCEDURE        DIVISION.
+           OPEN INPUT test-file
+           READ test-file   END-READ
+           IF test-rec NOT = "hello"
+              DISPLAY test-rec END-DISPLAY
+           END-IF
+           CLOSE test-file
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ASSIGN with LOCAL-STORAGE item and INITIAL prog])
+AT_KEYWORDS([runfile])
+
+# Files are initialised in a different location in INITIAL program, hence the
+# need for a separate test.
+
+AT_DATA([test.txt],
+[hello
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog INITIAL.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT test-file ASSIGN path
+                        ORGANIZATION LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE	            SECTION.
+       FD  test-file.
+       01  test-rec     PIC X(5).
+       LOCAL-STORAGE    SECTION.
+       01  path         PIC X(10) VALUE "test.txt".
+       PROCEDURE        DIVISION.
+           OPEN INPUT test-file
+           READ test-file   END-READ
+           IF test-rec NOT = "hello"
+              DISPLAY test-rec END-DISPLAY
+           END-IF
+           CLOSE test-file
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ASSIGN with BASED data item])
+AT_KEYWORDS([runfile])
+
+# TODO 2.3 - SIGSEGV - either dissallow or fix...
+AT_XFAIL_IF(true)
+ 
+AT_DATA([TEST-FILE],
+[hello
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT test-file ASSIGN path
+                        ORGANIZATION LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE	            SECTION.
+       FD  test-file.
+       01  test-rec     PIC X(5).
+       WORKING-STORAGE    SECTION.
+       01  path         BASED PIC X(10).
+       PROCEDURE        DIVISION.
+           ALLOCATE path
+           MOVE "test.txt" TO path
+           OPEN INPUT test-file
+           FREE path
+           READ test-file   END-READ
+           IF test-rec NOT = "hello"
+              DISPLAY test-rec END-DISPLAY
+           END-IF
+           CLOSE test-file
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([WRITE+REWRITE FILE name])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT FLATFILE ASSIGN EXTERNAL RELFIX
+           ORGANIZATION RELATIVE
+           ACCESS IS SEQUENTIAL RELATIVE KEY IS REC-NUM
+           FILE STATUS IS CUST-STAT.
+
+           SELECT FLATFILE2 ASSIGN EXTERNAL RELFIX
+           ORGANIZATION RELATIVE
+           ACCESS IS RANDOM RELATIVE KEY IS REC-NUM
+           FILE STATUS IS CUST-STAT.
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8).
+           10  CM-COMPANY                      PICTURE X(25).
+           10  CM-DISK                         PICTURE X(8).
+           10  CM-NO-TERMINALS                 PICTURE 9(4).
+
+       FD  FLATFILE2
+           BLOCK CONTAINS 5 RECORDS.
+
+       01  TSP2-RECORD.
+           10  C2-CUST-NUM                     PICTURE X(8).
+           10  C2-COMPANY                      PICTURE X(25).
+           10  C2-DISK                         PICTURE X(8).
+           10  C2-NO-TERMINALS                 PICTURE 9(4).
+
+       WORKING-STORAGE SECTION.
+
+       77  MAX-SUB           VALUE  6          PICTURE 9(4) COMP SYNC.
+       77  CUST-STAT                           PICTURE X(2).
+       77  REC-NUM           VALUE  1          PICTURE 9(4).
+
+       01  TEST-DATA.
+
+         02  DATA-CUST-NUM-TBL.
+
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+           05  FILLER PIC X(8) VALUE "GAM00000".
+
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 6.
+         02  DATA-COMPANY-TBL.
+
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+           05  FILLER PIC X(25) VALUE "GAMMA X-RAY TECHNOLOGY   ".
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 6.
+         02  DATA-ADDRESS-2-TBL.
+
+           05  FILLER PIC X(10) VALUE "ATLANTA   ".
+           05  FILLER PIC X(10) VALUE "CALGARY   ".
+           05  FILLER PIC X(10) VALUE "NEW YORK  ".
+           05  FILLER PIC X(10) VALUE "TORONTO   ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "WHITEPLAIN".
+         02  DATA-ADDRESS   REDEFINES DATA-ADDRESS-2-TBL
+                                       PIC X(10) OCCURS 6.
+
+         02  DATA-NO-TERMINALS-TBL.
+
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 13.
+           05  FILLER PIC 9(3) COMP-3 VALUE 75.
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 90.
+           05  FILLER PIC 9(3) COMP-3 VALUE 254.
+
+         02  DATA-NO-TERMINALS REDEFINES DATA-NO-TERMINALS-TBL
+                                       PIC 9(3) COMP-3 OCCURS 6.
+       01  WORK-AREA.
+           05  SUB                             PICTURE 9(4) COMP SYNC.
+               88  ODD-RECORD                  VALUE 1 3 5.
+
+
+       PROCEDURE DIVISION.
+
+           PERFORM LOADFILE.
+
+           OPEN I-O FLATFILE2.
+           MOVE 2 TO REC-NUM
+           READ FLATFILE2
+           DISPLAY "Read    " C2-CUST-NUM " Sts:" CUST-STAT
+                   " Trms:" C2-NO-TERMINALS.
+           ADD 1 TO C2-NO-TERMINALS
+           REWRITE FILE FLATFILE2 FROM TSP2-RECORD
+           READ FLATFILE2
+           DISPLAY "REWROTE " C2-CUST-NUM " Sts:" CUST-STAT
+                   " Trms:" C2-NO-TERMINALS.
+           CLOSE FLATFILE2.
+           STOP RUN.
+
+       LOADFILE.
+           DISPLAY "Loading sample program data file."
+                            UPON CONSOLE.
+
+           OPEN OUTPUT FLATFILE.
+
+           PERFORM LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1
+                          UNTIL SUB > MAX-SUB.
+
+           DISPLAY "Sample program data file load complete."
+                            UPON CONSOLE.
+           CLOSE FLATFILE.
+
+       LOAD-RECORD.
+
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE DATA-NO-TERMINALS  (SUB)     TO CM-NO-TERMINALS.
+           IF  ODD-RECORD
+               MOVE "8417"                   TO CM-DISK
+           ELSE
+               MOVE "8470"                   TO CM-DISK.
+           WRITE FILE FLATFILE FROM TSPFL-RECORD.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Loading sample program data file.
+Sample program data file load complete.
+Read    BET00000 Sts:00 Trms:0013
+REWROTE BET00000 Sts:00 Trms:0014
+], [])
+
+AT_CLEANUP
+
+AT_SETUP([START RELATIVE (1)])
+AT_KEYWORDS([fundamental runfile DELETE FILE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT OPTIONAL TEST-FILE
+              ASSIGN      "TESTFILE"
+              ACCESS       DYNAMIC
+              ORGANIZATION RELATIVE
+              STATUS       TESTSTAT
+              RELATIVE KEY TESTKEY
+       .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE.
+       01  TEST-REC     PIC X(4).
+       WORKING-STORAGE  SECTION.
+       01  TESTKEY      USAGE BINARY-LONG UNSIGNED.
+       01  TESTSTAT     PIC XX.
+           88  V-OK     VALUE "00" "05".
+       PROCEDURE        DIVISION.
+           DELETE FILE TEST-FILE.
+           OPEN  I-O   TEST-FILE.
+           IF NOT V-OK
+              DISPLAY "OPEN " TESTSTAT
+              END-DISPLAY
+              GOBACK
+           END-IF.
+           MOVE 99 TO TESTKEY.
+           START TEST-FILE KEY < TESTKEY
+           END-START.
+           IF TESTSTAT NOT = "23"
+              DISPLAY "START " TESTSTAT
+              END-DISPLAY
+           END-IF.
+           CLOSE TEST-FILE.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([START RELATIVE (2)])
+AT_KEYWORDS([fundamental runfile DELETE FILE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT OPTIONAL TEST-FILE
+              ASSIGN      "TESTFILE"
+              ACCESS       DYNAMIC
+              ORGANIZATION RELATIVE
+              STATUS       TESTSTAT
+              RELATIVE KEY TESTKEY
+       .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE.
+       01  TEST-REC     PIC X(4).
+       WORKING-STORAGE  SECTION.
+       01  TESTKEY      USAGE BINARY-LONG UNSIGNED.
+       01  TESTSTAT     PIC XX.
+           88  V-OK     VALUE "00" "05".
+           88  V-ZERO   VALUE "00".
+       PROCEDURE        DIVISION.
+           DELETE FILE TEST-FILE.
+           OPEN  I-O   TEST-FILE.
+           IF NOT V-OK
+              DISPLAY "OPEN " TESTSTAT
+              END-DISPLAY
+              GOBACK
+           END-IF.
+           MOVE 3 TO TESTKEY.
+           MOVE "0003" TO TEST-REC.
+           WRITE TEST-REC INVALID KEY
+                 DISPLAY "WRITE " TESTSTAT
+                 END-DISPLAY
+           END-WRITE.
+           MOVE 2 TO TESTKEY.
+           MOVE "0002" TO TEST-REC.
+           WRITE TEST-REC INVALID KEY
+                 DISPLAY "WRITE " TESTSTAT
+                 END-DISPLAY
+           END-WRITE.
+           MOVE 99 TO TESTKEY.
+           START TEST-FILE KEY < TESTKEY
+           END-START.
+           IF NOT V-ZERO
+              DISPLAY "START " TESTSTAT
+              END-DISPLAY
+           END-IF.
+           IF TESTKEY NOT = 99
+              DISPLAY "TESTKEY " TESTKEY
+              END-DISPLAY
+           END-IF.
+           MOVE  SPACE TO TEST-REC.
+           READ  TEST-FILE NEXT
+           END-READ.
+           IF NOT V-ZERO
+              DISPLAY "READ " TESTSTAT
+              END-DISPLAY
+           END-IF.
+           IF TEST-REC NOT = "0003"
+              DISPLAY "READ RECORD " TEST-REC
+              END-DISPLAY
+           END-IF.
+           CLOSE TEST-FILE.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Read on optional missing file])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT OPTIONAL INFILE  ASSIGN TO
+                "missing.txt"
+                ORGANIZATION IS RELATIVE
+                ACCESS IS SEQUENTIAL
+                FILE STATUS IS WSFS.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  INFILE.
+       01  INREC             PIC X(80).
+       WORKING-STORAGE SECTION.
+       01  WSFS           PIC X(2).
+           88  RECORDFOUND VALUE "00".
+       01  WSINREC         PIC X(80).
+       PROCEDURE DIVISION.
+       MAIN-PROCEDURE.
+      *    Open missing file
+           OPEN INPUT INFILE
+      *    First read, raise a FS 10 (AT END) which is expected
+           READ INFILE INTO WSINREC
+           END-READ
+           IF WSFS = '10'
+              DISPLAY "1st Read on missing optional file = " WSFS " OK"
+           ELSE
+              DISPLAY "1st Read on missing optional file = " WSFS " Bad"
+           END-IF.
+
+      *    Second read, should raise a FS 46 (READ AFTER AT END)
+      *    but a FS 23 is raised instead.
+           READ INFILE INTO WSINREC
+           END-READ
+
+           IF WSFS = '46'
+              DISPLAY "2nd Read on missing optional file = " WSFS " OK"
+           ELSE
+              DISPLAY "2nd Read on missing optional file = " WSFS " Bad"
+           END-IF.
+
+           CLOSE INFILE
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [1st Read on missing optional file = 10 OK
+2nd Read on missing optional file = 46 OK
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([EXTERNAL RELATIVE file])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT my-file
+               ASSIGN TO "blahblah"
+               ORGANIZATION IS RELATIVE
+               RELATIVE KEY IS my-key.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD my-file EXTERNAL.
+       01 my-record.
+           03 my-record-data PIC X(80).
+
+       WORKING-STORAGE SECTION.
+       01  my-key PIC 9.
+
+       PROCEDURE DIVISION.
+           CONTINUE
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([System routines for directories])
+AT_KEYWORDS([extensions runfile CBL_CREATE_DIR CBL_CHANGE_DIR CBL_DELETE_DIR])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 DIR PIC X(4) VALUE 'ABCD'.
+
+        PROCEDURE DIVISION.
+        CALL 'CBL_CREATE_DIR' USING DIR END-CALL
+        IF RETURN-CODE NOT = 0
+            DISPLAY 'error creating dir ...' END-DISPLAY
+        END-IF
+
+        CALL 'CBL_CHANGE_DIR' USING DIR END-CALL
+        IF RETURN-CODE NOT = 0
+            DISPLAY 'error changing dir ...' END-DISPLAY
+        END-IF
+
+        CALL 'CBL_CHANGE_DIR' USING '..' END-CALL
+        IF RETURN-CODE NOT = 0
+            DISPLAY 'error changing dir up ...' END-DISPLAY
+        END-IF
+
+        CALL 'CBL_DELETE_DIR' USING DIR END-CALL
+        IF RETURN-CODE NOT = 0
+            DISPLAY 'error deleting dir' END-DISPLAY
+        END-IF
+
+        STOP RUN.
+])
+
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CHECK([test -e abcd], [1], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([System routines for files])
+AT_KEYWORDS([extensions runfile CBL_CREATE_FILE CBL_WRITE_FILE CBL_FLUSH_FILE
+CBL_OPEN_FILE CBL_READ_FILE CBL_CLOSE_FILE CBL_RENAME_FILE CBL_DELETE_FILE
+C$DELETE])
+
+AT_DATA([file1], [
+dummy
+])
+AT_DATA([file2], [
+test
+])
+AT_DATA([file3], [
+data
+])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID.     prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 FNAME        PIC X(256) VALUE 'testtext.txt'.
+        01 ACCESS-MODE  PIC X      USAGE COMP-X VALUE 2.
+        01 FHANDLE      PIC X(4)   USAGE COMP-X.
+
+        01 OFFSET       PIC X(8)   USAGE COMP-X.
+        01 NBYTES       PIC X(4)   USAGE COMP-X.
+        01 WRITE-BUFFER PIC X(20).
+
+        PROCEDURE DIVISION.
+        CALL 'CBL_CREATE_FILE' USING FNAME 55 11 22 FHANDLE
+        END-CALL
+        IF RETURN-CODE NOT = -1
+           DISPLAY 'Wrong return codes ...' END-DISPLAY
+        END-IF
+        MOVE 0 TO RETURN-CODE
+
+        CALL 'CBL_CREATE_FILE' USING
+        FNAME ACCESS-MODE 0 0 FHANDLE
+        END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error creating file ...' END-DISPLAY
+           MOVE 0 TO RETURN-CODE
+        END-IF
+
+        MOVE 'TestText.ABCD' TO WRITE-BUFFER.
+        MOVE 0 TO OFFSET.
+        MOVE 9 TO NBYTES.
+
+        CALL 'CBL_WRITE_FILE' USING
+        FHANDLE OFFSET NBYTES '0' WRITE-BUFFER
+        END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error writing file ...' END-DISPLAY
+           MOVE 0 TO RETURN-CODE
+        END-IF
+
+        CALL 'CBL_FLUSH_FILE' USING FHANDLE END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error flushing file ...' END-DISPLAY
+           MOVE 0 TO RETURN-CODE
+        END-IF
+
+        CALL 'CBL_CLOSE_FILE' USING FHANDLE END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error closing file ...' END-DISPLAY
+           MOVE 0 TO RETURN-CODE
+        END-IF
+
+        STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID.     prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 FNAME        PIC X(256) VALUE 'testtext.txt'.
+        01 RET          PIC -9.
+        01 FHANDLE      PIC X(4)   USAGE COMP-X.
+
+        01 OFFSET       PIC X(8)   USAGE COMP-X.
+        01 NBYTES       PIC X(4)   USAGE COMP-X.
+        01 READ-BUFFER  PIC X(10).
+
+        PROCEDURE DIVISION.
+        CALL 'CBL_OPEN_FILE' USING FNAME 1 0 0 FHANDLE
+        END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error opening file ...' END-DISPLAY
+        END-IF
+
+        MOVE SPACES TO READ-BUFFER.
+        MOVE 2 TO OFFSET.
+        MOVE 9 TO NBYTES.
+
+        CALL 'CBL_READ_FILE' USING
+        FHANDLE OFFSET NBYTES 0 READ-BUFFER
+        END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error reading file ...'
+                   return-code
+           END-DISPLAY
+           MOVE 0 TO RETURN-CODE
+        END-IF
+        IF READ-BUFFER NOT = 'stText.' *> text from first test
+           DISPLAY 'Wrong readbuffer ...' END-DISPLAY
+        END-IF
+
+        CALL 'CBL_CLOSE_FILE' USING FHANDLE END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error closing file ...'
+                   return-code
+           END-DISPLAY
+           MOVE 0 TO RETURN-CODE
+        END-IF
+
+        CALL 'CBL_RENAME_FILE' USING FNAME 'foo.txt' END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error renaming file ...'
+                   return-code
+           END-DISPLAY
+           MOVE 0 TO RETURN-CODE
+        END-IF
+
+        CALL 'CBL_DELETE_FILE' USING 'file1' END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error deleting file1 ...'
+                   return-code
+           END-DISPLAY
+           MOVE 0 TO RETURN-CODE
+        END-IF
+        CALL 'CBL_DELETE_FILE' USING 'file1' END-CALL
+        IF RETURN-CODE = 0
+           DISPLAY 'no error on deleting file1 for the second time...'
+                   return-code
+           END-DISPLAY
+        END-IF
+        MOVE 0 TO RETURN-CODE
+
+        CALL 'C$DELETE' USING 'file2' 'S' END-CALL
+        IF RETURN-CODE NOT = 0
+           DISPLAY 'error deleting file2 ...'
+                   return-code
+           END-DISPLAY
+           MOVE 0 TO RETURN-CODE
+        END-IF
+        CALL 'CBL_DELETE_FILE' USING 'file2' END-CALL
+        IF RETURN-CODE = 0   *> note: should only return 0 or 1 when in ACUCOBOL mode
+           DISPLAY 'no error on deleting file2 for the second time...'
+                   return-code
+           END-DISPLAY
+        END-IF
+        MOVE 0 TO RETURN-CODE
+
+        STOP RUN.
+])
+
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [],
+[libcob: prog.cob: 15: warning: call to CBL_CREATE_FILE with wrong file_lock: 11
+libcob: prog.cob: 15: warning: call to CBL_CREATE_FILE with wrong file_dev: 22
+libcob: prog.cob: 15: warning: call to CBL_OPEN_FILE with wrong access mode: 55
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([System routine CBL_COPY_FILE])
+AT_KEYWORDS([extensions runfile])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE DIVISION.
+        DISPLAY "test" END-DISPLAY
+        STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 FILE1 PIC X(8) VALUE 'prog.cob'.
+        01 FILE2 PIC X(9) VALUE 'prog3.cob'.
+
+        PROCEDURE DIVISION.
+        CALL 'CBL_COPY_FILE' USING
+        FILE1 FILE2
+        END-CALL
+        STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [], [])
+AT_CHECK([diff prog.cob prog3.cob], [0], [], [])
+
+AT_CLEANUP

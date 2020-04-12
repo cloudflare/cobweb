@@ -1,0 +1,12 @@
+--- libcob/call.c	2017-09-06 19:37:28.000000000 +0100
++++ gnucobol-2.2/libcob/call.c	2020-04-12 15:41:55.712659699 +0100
+@@ -1455,7 +1455,8 @@
+ 	lt_dlinit ();
+ 
+ #ifndef	COB_BORKED_DLOPEN
+-	mainhandle = lt_dlopen (NULL);
++	/* mainhandle = lt_dlopen (NULL); */
++	mainhandle = NULL;
+ #endif
+ 
+ 	if (cobsetptr->cob_preload_str != NULL) {

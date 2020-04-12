@@ -1,0 +1,198 @@
+
+2017-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: extra target for summary.log
+
+2017-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: use $COBC defined in atlocal instead of "cobc";
+	  passing hints for valgrind logfile name when sourcing atlocal
+
+2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* report.pl: activated runtime checks where possible to prevent
+	  loops and hard aborts for not-working environments, for example
+	  when running ISAM tests with a no-ISAM build
+
+2017-07-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added some hacks for make not supporting $> and $(D>),
+	  make tests works there (again) as long as newcob.val is in builddir
+
+2017-06-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: separated rule for newcob.val.Z and make sure that
+	  out-of-path newcob.val.Z is copied before uncompress;
+	  corrected rule for EXEC85 to include executable extension
+
+2017-06-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added .PHONY to correctly declare logical targets that
+	  always have to be executed and don't result in a file
+	* Makefile.am: fixing tests with newcob.val in all possible VPATH
+	  entries by using the prerequisite's path directly in the Makefile
+	  and with ASSIGN variable for EXEC85
+	* Makefile.am: always build all test module folders,
+	  even if they aren't tested
+	* Makefile.am: allow parallel testing of modules
+	* Makefile.am, summary.txt: moved IX to end of tests to have the same
+	  order with DBNOIX
+
+2017-05-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* report.pl: redirect stderr to /dev/null if to_kill is requested
+
+2017-04-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: HACK for newcob.val in sourcedir during VPATH build
+
+2017-03-19  Edward Hart <edward.dan.hart@gmail.com>
+
+	* report.pl, EXEC85.conf.in: fixed bug #363: redefining filename (viz.
+	  "report.log") as variable is not portable.
+	* report.pl, summary.pl: fixed warnings and added "use warnings;" and
+	  "use strict;" directives.
+
+2017-01-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* report.pl: replaced fifo by sysin redirection and new kill sequence
+
+2016-12-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* report.pl: fixing running the suite from shared file systems by
+	  moving fifo to tempdir (where creation of fifo should always be possible)
+	* report.pl, NC.txt: automated "manual investigations"
+	* report.pl: moved test specific compilation flags to $cobc_flags
+	  and show them on command line,
+	  create report.log directly with test specific name
+
+2016-12-14  Edward Hart <edward.dan.hart@gmail.com>
+
+	* report.pl, *.txt: compile only tests no longer
+	  increment the successful test counter, as this is for runtime tests
+	* report.pl: allow passing input to programs (e.g. for those
+	  with STOP literal), implemented by mkfifo, asynchron run and kill
+
+2016-12-12  Edward Hart <edward.dan.hart@gmail.com>
+
+	* report.pl: updated and annotated the list of compile-only tests
+
+2016-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* report.pl: check environment for COBC/COBCRUN to override
+	  the called binaries (useful for testing with valgrind)
+
+2016-10-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am, report.pl: added support for make with
+	  multiple jobs (only done when building the test directories)
+
+2016-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: checking `perl` before running target "test"
+
+2015-02-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added target for decompressing newcob.val.Z and
+	  download it
+
+2010-06-28  Roger While <simrw@sim-basis.de>
+
+	* MARK - Version 2.0
+	* Move to GPL/LGPL 3
+
+2009-07-01  Roger While <simrw@sim-basis.de>
+
+	* Include some extra 85 compile only programs
+
+2009-05-11  Roger While <simrw@sim-basis.de>
+
+	* Allow tests to run without ISAM I/O
+
+2009-03-05  Roger While <simrw@sim-basis.de>
+
+	* Clean up 85 test scripts
+
+2008-12-02  Roger While <simrw@sim-basis.de>
+
+	* Activate some more ANSI85 tests
+
+2008-11-28  Roger While <simrw@sim-basis.de>
+
+	* Adjust ANSI85 results; USE GLOBAL tests now run
+	* Adjust ANSI85 report output
+
+2008-11-25  Roger While <simrw@sim-basis.de>
+
+	* report.pl, summary.pl: fix warning when running perl with -w
+
+2008-11-07  Roger While <simrw@sim-basis.de>
+
+	* Adjust ANSI85 results; we successfully execute one of the GLOBAL tests
+
+2008-10-11  Roger While <simrw@sim-basis.de>
+
+	* Makefile.am : Refix out of source directory builds
+
+2008-09-30  Roger While <simrw@sim-basis.de>
+
+	* Makefile.am : Fix out of source directory builds
+
+2008-01-02  Roger While <simrw@sim-basis.de>
+
+	* Cobol85 tests rechanged to cater for unsupported ALTER
+
+2007-12-27  Roger While <simrw@sim-basis.de>
+
+	** Mark 1.0 RELEASE
+
+2007-12-21  Roger While <simrw@sim-basis.de>
+
+	* Cobol85 tests changed to cater for unsupported ALTER
+
+2006-07-23  Roger While <simrw@sim-basis.de>
+
+	* report.pl : Remove SWITCH settings from atlocal and insert
+	  directly into the tests
+
+2006-07-06  Roger While <simrw@sim-basis.de>
+
+	* report.pl : Cater for DB_HOME (BDB >= 4.1)
+
+2006-02-08  Roger While <simrw@sim-basis.de>
+
+	* Adjust results for cobol85 suite.
+	  We now pass some nested program tests.
+
+2006-01-05  Roger While <simrw@sim-basis.de>
+
+	* general: Bootstrap up to new libtool / automake
+	* ifedit.sh: Fix up test IX110A -
+	  This has an incorrect PIC clause in the
+	  compressed file newcob.val.Z.
+
+2005-12-09  Roger While <simrw@sim-basis.de>
+
+	* report.pl, Makefile.am: Changes for '-x' option
+
+2005-12-05  Roger While <simrw@sim-basis.de>
+
+	* report.pl, Makefile.am : Fix perl usage
+
+2005-11-09  Roger While <simrw@sim-basis.de>
+
+	* Adjust Cobol85 test results for SAME RECORD implementation.
+
+2005-10-01  Roger While <simrw@sim-basis.de>
+
+	* Makefile.am : Include IF.txt, ifedit.sh
+
+2005-05-03  Roger While <simrw@sim-basis.de>
+
+	* general : Allow to run without a "make install".
+	  Update expected results.
+	* EXEC85.conf.in - Change 2 params.
+
+2005-03-03  Roger While <simrw@sim-basis.de>
+
+	* SQ.txt, summary.txt : We now pass the LINAGE tests

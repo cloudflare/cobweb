@@ -1,0 +1,233 @@
+## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2002 14.8.1 ACCEPT statement
+### ISO+IEC+1989-2014 14.9.1 ACCEPT statement
+
+# Format 1: hardware / device
+
+## TODO - only omitted tested so far
+
+AT_SETUP([ACCEPT OMITTED (simple)])
+AT_KEYWORDS([accept extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+
+       DATA           DIVISION.
+
+       PROCEDURE      DIVISION.
+           ACCEPT OMITTED
+           END-ACCEPT.
+])
+
+AT_DATA([input.txt], [
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog < input.txt], [0], [], [])
+
+AT_CLEANUP
+
+#
+## Format 2: chronological / temporal
+#
+
+AT_SETUP([ACCEPT FROM TIME / DATE / DAY / DAY-OF-WEEK (1)])
+AT_KEYWORDS([accept])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       *> one byte longer to make sure there is no garbage in
+       01 X             PIC X(9).
+       PROCEDURE        DIVISION.
+           ACCEPT X FROM TIME
+           END-ACCEPT
+           IF X (1:2) >= "00" AND <= "23" AND
+              X (3:2) >= "00" AND <= "59" AND
+              X (5:2) >= "00" AND <= "60" AND
+              X (7:2) >= "00" AND <= "99" AND
+              X (9: )  = SPACE
+              CONTINUE
+           ELSE
+              DISPLAY "TIME " X "!"
+              END-DISPLAY
+           END-IF
+           ACCEPT X FROM DATE
+           END-ACCEPT
+           INSPECT X CONVERTING "012345678" TO "999999999"
+           IF X NOT = "999999"
+              DISPLAY "DATE " X "!"
+              END-DISPLAY
+           END-IF
+           ACCEPT X FROM DATE YYYYMMDD
+           END-ACCEPT
+           INSPECT X CONVERTING "012345678" TO "999999999"
+           IF X NOT = "99999999"
+              DISPLAY "YYYYMMDD " X "!"
+              END-DISPLAY
+           END-IF
+           ACCEPT X FROM DAY
+           END-ACCEPT
+           INSPECT X CONVERTING "012345678" TO "999999999"
+           IF X NOT = "99999"
+              DISPLAY "DAY " X "!"
+              END-DISPLAY
+           END-IF
+           ACCEPT X FROM DAY YYYYDDD
+           END-ACCEPT
+           INSPECT X CONVERTING "012345678" TO "999999999"
+           IF X NOT = "9999999"
+              DISPLAY "YYYYDDD " X "!"
+              END-DISPLAY
+           END-IF
+           ACCEPT X FROM DAY-OF-WEEK
+           END-ACCEPT
+           INSPECT X CONVERTING "1234567" TO "9999999"
+           IF X NOT = "9"
+              DISPLAY "DAY-OF-WEEK " X "!"
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ACCEPT FROM TIME / DATE / DAY / DAY-OF-WEEK (2)])
+AT_KEYWORDS([accept configuration COB_CURRENT_DATE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       *> one byte longer to make sure there is no garbage in
+       01  WS-YYYYMMDD   PIC X(9).
+       01  WS-YYYYDDD    PIC X(8).
+       01  WS-DAYOFWEEK  PIC X(2).
+       01  WS-DATE-TODAY.
+           05  WS-TODAYS-YY            PIC 9(02) VALUE 0.
+           05  WS-TODAYS-MM            PIC 9(02) VALUE 0.
+           05  WS-TODAYS-DD            PIC 9(02) VALUE 0.
+
+       01  WS-DATE.
+           05  WS-DATE-MM              PIC 9(02) VALUE 0.
+           05  FILLER                  PIC X(01) VALUE '/'.
+           05  WS-DATE-DD              PIC 9(02) VALUE 0.
+           05  FILLER                  PIC X(01) VALUE '/'.
+           05  WS-DATE-YY              PIC 9(02) VALUE 0.
+
+       01  WS-TIME-NOW.
+           05  WS-NOW-HH               PIC 9(02) VALUE 0.
+           05  WS-NOW-MM               PIC 9(02) VALUE 0.
+           05  WS-NOW-SS               PIC 9(02) VALUE 0.
+           05  WS-NOW-HS               PIC 9(02) VALUE 0.
+
+       01  WS-TIME.
+           05  WS-TIME-HH              PIC 9(02) VALUE 0.
+           05  FILLER                  PIC X(01) VALUE ':'.
+           05  WS-TIME-MM              PIC 9(02) VALUE 0.
+           05  FILLER                  PIC X(01) VALUE ':'.
+           05  WS-TIME-SS              PIC 9(02) VALUE 0.
+
+       PROCEDURE DIVISION.
+           ACCEPT WS-DATE-TODAY FROM DATE
+           ACCEPT WS-TIME-NOW   FROM TIME
+           MOVE WS-TODAYS-YY TO WS-DATE-YY
+           MOVE WS-TODAYS-MM TO WS-DATE-MM
+           MOVE WS-TODAYS-DD TO WS-DATE-DD
+           MOVE WS-NOW-HH    TO WS-TIME-HH
+           MOVE WS-NOW-MM    TO WS-TIME-MM
+           MOVE WS-NOW-SS    TO WS-TIME-SS
+           DISPLAY 'PROCESS DATE/TIME : ' WS-DATE ' ' WS-TIME
+                   WITH NO ADVANCING
+           END-DISPLAY
+           ACCEPT WS-YYYYMMDD   FROM DATE YYYYMMDD
+           IF WS-YYYYMMDD not = "20150405"
+              DISPLAY 'Wrong date DATE YYYYMMDD: ' WS-YYYYMMDD
+                      ' expected: 20150405'
+                      UPON SYSERR
+              END-DISPLAY
+           END-IF
+           ACCEPT WS-YYYYDDD    FROM DAY  YYYYDDD
+           IF WS-YYYYDDD  not = "2015095"
+              DISPLAY 'Wrong date YYYYDDD:  '      WS-YYYYDDD
+                      ' expected: 2015095'
+                      UPON SYSERR
+              END-DISPLAY
+           END-IF
+           ACCEPT WS-DAYOFWEEK    FROM DAY-OF-WEEK
+           IF WS-DAYOFWEEK  not = "7"
+              DISPLAY 'Wrong date DAYOFWEEK: '     WS-DAYOFWEEK
+                      ' expected: 7'
+                      UPON SYSERR
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([COB_CURRENT_DATE='2015/04/05 18:45:22' \
+./prog], [0], [PROCESS DATE/TIME : 04/05/15 18:45:22], [])
+
+AT_CLEANUP
+
+#
+## Format 3: screen
+#
+
+## TODO - only omitted tested so far
+
+AT_SETUP([ACCEPT OMITTED (SCREEN)])
+AT_KEYWORDS([accept extensions])
+
+AT_CHECK([test "$COB_HAS_CURSES" = "yes" || exit 77])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+
+       DATA           DIVISION.
+       SCREEN         SECTION.
+       01  scr.
+           03  VALUE "Hello!" LINE 3 COL 3.
+
+       PROCEDURE      DIVISION.
+           ACCEPT OMITTED
+           END-ACCEPT.
+])
+
+AT_DATA([input.txt], [
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog < input.txt], [0], ignore, [])
+
+AT_CLEANUP
+

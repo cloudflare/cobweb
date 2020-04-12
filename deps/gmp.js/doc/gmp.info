@@ -1,0 +1,181 @@
+This is gmp.info, produced by makeinfo version 6.5 from gmp.texi.
+
+This manual describes how to install and use the GNU multiple precision
+arithmetic library, version 5.0.2.
+
+   Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software
+Foundation, Inc.
+
+   Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover Texts being "A GNU Manual", and
+with the Back-Cover Texts being "You have freedom to copy and modify
+this GNU Manual, like GNU software".  A copy of the license is included
+in *note GNU Free Documentation License::.
+INFO-DIR-SECTION GNU libraries
+START-INFO-DIR-ENTRY
+* gmp: (gmp).                   GNU Multiple Precision Arithmetic Library.
+END-INFO-DIR-ENTRY
+
+
+Indirect:
+gmp.info-1: 955
+gmp.info-2: 301547
+
+Tag Table:
+(Indirect)
+Node: Top955
+Node: Copying3187
+Node: Introduction to GMP5038
+Node: Installing GMP7749
+Node: Build Options8481
+Node: ABI and ISA24538
+Node: Notes for Package Builds34228
+Node: Notes for Particular Systems37315
+Node: Known Build Problems43873
+Node: Performance optimization47404
+Node: GMP Basics48533
+Node: Headers and Libraries49181
+Node: Nomenclature and Types50605
+Node: Function Classes52602
+Node: Variable Conventions54296
+Node: Parameter Conventions55905
+Node: Memory Management57961
+Node: Reentrancy59089
+Node: Useful Macros and Constants60961
+Node: Compatibility with older versions61959
+Node: Demonstration Programs62919
+Node: Efficiency64778
+Node: Debugging72392
+Node: Profiling78945
+Node: Autoconf82935
+Node: Emacs84714
+Node: Reporting Bugs85320
+Node: Integer Functions87862
+Node: Initializing Integers88638
+Node: Assigning Integers90785
+Node: Simultaneous Integer Init & Assign92372
+Node: Converting Integers93997
+Node: Integer Arithmetic96895
+Node: Integer Division98481
+Node: Integer Exponentiation104798
+Node: Integer Roots106238
+Node: Number Theoretic Functions107909
+Node: Integer Comparisons114051
+Node: Integer Logic and Bit Fiddling115429
+Node: I/O of Integers117971
+Node: Integer Random Numbers120940
+Node: Integer Import and Export123551
+Node: Miscellaneous Integer Functions127561
+Node: Integer Special Functions129421
+Node: Rational Number Functions132509
+Node: Initializing Rationals133702
+Node: Rational Conversions136157
+Node: Rational Arithmetic137888
+Node: Comparing Rationals139192
+Node: Applying Integer Functions140559
+Node: I/O of Rationals142042
+Node: Floating-point Functions144083
+Node: Initializing Floats146968
+Node: Assigning Floats151054
+Node: Simultaneous Float Init & Assign153618
+Node: Converting Floats155146
+Node: Float Arithmetic158369
+Node: Float Comparison160382
+Node: I/O of Floats161964
+Node: Miscellaneous Float Functions164647
+Node: Low-level Functions166589
+Node: Random Number Functions190796
+Node: Random State Initialization191864
+Node: Random State Seeding194722
+Node: Random State Miscellaneous196111
+Node: Formatted Output196752
+Node: Formatted Output Strings196997
+Node: Formatted Output Functions202227
+Node: C++ Formatted Output206291
+Node: Formatted Input208973
+Node: Formatted Input Strings209209
+Node: Formatted Input Functions213869
+Node: C++ Formatted Input216838
+Node: C++ Class Interface218741
+Node: C++ Interface General219742
+Node: C++ Interface Integers222811
+Node: C++ Interface Rationals226160
+Node: C++ Interface Floats229747
+Node: C++ Interface Random Numbers235457
+Node: C++ Interface Limitations237861
+Node: BSD Compatible Functions240676
+Node: Custom Allocation245387
+Node: Language Bindings249706
+Node: Algorithms253662
+Node: Multiplication Algorithms254362
+Node: Basecase Multiplication255334
+Node: Karatsuba Multiplication257242
+Node: Toom 3-Way Multiplication260865
+Node: Toom 4-Way Multiplication267280
+Node: FFT Multiplication268652
+Node: Other Multiplication273988
+Node: Unbalanced Multiplication276462
+Node: Division Algorithms277250
+Node: Single Limb Division277629
+Node: Basecase Division280517
+Node: Divide and Conquer Division281720
+Node: Block-Wise Barrett Division283788
+Node: Exact Division284440
+Node: Exact Remainder287604
+Node: Small Quotient Division289831
+Node: Greatest Common Divisor Algorithms291429
+Node: Binary GCD291726
+Node: Lehmer's Algorithm294576
+Node: Subquadratic GCD296806
+Node: Extended GCD299274
+Node: Jacobi Symbol301547
+Node: Powering Algorithms302464
+Node: Normal Powering Algorithm302727
+Node: Modular Powering Algorithm303255
+Node: Root Extraction Algorithms304035
+Node: Square Root Algorithm304350
+Node: Nth Root Algorithm306491
+Node: Perfect Square Algorithm307276
+Node: Perfect Power Algorithm309362
+Node: Radix Conversion Algorithms309983
+Node: Binary to Radix310359
+Node: Radix to Binary314288
+Node: Other Algorithms316376
+Node: Prime Testing Algorithm316728
+Node: Factorial Algorithm317912
+Node: Binomial Coefficients Algorithm319319
+Node: Fibonacci Numbers Algorithm320213
+Node: Lucas Numbers Algorithm322687
+Node: Random Number Algorithms323408
+Node: Assembly Coding325527
+Node: Assembly Code Organisation326487
+Node: Assembly Basics327454
+Node: Assembly Carry Propagation328604
+Node: Assembly Cache Handling330434
+Node: Assembly Functional Units332595
+Node: Assembly Floating Point334208
+Node: Assembly SIMD Instructions337987
+Node: Assembly Software Pipelining338969
+Node: Assembly Loop Unrolling340032
+Node: Assembly Writing Guide342247
+Node: Internals345012
+Node: Integer Internals345524
+Node: Rational Internals347780
+Node: Float Internals349018
+Node: Raw Output Internals356418
+Node: C++ Interface Internals357612
+Node: Contributors360898
+Node: References365847
+Node: GNU Free Documentation License371572
+Node: Concept Index396720
+Node: Function Index444385
+
+End Tag Table
+
+
+Local Variables:
+coding: iso-8859-1
+End:

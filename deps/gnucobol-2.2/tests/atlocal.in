@@ -1,0 +1,89 @@
+#
+# atlocal gnucobol/tests
+#
+# Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+# Written by Keisuke Nishida, Roger While, Simon Sobisch
+#
+# This file is part of GnuCOBOL.
+#
+# The GnuCOBOL compiler is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# GnuCOBOL is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+# CC="@CC@"
+COB_BIGENDIAN="@COB_BIGENDIAN@"
+COB_HAS_ISAM="@COB_HAS_ISAM@"
+COB_HAS_CURSES="@COB_HAS_CURSES@"
+COB_HAS_UTC_OFFSET="@COB_HAS_UTC_OFFSET@"
+COB_HAS_64_BIT_POINTER="@COB_HAS_64_BIT_POINTER@"
+
+COBC="${abs_top_builddir}/cobc/cobc"
+COBCRUN="${abs_top_builddir}/bin/cobcrun"
+COBCRUN_DIRECT="" # used for running created executables through tools
+
+TEMPLATE="${abs_srcdir}/testsuite.src"
+
+FLAGS="-debug -Wall ${COBOL_FLAGS}"
+COMPILE="${COBC} -x ${FLAGS}"
+COMPILE_ONLY="${COBC} -fsyntax-only ${FLAGS}"
+COMPILE_MODULE="${COBC} -m ${FLAGS}"
+
+COB_OBJECT_EXT="@COB_OBJECT_EXT@"
+COB_EXE_EXT="@COB_EXE_EXT@"
+
+PATHSEP=":"
+
+# Helper script to unify listings (repleace version, date, time)
+UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
+
+# unset all environment variables that are used in libcob for runtime configuration
+for cobenv in $($COBCRUN --runtime-conf | grep COB_ | cut -d: -f2); do unset $cobenv; done
+
+# For running the testsuite in Cygwin with non-Cygwin binaries we need a wrapper function
+_return_path () {
+	echo "$1"
+}
+
+PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
+export PATH
+export COB_CFLAGS="-I${abs_top_srcdir} -I${abs_top_srcdir}/libcob @COB_CFLAGS@"
+export COB_LDFLAGS="-L${abs_top_builddir}/libcob/.libs @COB_LDFLAGS@"
+export COB_LIBS="-L${abs_top_builddir}/libcob/.libs -lcob @LIBCOB_LIBS@"
+export COB_CONFIG_DIR="${abs_top_srcdir}/config"
+export COB_RUNTIME_CONFIG="${COB_CONFIG_DIR}/runtime_empty.cfg"
+export COB_COPY_DIR="${abs_top_srcdir}/copy"
+export LD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$LD_LIBRARY_PATH"
+export DYLD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$DYLD_LIBRARY_PATH"
+export SHLIB_PATH="${abs_top_builddir}/libcob/.libs:$SHLIB_PATH"
+export LIBPATH="${abs_top_builddir}/libcob/.libs:$LIBPATH"
+export COB_LIBRARY_PATH="${abs_top_builddir}/extras:$COB_LIBRARY_PATH"
+export COB_UNIX_LF=YES
+export COB_HAS_ISAM
+if test "$MSYSTEM" = "MINGW32"; then
+	# running MSYS builds as not-visible child processes result in
+	# "Redirection is not supported"
+	COB_HAS_CURSES="no"
+	# Fix for testcases were cobc translates path to win32 equivalents
+	PATHSEP=";"
+fi
+export COB_HAS_CURSES
+export COB_HAS_UTC_OFFSET
+export COB_HAS_64_BIT_POINTER
+export LC_ALL=C
+export PATHSEP
+
+
+# For rare cases where cobc/libcob may need to know if they're running in test mode:
+case $0 in
+	*/testsuite) export COB_IS_RUNNING_IN_TESTMODE=1;;
+	*)	unset COB_IS_RUNNING_IN_TESTMODE;;
+esac

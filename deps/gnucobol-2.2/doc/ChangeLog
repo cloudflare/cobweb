@@ -1,0 +1,136 @@
+
+2017-08-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.texi: explained use of cob_tidy / cob_stop_run
+
+2017-07-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.texi: added -std=rm and all strict variants,
+	  added explanations for -std
+
+2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: passed GREP from configure to cobcinfo.sh
+	* cobcinfo.sh: use GREP from configure, check for working grep -A
+
+2017-02-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* texinfo.tex: moved to ../build_aux
+	* Makefile.am, cobcinfo.sh: changes to cater for move of texinfo.tex
+	* general: always regenerate tex include files when building gnucobol.texi
+
+2016-12-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.texi: fixed texinfo warnings
+
+2016-10-22  Dave Pitts <dpitts@cozx.com>
+
+	* gnucobol.texi: added --no-symbols option
+
+2016-10-17  Dave Pitts <dpitts@cozx.com>
+
+	* gnucobol.texi: added a COPY to listing example
+
+2016-10-16  Dave Pitts <dpitts@cozx.com>
+
+	* gnucobol.texi: added listing example
+
+2016-10-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.texi: replaced cb_conf by samples of compiler configuration
+	  flags and added minimal entry for listing options
+
+2016-10-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.texi: Added entries for all GC-specific system libraries
+
+2016-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcinfo.sh: used new option -q to remove most `sed` calls
+
+2016-08-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added all sources to gnucobol_TEXINFOS and removed them
+	  from EXTRA_DIST
+
+2016-06-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcinfo.sh, Makefile.am: fix VPATH builds by sourcing atconfig/atlocal
+	  in the Makefile (where the VPATH is available) instead of cobcinfo.sh
+
+2016-04-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcinfo.sh: portability change (using expr instead of declare)
+
+2016-03-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* gnucobol.texi: Copyediting: improved capitalisation of headings,
+	  changed "Hello World!" to "Hello, world!", formatted COBOL/C/compiler
+	  options as code, added missing full stops in bullet point lists and
+	  improved some sentences.
+
+2016-02-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcinfo.sh: remove the built-prefix from cobc/cobcrun
+	  when capturing --help
+
+2015-12-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.texi: Update for GnuCOBOL 2.0
+	* texinfo.tex: updated to version from texinfo 5.2
+	  (more current versions throw errors in gnucobol.texi)
+	* new appendix cbrunt.tex from config/runtime.cfg, translating it to
+	  texinfo format
+	* new appendix cbchelp.tex from `cobcrun --help`
+	* removed appendix cbinfo.tex from `cobcrun --info` as this is highly
+	  system specific
+	* cobcinfo.sh: Make sure the version of cobc is used that was built from
+	  this package, cater for changed appendixes, overwrite tex-files only if
+	  they are changed, new (optional) parameters for creating tex-files by
+	  group or single ones and for fixing the timestamps
+	* Makefile.am: cater for changed appendixes, make all appendixes dependent
+	  on cobcinfo.sh and source files of cobc to make sure these are always
+	  up-to-date
+
+2015-12-15  Brian Tiffin <btiffin@gnu.org>
+
+	* gnucobol.texi: Add -j and "-" stdin filename explanation.
+
+2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* gnucobol.texi: Add Extended ACCEPT special keys section. 
+
+2014-14-04  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* gnucobol.texi: Added documentation for CBL_OC_GETOPT
+
+2010-06-28  Roger While <simrw@sim-basis.de>
+
+	* MARK - Version 2.0
+	* Move to GPL/LGPL 3
+	* open-cobol.texi: Update for 2.0
+
+2009-02-01  Brian Tiffin <btiffin@canada.com>
+
+	* open-cobol.texi: Update for 1.1
+
+2005-05-21  Roger While <simrw@sim-basis.de>
+
+	* open-cobol.texi: Revise
+
+2005-05-13  Roger While <simrw@sim-basis.de>
+
+	* open-cobol.texi: Revise
+
+2005-03-03  Roger While <simrw@sim-basis.de>
+
+	* open-cobol.texi: update for -Os
+
+2002-06-11  Keisuke Nishida  <knishida@netlab.jp>
+
+	* open-cobol.texi: Revise for 0.9.6.
+
+2002-06-03  Keisuke Nishida  <knishida@netlab.jp>
+
+	* open-cobol.texi (Customize): Add COB_LDADD, COB_CONFIG_FILE.
+

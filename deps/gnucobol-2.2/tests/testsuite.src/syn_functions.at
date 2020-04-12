@@ -1,0 +1,598 @@
+## Copyright (C) 2007-2012, 2014-2017 Free Software Foundation, Inc.
+## Written by Roger While, Simon Sobisch, Edward Hart
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+
+AT_SETUP([ANY LENGTH / NUMERIC as function RETURNING item])
+AT_KEYWORDS([functions extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID.   func.
+
+       DATA           DIVISION.
+       LINKAGE        SECTION.
+       01  any-len    PIC X ANY LENGTH.
+
+       PROCEDURE      DIVISION RETURNING any-len.
+           CONTINUE
+           .
+       END FUNCTION   func.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 9: error: function RETURNING item may not be ANY LENGTH
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID.   func.
+
+       DATA           DIVISION.
+       LINKAGE        SECTION.
+       01  any-len    PIC 9 ANY NUMERIC.
+
+       PROCEDURE      DIVISION RETURNING any-len.
+           CONTINUE
+           .
+       END FUNCTION   func.
+])
+
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob: 9: error: function RETURNING item may not be ANY LENGTH
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([REPOSITORY INTRINSIC phrase])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION pi e intrinsic
+           .
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY PI.
+           DISPLAY E.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([REPOSITORY FUNCTION phrase])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. x AS "y".
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  ret PIC 9(4).
+
+       PROCEDURE DIVISION RETURNING ret.
+           MOVE 100 TO ret
+           .
+       END FUNCTION x.
+
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. z.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  ret PIC 9(5).
+
+       PROCEDURE DIVISION RETURNING ret.
+           MOVE 1 TO ret
+           .
+       END FUNCTION z.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. testing.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION y AS "y"
+           FUNCTION z
+           .
+       PROCEDURE DIVISION.
+           DISPLAY FUNCTION y
+           DISPLAY FUNCTION z
+           .
+       END PROGRAM testing.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([Redundant REPOSITORY entries])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       PROGRAM-ID. beta.
+       END PROGRAM beta.
+
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. alpha.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           ALPHABET gamma IS ASCII
+           .
+       REPOSITORY.
+           FUNCTION alpha
+           PROGRAM beta
+           PROGRAM beta
+           PROGRAM beta AS "alpha"
+           FUNCTION beta
+           FUNCTION gamma
+           .
+       END FUNCTION alpha.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 14: warning: prototype has same name as current function and will be ignored
+prog.cob: 16: warning: duplicate REPOSITORY entry for 'beta'
+prog.cob: 17: error: duplicate REPOSITORY entries for 'beta' do not match
+prog.cob: 18: error: duplicate REPOSITORY entries for 'beta' do not match
+prog.cob: 19: warning: no definition/prototype seen for function 'gamma'
+prog.cob: 19: error: redefinition of 'gamma'
+prog.cob: 11: error: 'gamma' previously defined here
+prog.cob: 21: error: FUNCTION 'alpha' has no PROCEDURE DIVISION
+])
+AT_CLEANUP
+
+
+AT_SETUP([Missing prototype/definition])
+AT_KEYWORDS([functions programs prototypes])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. blah.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION x
+           PROGRAM y
+           .
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  ret PIC X.
+           
+       PROCEDURE DIVISION RETURNING ret.
+           MOVE FUNCTION x TO ret
+           MOVE FUNCTION x TO ret
+           .
+       END FUNCTION blah.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 8: warning: no definition/prototype seen for function 'x'
+prog.cob: 9: warning: no definition/prototype seen for program 'y'
+])
+AT_CLEANUP
+
+
+AT_SETUP([Empty function])
+AT_KEYWORDS([functions])
+
+# Note: Test case for "Function without END FUNCTION" in syn_definition
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. func.
+       
+       END FUNCTION func.
+       
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC 999 VALUE 124.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 5: error: FUNCTION 'func' has no PROCEDURE DIVISION
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Function definition inside program])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       PROCEDURE DIVISION.
+           CONTINUE
+           .
+
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. f.
+       END FUNCTION f.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: error: functions may not be defined within a program/function
+prog.cob: 11: error: FUNCTION 'f' has no PROCEDURE DIVISION
+])
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsic functions: dialect])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION ABS (1).
+           DISPLAY FUNCTION TRIM (" some text here").
+           DISPLAY FUNCTION SUBSTITUTE ('some text' 'some' 'nice').
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
+[prog.cob: 9: error: FUNCTION 'TRIM' unknown
+prog.cob: 10: error: FUNCTION 'SUBSTITUTE' unknown
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsic functions: replaced])
+AT_KEYWORDS([functions SUBSTITUTE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. SUBSTITUTE.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  func-in  PIC X(15).
+       01  func-sub PIC X.
+       01  func-out PIC X(15).
+
+       PROCEDURE DIVISION USING func-in, func-sub RETURNING func-out.
+           MOVE func-in TO func-out
+           INSPECT func-out REPLACING ALL '%' BY func-sub
+           .
+       END FUNCTION SUBSTITUTE.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION SUBSTITUTE
+           .
+       PROCEDURE DIVISION.
+           DISPLAY FUNCTION SUBSTITUTE(" % C%O%B%O%L % ", "_")
+           DISPLAY FUNCTION SUBSTITUTE(" % C%O%B%O%L % ", "-")
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE_ONLY -fnot-intrinsic=substitute prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 24: error: syntax error, unexpected ., expecting intrinsic function name or INTRINSIC
+prog.cob: 26: error: FUNCTION 'SUBSTITUTE' has wrong number of arguments
+prog.cob: 27: error: FUNCTION 'SUBSTITUTE' has wrong number of arguments
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsic functions: number of arguments])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION PI.
+           DISPLAY FUNCTION PI ( ).
+           DISPLAY FUNCTION PI (1).
+           DISPLAY FUNCTION ABS.
+           DISPLAY FUNCTION ABS (1).
+           DISPLAY FUNCTION ABS (1, 2).
+           DISPLAY FUNCTION DAY-TO-YYYYDDD.
+           DISPLAY FUNCTION DAY-TO-YYYYDDD (6000).
+           DISPLAY FUNCTION DAY-TO-YYYYDDD (6000,50).
+           DISPLAY FUNCTION DAY-TO-YYYYDDD (6000,50,1600).
+           DISPLAY FUNCTION DAY-TO-YYYYDDD (6000,50,1600,500).
+           DISPLAY FUNCTION MAX ().
+           DISPLAY FUNCTION MAX (6000).
+           DISPLAY FUNCTION SUBSTITUTE ('A' 'B' 'C' 'D').
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: error: FUNCTION 'PI' has wrong number of arguments
+prog.cob: 11: error: FUNCTION 'ABS' has wrong number of arguments
+prog.cob: 13: error: FUNCTION 'ABS' has wrong number of arguments
+prog.cob: 14: error: FUNCTION 'DAY-TO-YYYYDDD' has wrong number of arguments
+prog.cob: 18: error: FUNCTION 'DAY-TO-YYYYDDD' has wrong number of arguments
+prog.cob: 19: error: FUNCTION 'MAX' has wrong number of arguments
+prog.cob: 21: error: FUNCTION 'SUBSTITUTE' has wrong number of arguments
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsic functions: reference modification])
+AT_KEYWORDS([functions refmod])
+
+# the following should be checked, currently doesn't work
+#AT_DATA([prog.cob], [
+#       IDENTIFICATION   DIVISION.
+#       PROGRAM-ID.      prog.
+#       ENVIRONMENT DIVISION.
+#       DATA             DIVISION.
+#       WORKING-STORAGE  SECTION.
+#       PROCEDURE        DIVISION.
+#           DISPLAY FUNCTION CHAR (66)(1:2).
+#           DISPLAY FUNCTION NUMVAL-C (123)(1:2).
+#           DISPLAY FUNCTION REVERSE ("TESTME")(20:1).
+#           DISPLAY FUNCTION REVERSE ("TESTME")(-1:1).
+#           DISPLAY FUNCTION REVERSE ("TESTME")(1:0).
+#           STOP RUN.
+#])
+#
+#AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+#[prog.cob: 8: error: FUNCTION 'PI' can not have reference modification
+#prog.cob: 9: error: FUNCTION 'NUMVAL-C' can not have reference modification
+#prog.cob: 10: error: FUNCTION 'REVERSE' has invalid reference modification
+#prog.cob: 11: error: FUNCTION 'REVERSE' has invalid reference modification
+#prog.cob: 12: error: FUNCTION 'REVERSE' has invalid reference modification
+#])
+
+# test what is in already...
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION REVERSE ("TESTME")(-1:1).
+           DISPLAY FUNCTION REVERSE ("TESTME")(1:0).
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: FUNCTION 'REVERSE' has invalid reference modification
+prog.cob: 9: error: FUNCTION 'REVERSE' has invalid reference modification
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsic functions: Parameter type])
+AT_KEYWORDS([functions])
+
+# TODO: Add more tests
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION ABS ('1').
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: FUNCTION 'ABS' has invalid parameter
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([invalid formatted date/time args])
+AT_KEYWORDS([functions FORMATTED-DATE FORMATTED-CURRENT-DATE FORMATTED-TIME FORMATTED-DATETIME INTEGER-OF-FORMATTED-DATE SECONDS-FROM-FORMATTED-TIME])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  format-str         PIC X(8) VALUE "YYYYMMDD".
+       01  Date-Format        CONSTANT "YYYYMMDD".
+       01  Time-Format        CONSTANT "hhmmss".
+       01  Datetime-Format    CONSTANT "YYYYMMDDThhmmss".
+       PROCEDURE        DIVISION.
+      *>   Test wrong formats
+           DISPLAY FUNCTION FORMATTED-DATE ( "YYYYWWWD", 1 )
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-TIME ( "HHMMSS", 1)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-DATETIME
+                ( "YYYYWWWDTHHMMSS", 1, 1)
+           END-DISPLAY
+
+      *>   Test format in variable
+           DISPLAY FUNCTION FORMATTED-DATE ( format-str, 1)
+           END-DISPLAY
+
+      *>   Test incompatible formats
+           DISPLAY FUNCTION FORMATTED-CURRENT-DATE (Date-Format)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-CURRENT-DATE (Time-Format)
+           END-DISPLAY
+
+           DISPLAY FUNCTION FORMATTED-DATE ( Time-Format, 1)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-DATE ( Datetime-Format, 1)
+           END-DISPLAY
+
+           DISPLAY FUNCTION FORMATTED-TIME ( Date-Format, 1)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-TIME ( Datetime-Format, 1)
+           END-DISPLAY
+
+           DISPLAY FUNCTION FORMATTED-DATETIME ( Date-Format, 1, 1)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-DATETIME ( Time-Format, 1, 1)
+           END-DISPLAY
+
+           DISPLAY FUNCTION INTEGER-OF-FORMATTED-DATE ( Time-Format, 1)
+           END-DISPLAY
+
+           DISPLAY FUNCTION SECONDS-FROM-FORMATTED-TIME
+               ( Date-Format, 1)
+           END-DISPLAY
+
+      *>   Time format with more than 9 decimal places.
+           DISPLAY FUNCTION FORMATTED-TIME ( "hhmmss.ssssssssss", 1)
+           END-DISPLAY
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: error: FUNCTION 'FORMATTED-DATE' has invalid date/time format
+prog.cob: 14: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+prog.cob: 16: error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
+prog.cob: 21: warning: FUNCTION 'FORMATTED-DATE' has format in variable
+prog.cob: 25: error: FUNCTION 'FORMATTED-CURRENT-DATE' has invalid date/time format
+prog.cob: 27: error: FUNCTION 'FORMATTED-CURRENT-DATE' has invalid date/time format
+prog.cob: 30: error: FUNCTION 'FORMATTED-DATE' has invalid date/time format
+prog.cob: 32: error: FUNCTION 'FORMATTED-DATE' has invalid date/time format
+prog.cob: 35: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+prog.cob: 37: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+prog.cob: 40: error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
+prog.cob: 42: error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
+prog.cob: 45: error: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has invalid date/time format
+prog.cob: 48: error: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has invalid date/time format
+prog.cob: 53: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+])
+
+AT_CLEANUP
+
+AT_SETUP([invalid formats w/ DECIMAL-POINT IS COMMA])
+AT_KEYWORDS([functions FORMATTED-TIME FORMATTED-DATETIME])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT IS COMMA.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION FORMATTED-TIME ("hhmmss,ss", 1)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-DATETIME
+                       ("YYYYMMDDThhmmss,ss", 1, 1)
+           END-DISPLAY
+
+           DISPLAY FUNCTION FORMATTED-TIME ("hhmmss.ss", 1)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-DATETIME
+                       ("YYYYMMDDThhmmss.ss", 1, 1)
+           END-DISPLAY
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 15: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+prog.cob: 17: error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Specified offset and SYSTEM-OFFSET])
+AT_KEYWORDS([functions FORMATTED-TIME FORMATTED-DATETIME])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION FORMATTED-DATETIME
+                       ("YYYYDDDThhmmssZ", 1, 1, 1, SYSTEM-OFFSET)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-TIME
+                       ("hhmmssZ", 1, 1, SYSTEM-OFFSET)
+           END-DISPLAY
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: 6: error: cannot specify offset and SYSTEM-OFFSET at the same time
+prog.cob: 9: error: cannot specify offset and SYSTEM-OFFSET at the same time
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LENGTH / BYTE-LENGTH])
+AT_KEYWORDS([functions PREFIXED])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION LENGTH ("abcd" & "xyz")
+           END-DISPLAY
+           DISPLAY FUNCTION BYTE-LENGTH ("abcd" & "xyz")
+           END-DISPLAY
+           DISPLAY FUNCTION LENGTH ("abcd" "xyz")
+           END-DISPLAY
+           DISPLAY FUNCTION LENGTH ("abcd" & "xyz" PHYSICAL)
+           END-DISPLAY
+           DISPLAY FUNCTION BYTE-LENGTH ("abcd" & "xyz" PHYSICAL)
+           END-DISPLAY
+           .
+])
+
+AT_CHECK([$COMPILE -Wno-pending prog.cob], [1], [],
+[prog.cob: 9: error: syntax error, unexpected Literal, expecting PHYSICAL or )
+])
+
+AT_CLEANUP

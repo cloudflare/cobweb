@@ -1,0 +1,53 @@
+
+2017-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* update_linguas.sh: auto-add new translations received from TP
+	  to svn; only run make if a Makefile actually exists
+
+2017-05-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* pt.po: added Portuguese (translated by Mario Matos)
+
+2016-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* update_linguas.sh: added shell for updating the translations
+	  before a release, used version from nano-project as template
+	* Makevars: set DIST_DEPENDS_ON_UPDATE_PO to no
+	* en.translate: removed
+
+2016-11-05  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.in.in: Upgrade to gettext-0.19.8.1.
+	* Rules-quot: Upgrade to gettext-0.19.8.1.
+
+2016-08-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makevars: added --no-wrap to MSGMERGE_OPTIONS (upon request of TP)
+	* POTFILES.in: Changed bison/flex sources to the generated sources
+	 (same strings but no "looks like a string, but isn't one")
+
+2015-03-06  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.in.in: Upgrade to gettext-0.19.4.
+	* Rules-quot: Upgrade to gettext-0.19.4.
+
+2014-01-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gettext extra message catalogues en@quot and en@boldquot added
+
+2013-10-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* nl.po: added Dutch  (translated by Ed Borchert and Ronald Heirbaut)
+
+2011-06-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* es.po: added Spanish (translated by Randy Coman)
+
+2010-06-28  Roger While <simrw@sim-basis.de>
+
+	* MARK - Version 2.0
+	* Move to GPL/LGPL 3
+
+2002-05-29  Keisuke Nishida  <knishida@netlab.jp>
+
+	* ja.po: New file.

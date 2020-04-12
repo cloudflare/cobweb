@@ -1,0 +1,115 @@
+# GnuCOBOL compiler configuration
+#
+# Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+# Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
+#
+# This file is part of GnuCOBOL.
+#
+# The GnuCOBOL compiler is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# GnuCOBOL is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# NOTES on the usage:
+#  This is an include-only compiler configuration file.
+#  The following steps are applied when using this:
+#  1: include "strict" syntax, setting behaviour-specific atrributes
+#  2: include this file to allow features that the original
+#     compilers don't support (larger lengths, syntax variations,...)
+#  3: include the reserved-words list to *additional* set the
+#     compiler-specific words to the default list
+
+
+# Value: int
+# Maximum word-length for COBOL words / Programmer defined words
+# current max (COB_MAX_WORDLEN): 61
+#word-length:			127
+word-length:			61
+literal-length:			8192
+numeric-literal-length:	38
+pic-length:				255
+
+# Allow complex OCCURS DEPENDING ON
+complex-odo:			yes
+
+# Allow REDEFINES to other than last equal level number
+indirect-redefines:		yes
+
+# Allow larger REDEFINES items
+larger-redefines-ok:		yes
+
+# Allow certain syntax variations (eg. REDEFINES position)
+relax-syntax-checks:		yes
+
+# If yes, allow non-matching level numbers
+relax-level-hierarchy:		yes
+
+
+# Dialect features
+# Value: 'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error',
+#        'unconformable'
+# Special option used here: "adjust" --> if the previous set option
+# is more strict: override, otherwise leave it as it is
+
+alter-statement:			+obsolete
+comment-paragraphs:			ok
+call-overflow:				ok
+data-records-clause:			+obsolete
+debugging-mode:				ok
+use-for-debugging:			+obsolete
+listing-statements:			ok	# may be a user-defined word
+title-statement:			ok	# may be a user-defined word
+entry-statement:			ok
+goto-statement-without-name:		+obsolete
+label-records-clause:			+obsolete
+memory-size-clause:			+obsolete
+move-noninteger-to-alphanumeric:	+warning
+move-figurative-constant-to-numeric:	+archaic
+move-figurative-quote-to-numeric:	+archaic
+multiple-file-tape-clause:		+obsolete
+next-sentence-phrase:			+archaic
+odo-without-to:				+warning
+padding-character-clause:		+obsolete
+section-segments:			+ignore
+stop-literal-statement:			+obsolete
+stop-identifier-statement:		ok
+synchronized-clause:			ok
+top-level-occurs-clause:		ok
+value-of-clause:			+obsolete
+numeric-boolean:			ok
+hexadecimal-boolean:		ok
+national-literals:			ok
+hexadecimal-national-literals:		ok
+acu-literals:			ok
+word-continuation:			ok
+not-exception-before-exception:		+warning
+accept-display-extensions:		ok
+renames-uncommon-levels:		ok
+constant-01:				ok
+constant-78:				ok
+program-prototypes:			ok
+reference-out-of-declaratives:		+warning
+numeric-value-for-edited-item:		+warning
+incorrect-conf-sec-order:		+warning
+define-constant-directive:		+obsolete
+
+
+# use complete word list
+# (vendor specific, currently not supported words are
+# loaded by *including* the appropriate word list)
+reserved-words:		default
+
+# enable all intrinsic functions
+intrinsic-function:	DIALECT-ALL
+
+# enable all registers
+register:		DIALECT-ALL

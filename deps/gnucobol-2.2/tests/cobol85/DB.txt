@@ -1,0 +1,25 @@
+Filename    total pass fail deleted inspect
+--------    ----- ---- ---- ------- -------
+DB101A.CBL     34   25    0       0       9 OK
+DB102A.CBL     14   14    0       0       0 OK
+DB103M.CBL     14   14    0       0       0 OK
+DB103M.CBL     28   28    0       0       0 OK
+DB104A.CBL     12    9    0       0       3 OK
+DB105A.CBL    227  227    0       0       0 OK
+DB201A.CBL     68   56    0       4       8 OK
+DB202A.CBL     24   20    0       0       4 OK
+DB203A.CBL     20   18    0       0       2 OK
+DB204A.CBL      4    3    0       0       1 OK
+DB205A.CBL      0    0    0       0       0 OK
+DB301M.CBL      1    1    0       0       0 OK
+DB302M.CBL      1    1    0       0       0 OK
+DB303M.CBL      1    1    0       0       0 OK
+DB304M.CBL      0    0    0       0       0 OK
+DB305M.CBL      1    1    0       0       0 OK
+--------    ----- ---- ---- ------- -------
+Total         449  418    0       4      27
+
+Number of programs:    16
+Successfully executed: 16
+Compile error:          0
+Execute error:          0

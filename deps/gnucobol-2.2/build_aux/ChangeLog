@@ -1,0 +1,33 @@
+
+2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* bootstrap: new script for creating missing files after checkout
+	* config.guess: updated to recent version
+
+2017-07-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* config.guess, config.sub, compile: updated to recent version from
+	  http://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
+	* texinfo.tex: updated from https://ftp.gnu.org/gnu/texinfo
+
+2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* ylwrap: updated to recent version from
+	  http://git.savannah.gnu.org/cgit/automake.git/tree/lib/ylwrap
+
+2016-08-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: updated to versions from automake 1.15
+	* ylwrap: added from automake 1.15
+	* config.sub, config.guess: updated to recent versions from
+	  git.savannah.gnu.org/gitweb/?p=config.git, backported support
+	  for "ancient" systems without uname(1)
+
+2015-07-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: moved additional build-scripts from rootdir to build_aux
+	* mdate-sh: added from automake 1.11.1
+	* config.sub, config.guess: updated to recent versions from
+	  git.savannah.gnu.org/gitweb/?p=config.git to solve build issues
+	  on different machines, but backported support for "ancient" systems
+	  without uname(1) [removed 2014-01-25] from old version

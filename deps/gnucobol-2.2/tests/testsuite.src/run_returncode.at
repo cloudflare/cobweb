@@ -1,0 +1,136 @@
+## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
+## 
+## This file is part of GnuCOBOL.
+## 
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### Non-standard extensions
+
+AT_SETUP([RETURN-CODE moving])
+AT_KEYWORDS([returncode])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 I             PIC 99 COMP.
+       PROCEDURE        DIVISION.
+           INITIALIZE RETURN-CODE.
+           MOVE ZERO TO RETURN-CODE.
+           MOVE 1 TO RETURN-CODE.
+           MOVE RETURN-CODE TO I.
+           IF I NOT = 1
+              DISPLAY I NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1])
+
+AT_CLEANUP
+
+AT_SETUP([RETURN-CODE passing])
+AT_KEYWORDS([returncode])
+
+AT_DATA([mod1.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      mod1.
+       PROCEDURE        DIVISION.
+           IF RETURN-CODE NOT = 0
+              DISPLAY RETURN-CODE NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           MOVE 1 TO RETURN-CODE.
+           IF RETURN-CODE NOT = 1
+              DISPLAY RETURN-CODE NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           EXIT PROGRAM.
+])
+
+AT_DATA([mod2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      mod2.
+       PROCEDURE        DIVISION.
+           EXIT PROGRAM.
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           CALL "mod1"
+           END-CALL.
+           IF RETURN-CODE NOT = 1
+              DISPLAY RETURN-CODE NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           CALL "mod2"
+           END-CALL.
+           IF RETURN-CODE NOT = 0
+              DISPLAY RETURN-CODE NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_MODULE mod1.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE mod2.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([RETURN-CODE nested])
+AT_KEYWORDS([returncode])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           MOVE 1 TO RETURN-CODE.
+           IF RETURN-CODE NOT = 1
+              DISPLAY RETURN-CODE NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           CALL "mod1"
+           END-CALL.
+           IF RETURN-CODE NOT = 2
+              DISPLAY RETURN-CODE NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           MOVE ZERO TO RETURN-CODE.
+           STOP RUN.
+       PROGRAM-ID.      mod1.
+       PROCEDURE        DIVISION.
+           IF RETURN-CODE NOT = 1
+              DISPLAY RETURN-CODE NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           MOVE 2 TO RETURN-CODE.
+           EXIT PROGRAM.
+       END PROGRAM mod1.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP

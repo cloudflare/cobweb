@@ -1,0 +1,49 @@
+Filename    total pass fail deleted inspect
+--------    ----- ---- ---- ------- -------
+ST101A.CBL      9    9    0       0       0 OK
+ST102A.SUB      1    1    0       0       0 OK
+ST103A.SUB      9    9    0       0       0 OK
+ST104A.CBL      1    1    0       0       0 OK
+ST105A.SUB      2    2    0       0       0 OK
+ST106A.CBL      1    1    0       0       0 OK
+ST107A.SUB      6    6    0       0       0 OK
+ST108A.CBL      9    9    0       0       0 OK
+ST109A.CBL      1    1    0       0       0 OK
+ST110A.SUB      1    1    0       0       0 OK
+ST111A.SUB      7    7    0       0       0 OK
+ST112M.CBL      1    1    0       0       0 OK
+ST113M.SUB      1    1    0       0       0 OK
+ST114M.SUB     10   10    0       0       0 OK
+ST115A.CBL      1    1    0       0       0 OK
+ST116A.SUB      1    1    0       0       0 OK
+ST117A.SUB      1    1    0       0       0 OK
+ST118A.CBL      9    9    0       0       0 OK
+ST119A.CBL     27   27    0       0       0 OK
+ST120A.SUB      1    1    0       0       0 OK
+ST121A.SUB      9    9    0       0       0 OK
+ST122A.CBL      1    1    0       0       0 OK
+ST123A.SUB      1    1    0       0       0 OK
+ST124A.SUB      7    7    0       0       0 OK
+ST125A.CBL      1    1    0       0       0 OK
+ST126A.SUB     18   18    0       0       0 OK
+ST127A.CBL     27   27    0       0       0 OK
+ST131A.CBL     15   15    0       0       0 OK
+ST132A.CBL      6    6    0       0       0 OK
+ST133A.CBL     18   18    0       0       0 OK
+ST134A.CBL      4    4    0       0       0 OK
+ST135A.CBL      9    9    0       0       0 OK
+ST136A.CBL      5    5    0       0       0 OK
+ST137A.CBL      6    6    0       0       0 OK
+ST139A.CBL     10   10    0       0       0 OK
+ST140A.CBL     11   11    0       0       0 OK
+ST144A.CBL     11   11    0       0       0 OK
+ST146A.CBL      4    4    0       0       0 OK
+ST147A.CBL     26   26    0       0       0 OK
+ST301M.CBL      0    0    0       0       0 OK
+--------    ----- ---- ---- ------- -------
+Total         288  288    0       0       0
+
+Number of programs:    40
+Successfully executed: 40
+Compile error:          0
+Execute error:          0

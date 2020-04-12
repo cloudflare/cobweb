@@ -1,0 +1,13 @@
+* Keisuke Nishida <knishida@netlab.jp> wrote
+cobc/*, libcob/*, libcob.h, libcob.conf, cob-config.in,
+and po/ja.po.
+
+* lib/getopt1.c, lib/getopt.h, lib/getopt1.c were extracted
+from the GNU C Library 2.3.2.  Distributed under GNU LGPL.
+
+* lib/gettext.h was extracted from the GNU gettext 0.11.2.
+Distributed under GNU LGPL.
+
+* libcob/byteswap.h (included in libcob/common.h later on)
+was extracted from GLIB 2.2.2 and modified by Keisuke Nishida
+and Roger While. Distributed under GNU LGPL.

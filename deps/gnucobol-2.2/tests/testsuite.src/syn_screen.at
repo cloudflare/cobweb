@@ -1,0 +1,585 @@
+## Copyright (C) 2014-2017 Free Software Foundation, Inc.
+## Written by Simon Sobisch, Edward Hart
+##
+## This file is part of GnuCOBOL.
+##
+## The GnuCOBOL compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## GnuCOBOL is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+### GnuCOBOL Test Suite
+
+### ISO+IEC+1989-2014 13.9 SCREEN section
+
+
+AT_SETUP([Flexible ACCEPT/DISPLAY syntax])
+AT_KEYWORDS([screen ACCEPT DISPLAY])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           SYSERR IS ERR-STREAM
+           .
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  a-field      PIC XXX.
+
+       SCREEN           SECTION.
+       01  scr.
+           03 VALUE "blah" LINE 5 COL 5.
+
+       PROCEDURE        DIVISION.
+           *> Valid statements
+           DISPLAY "123" "456" "789" NO ADVANCING
+           DISPLAY "foo" COL 1 HIGHLIGHT AT LINE 1 WITH UNDERLINE,
+               "bar", "foo"
+           DISPLAY "a" UPON CRT, "b" LINE 3 COL 3, "c" UPON CRT-UNDER
+           DISPLAY scr, scr
+
+           ACCEPT a-field LINE 5 SIZE 3 AT COL 1 WITH AUTO WITH
+               REVERSE-VIDEO, BLINK
+
+           *> invalid statements
+           DISPLAY scr WITH NO ADVANCING
+           DISPLAY scr, scr LINE 2 COL 2 UPON ERR-STREAM
+           DISPLAY "foo" LINE 2 COL 2, scr
+           DISPLAY "foo" LINE 2 COL 2, "bar" UPON ERR-STREAM
+           DISPLAY "foo" LINE 1 UPON ERR-STREAM
+           DISPLAY scr, "foo"
+           .
+       END PROGRAM prog.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog-2.
+
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           CONSOLE IS CRT
+           .
+       PROCEDURE DIVISION.
+           DISPLAY "foo" NO ADVANCING
+           .
+       END PROGRAM prog-2.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 31: error: cannot specify NO ADVANCING in screen DISPLAY
+prog.cob: 31: error: screens may only be displayed on CRT
+prog.cob: 32: error: cannot mix screens and fields in the same DISPLAY statement
+prog.cob: 33: error: ambiguous DISPLAY; put items to display on device in separate DISPLAY
+prog.cob: 34: error: screen clauses may only be used for DISPLAY on CRT
+prog.cob: 35: error: cannot mix screens and fields in the same DISPLAY statement
+prog.cob: 49: error: cannot specify NO ADVANCING in screen DISPLAY
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Duplicate ACCEPT/DISPLAY clauses])
+AT_KEYWORDS([screen ACCEPT DISPLAY])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  a-field      PIC XXX.
+       PROCEDURE        DIVISION.
+           DISPLAY "foo" LINE 1 COL 1 HIGHLIGHT LINE 1 HIGHLIGHT
+               AT 0101 MODE IS BLOCK MODE IS BLOCK
+           ACCEPT a-field LINE 1 COL 1 HIGHLIGHT LINE 1 HIGHLIGHT
+               AT 0101
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: duplicate LINE clause
+prog.cob: 8: error: duplicate HIGHLIGHT clause
+prog.cob: 9: error: cannot specify both AT screen-location and LINE or COLUMN
+prog.cob: 9: error: duplicate MODE IS BLOCK clause
+prog.cob: 10: error: duplicate LINE clause
+prog.cob: 10: error: duplicate HIGHLIGHT clause
+prog.cob: 11: error: cannot specify both AT screen-location and LINE or COLUMN
+])
+AT_CLEANUP
+
+
+AT_SETUP([AT clause])
+AT_KEYWORDS([screen extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  curs-1      PIC 9(4) VALUE 00000000001111.
+       01  curs-2.
+           03  linee   PIC 999.
+           03  coll    PIC 999.
+       01  pos         CONSTANT 0101.
+
+       01  curs-3      PIC 99.
+       01  curs-4      PIC 9(8) VALUE 0101.
+       01  curs-5      PIC X(4).
+
+       PROCEDURE       DIVISION.
+           *> Valid AT clauses
+           DISPLAY "a" AT curs-1
+           DISPLAY "a" AT curs-2
+           DISPLAY "a" AT pos
+
+           *> Invalid AT clauses
+           DISPLAY "a" AT curs-3
+           DISPLAY "a" AT curs-4
+           DISPLAY "a" AT curs-5
+           DISPLAY "a" AT 101
+           DISPLAY "a" AT ZERO
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 24: error: value in AT clause must have 4 or 6 digits
+prog.cob: 25: error: value in AT clause must have 4 or 6 digits
+prog.cob: 26: error: value in AT clause is not numeric
+prog.cob: 27: error: value in AT clause must have 4 or 6 digits
+prog.cob: 29: error: cannot specify figurative constant ZERO in AT clause
+])
+AT_CLEANUP
+
+
+AT_SETUP([ACCEPT/DISPLAY extensions detection])
+AT_KEYWORDS([AT LINE COLUMN ACCEPT DISPLAY screen extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  zero-const CONSTANT 0.
+       01  x PIC 99.
+
+       SCREEN SECTION.
+       01  scr.
+           03  y PIC 99 FROM x LINE 3 COLUMN 5.
+
+       PROCEDURE DIVISION.
+           DISPLAY "hello" AT 0000
+           DISPLAY "world" LINE ZERO COLUMN zero-const
+           ACCEPT x WITH TIME-OUT 5
+
+           DISPLAY scr WITH UNDERLINE
+           ACCEPT scr WITH HIGHLIGHT
+
+           DISPLAY scr, scr
+
+           *> Valid statements
+           DISPLAY scr UPON CRT-UNDER
+           ACCEPT scr AT LINE 4 COLUMN 4
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY -faccept-display-extensions=error prog.cob], [1], [],
+[prog.cob: 15: error: AT clause used
+prog.cob: 15: error: non-standard DISPLAY used
+prog.cob: 16: error: LINE 0 used
+prog.cob: 16: error: COLUMN 0 used
+prog.cob: 16: error: non-standard DISPLAY used
+prog.cob: 17: error: non-standard ACCEPT used
+prog.cob: 19: error: non-standard DISPLAY used
+prog.cob: 20: error: non-standard ACCEPT used
+prog.cob: 22: error: non-standard DISPLAY used
+])
+AT_CLEANUP
+
+
+AT_SETUP([FROM clause])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+       SCREEN  SECTION.
+       01 SG.
+          05 SI1   LINE 1 COL 1 PIC X FROM X.
+          05 SI2   LINE 2 COL 1 PIC X FROM SPACE.
+          05 SI2-2 LINE 2 COL 5 PIC X(03) FROM ALL SPACES.
+          05 SI3   LINE 3 COL 1 PIC 9 FROM ZERO.
+          05 SI3-2 LINE 3 COL 5 PIC X(03) FROM ALL ZEROES.
+       PROCEDURE        DIVISION.
+           DISPLAY SG END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SCREEN SECTION clause numbers])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       *> Valid numbers
+       01  a            VALUE "-" LINE 1.
+       01  b            VALUE "-" LINE +1.
+       01  c            VALUE "-" LINE 0.
+
+       *> invalid numbers
+       01  d            VALUE "-" LINE -1.
+       01  e            VALUE "-" LINE 1.0.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: error: non-negative integer value expected
+prog.cob: 13: error: non-negative integer value expected
+])
+
+AT_CLEANUP
+
+# ToDo: Add all clauses, maybe split into multiple tests
+AT_SETUP([Screen clauses])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  foo          PIC X.
+       SCREEN           SECTION.
+       01  scr.
+           03  a        PIC X TO foo FULL, LEFTLINE, OVERLINE, REQUIRED,
+                        GRID.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 9: warning: LEFTLINE is not implemented
+prog.cob: 9: warning: OVERLINE is not implemented
+prog.cob: 10: warning: GRID is not implemented
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([ACCEPT ON EXCEPTION/ESCAPE])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  foo          PIC X.
+       PROCEDURE        DIVISION.
+           ACCEPT foo
+               ON EXCEPTION
+                   CONTINUE
+               NOT EXCEPTION
+                   CONTINUE
+           END-ACCEPT
+
+           ACCEPT foo
+               ESCAPE
+                   CONTINUE
+               NOT ON ESCAPE
+                   CONTINUE
+           END-ACCEPT
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([Referencing 88-level])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  flag PIC X.
+           88  blah VALUE "N".
+
+       SCREEN           SECTION.
+       01  scr.
+           03  PIC X COLUMN blah TO blah FROM blah.
+
+       PROCEDURE        DIVISION.
+           ACCEPT scr
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: error: 88-level cannot be used here
+prog.cob: 12: error: 88-level cannot be used here
+prog.cob: 12: error: 88-level cannot be used here
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Conflicting screen clauses])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  x            PIC 999.
+
+       SCREEN           SECTION.
+       01  scr.
+           03  VALUE "foo" HIGHLIGHT, LOWLIGHT;
+                           ERASE EOL, ERASE EOS;
+                           BLANK LINE, BLANK SCREEN.
+
+       PROCEDURE        DIVISION.
+           DISPLAY "blah" WITH HIGHLIGHT, LOWLIGHT;
+                               ERASE EOL, ERASE EOS;
+                               BLANK LINE, BLANK SCREEN;
+                               SCROLL UP, SCROLL DOWN;
+
+           ACCEPT x WITH AUTO, TAB; SCROLL UP, SCROLL DOWN;
+               UPDATE, NO UPDATE
+
+           SET scr ATTRIBUTE HIGHLIGHT ON, LOWLIGHT OFF
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 11: error: cannot specify both LOWLIGHT and HIGHLIGHT
+prog.cob: 12: error: cannot specify both ERASE EOS and ERASE EOL
+prog.cob: 13: error: cannot specify both BLANK SCREEN and BLANK LINE
+prog.cob: 16: error: cannot specify both LOWLIGHT and HIGHLIGHT
+prog.cob: 17: error: cannot specify both ERASE EOS and ERASE EOL
+prog.cob: 18: error: cannot specify both BLANK SCREEN and BLANK LINE
+prog.cob: 21: error: cannot specify both SCROLL DOWN and SCROLL UP
+prog.cob: 21: error: cannot specify both TAB and AUTO
+prog.cob: 22: error: cannot specify both SCROLL DOWN and SCROLL UP
+prog.cob: 22: error: cannot specify both NO UPDATE and UPDATE
+prog.cob: 24: error: cannot specify both HIGHLIGHT and LOWLIGHT
+])
+
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [1], [],
+[prog.cob: 11: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
+prog.cob: 12: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
+prog.cob: 13: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
+prog.cob: 16: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
+prog.cob: 17: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
+prog.cob: 18: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
+prog.cob: 21: warning: cannot specify both SCROLL DOWN and SCROLL UP; SCROLL DOWN is ignored
+prog.cob: 21: warning: cannot specify both TAB and AUTO; TAB is ignored
+prog.cob: 22: warning: cannot specify both SCROLL DOWN and SCROLL UP; SCROLL DOWN is ignored
+prog.cob: 22: warning: cannot specify both NO UPDATE and UPDATE; NO UPDATE is ignored
+prog.cob: 24: error: cannot specify both HIGHLIGHT and LOWLIGHT
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Optional SCREEN for BLANK / ERASE])
+AT_KEYWORDS([screen])
+
+# SCREEN is currently not optional in the parser but at least with ACUCOBOL
+AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+
+       SCREEN           SECTION.
+       01  scr.
+           03  VALUE "foo1" BLANK SCREEN.
+       01  scr2.
+           03  VALUE "foo2" BLANK.
+       01  scr3.
+           03  VALUE "foo3" ERASE EOS.
+       01  scr4.
+           03  VALUE "foo4" ERASE.
+
+       PROCEDURE        DIVISION.
+           DISPLAY "one" BLANK SCREEN.
+           DISPLAY "two" BLANK.
+           DISPLAY " 3 " ERASE TO END OF SCREEN.
+           DISPLAY " 4 " ERASE
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Redundant screen clauses])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  x            PIC 999.
+
+       SCREEN           SECTION.
+       01  scr.
+           03  HIGHLIGHT FULL.
+               05  HIGHLIGHT FULL.
+                   07  FULL FULL VALUE "foo".
+
+       PROCEDURE        DIVISION.
+           DISPLAY "hello" WITH BACKGROUND-COLOR 2, BACKGROUND-COLOR 2
+           ACCEPT x WITH HIGHLIGHT, HIGHLIGHT, UPDATE, DEFAULT
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 13: error: duplicate FULL clause
+prog.cob: 16: error: duplicate BACKGROUND-COLOR clause
+prog.cob: 17: error: duplicate HIGHLIGHT clause
+prog.cob: 17: error: duplicate UPDATE clause
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Screen item OCCURS w-/wo relative LINE/COL])
+AT_KEYWORDS([occurs])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       01 x-scr.
+          03 x PIC X VALUE "a" OCCURS 10.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       01 x-scr.
+          03 x PIC X VALUE "a" OCCURS 10 COL  10.
+       01 y-scr.
+          03 y PIC X VALUE "a" OCCURS 10 LINE 10.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       01 x-scr.
+          03 x PIC X VALUE "a" OCCURS 10 COL  + 10.
+       01 y-scr.
+          03 y PIC X VALUE "a" OCCURS 10 LINE - 10.
+       01 a-scr.
+          03 a PIC X VALUE "a" OCCURS 10 COL  PLUS 10.
+       01 b-scr.
+          03 b PIC X VALUE "a" OCCURS 10 LINE MINUS 10.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: warning: OCCURS screen items is not implemented
+prog.cob: 7: error: relative LINE/COLUMN clause required with OCCURS
+])
+
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob: 7: warning: OCCURS screen items is not implemented
+prog2.cob: 7: error: relative LINE/COLUMN clause required with OCCURS
+prog2.cob: 9: warning: OCCURS screen items is not implemented
+prog2.cob: 9: error: relative LINE/COLUMN clause required with OCCURS
+])
+
+AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [],
+[prog3.cob: 7: warning: OCCURS screen items is not implemented
+prog3.cob: 9: warning: OCCURS screen items is not implemented
+prog3.cob: 11: warning: OCCURS screen items is not implemented
+prog3.cob: 13: warning: OCCURS screen items is not implemented
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([VALUE clause missing])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       SCREEN  SECTION.
+       01 SG.
+          05 LINE 21 COL 1 VALUE "TESTING".
+          05 " IMPLICIT VALUE " HIGHLIGHT.
+       PROCEDURE        DIVISION.
+           DISPLAY SG END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 9: error: syntax error, unexpected Literal
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FULL on numeric item])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  num PIC 999.
+
+       SCREEN SECTION.
+       01  scr.
+           03  full-pointless PIC 999 TO num FULL.
+           03  full-useful PIC ZZZ TO num FULL.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 11: warning: FULL has no effect on numeric items; you may want REQUIRED or PIC Z
+])
+
+AT_CLEANUP

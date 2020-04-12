@@ -1,0 +1,33 @@
+<!doctype html>
+<title>Emscripten + npm example</title>
+Open the console to see the output from the wasm module.
+<script type="module">
+import wasmModule from "/out.js";
+
+console.time("instance")
+
+globalThis.response = {
+  status: 0,
+  body: "",
+};
+globalThis.request = {
+  params: {
+    pick: 1,
+  }
+};
+
+const instance = wasmModule({
+  onRuntimeInitialized() {
+    console.timeEnd("instance")
+    console.time("entry")
+    try {
+      instance._entry();
+    } catch(e) {
+      console.log(e)
+    }
+
+    console.log("response", globalThis.response)
+    console.timeEnd("entry")
+  }
+});
+</script>
