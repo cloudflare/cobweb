@@ -1,3 +1,4 @@
+export DOCKER_BUILDKIT=0
 DEPS_OUT = $(PWD)/dist
 CFLAGS=-I$(DEPS_OUT)/include -L$(DEPS_OUT)/lib
 
