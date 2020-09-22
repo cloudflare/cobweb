@@ -9,7 +9,7 @@ cobc -C -Wall -o /tmp/out.c -g -x -static -free $1
 EM_ARGS=${EM_ARGS:-""}
 EM_OUT=${EM_OUT:-"out.js"}
 
-emcc ./cobaul.c \
+emcc ./cobweb.c \
     -I./dist/include -L./dist/lib \
     -lgmp -lcob \
     -fno-rtti -fno-exceptions \

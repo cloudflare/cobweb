@@ -6,7 +6,7 @@ In the parent directory, run the following commands.
 
 Compile:
 ```sh
-EM_OUT=example/out.js ./cobaul.sh example/hello.cob
+EM_OUT=example/out.js ./cobweb.sh example/hello.cob
 ```
 
 In the `example` directory, serve the content statically. The web server should

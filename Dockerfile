@@ -3,12 +3,12 @@ FROM ubuntu:18.04
 SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update
-RUN apt-get -y install git gcc libgmp-dev make python3 python3-distutils
+RUN apt-get -y install git gcc libgmp-dev make python3 python3-distutils autoconf texinfo
 
 WORKDIR /src
-RUN git clone https://github.com/xtuc/cobaul.git .
+RUN git clone https://github.com/cloudflare/cobweb.git .
 
-# install cobc
+# install cobc for headers
 WORKDIR deps/gnucobol-2.2/
 RUN ./configure --without-db --prefix=/usr/
 RUN make
@@ -26,8 +26,8 @@ ENV PATH /src/deps/emsdk:/src/deps/emsdk/node/12.9.1_64bit/bin:/src/deps/emsdk/u
 ENV EMSDK /src/deps/emsdk
 ENV EM_CONFIG /root/.emscripten
 
-# build cobaul
+# build cobweb
 WORKDIR /src
 RUN make all
 
-ENTRYPOINT ["./cobaul.sh"]
+ENTRYPOINT ["./cobweb.sh"]

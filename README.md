@@ -1,11 +1,11 @@
-# cobaul
+# CobWeb
 
 Uses GnuCOBOL 2.2.
 
 ## Usage with Docker
 
 To avoid setting up the compiler environment locally, you can use a pre-built
-Docker image: `xtuc/cobaul`:
+Docker image: `xtuc/cobweb`:
 
 ```sh
 docker run \
@@ -14,7 +14,7 @@ docker run \
   -v /tmp/cobol-worker:/root/.emscripten_cache/ \
   -v $PWD:/worker \
   -v $PWD/build:/build \
-  xtuc/cobaul \
+  xtuc/cobweb \
   /worker/src/worker.cob
 ```
 
@@ -27,7 +27,7 @@ make all
 
 Compile COBOL to WebAssembly:
 ```sh
-./cobaul.sh source.cob
+./cobweb.sh source.cob
 ```
 
 ## `program-id`

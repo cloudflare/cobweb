@@ -6,15 +6,16 @@ all: $(DEPS_OUT)/lib/libgmp.a $(DEPS_OUT)/lib/libcob.a
 
 $(DEPS_OUT)/lib/libgmp.a:
 	cd ./deps/gmp.js && \
-		emconfigure ./configure --disable-assembly --host none --enable-cxx \
+		emconfigure ./configure --disable-assembly --host none --build none \
+		--enable-cxx \
 		--prefix=$(DEPS_OUT)
 	make -C ./deps/gmp.js
 	make -C ./deps/gmp.js install
 
 $(DEPS_OUT)/lib/libcob.a: $(DEPS_OUT)/lib/libgmp.a
 	cd ./deps/gnucobol-2.2 && \
-		emconfigure ./configure --host none \
-		 --without-db CFLAGS="$(CFLAGS)" \
+		emconfigure ./configure --host none --build none \
+		--without-db CFLAGS="$(CFLAGS)" \
 		--disable-assembly --with-gmp=$(DEPS_OUT) --prefix=$(DEPS_OUT)
 	make -C ./deps/gnucobol-2.2 CFLAGS="$(CFLAGS)" libcob
 	make -C ./deps/gnucobol-2.2/libcob install
@@ -28,4 +29,4 @@ clean:
 	rm -rf deps/gnucobol-2.2/config.log
 
 build-docker:
-	docker build -t xtuc/cobaul .
+	docker build -t xtuc/cobweb .
