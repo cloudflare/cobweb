@@ -1,7 +1,7 @@
 #include <libcob.h>
 #include <emscripten.h>
 
-// Cobaul runtime with JavaScript implementations
+// CobWeb runtime with JavaScript implementations
 #define set_http_status js_set_http_status
 #define set_http_body js_set_http_body
 #define append_http_body js_append_http_body
