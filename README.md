@@ -1,5 +1,7 @@
 # CobWeb
 
+See announcement [Cloudflare Workers Now Support COBOL](https://blog.cloudflare.com/cloudflare-workers-now-support-cobol).
+
 Uses GnuCOBOL 2.2.
 
 ## Usage with Docker
